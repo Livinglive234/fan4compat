@@ -34,6 +34,7 @@ public class GenerateAddon implements Opcodes {
         ImmersivePortalsGenerator.chunkCacheDuckMixin();
         TardisBridgeGenerator.generate();
         ShipTransitGenerator.transit();
+        ShipLoadRecoveryGenerator.generate();
         MovementDiagnosticsGenerator.generate();
         PortalShipWatchGenerator.generate();
         PortalMotionGenerator.generate();

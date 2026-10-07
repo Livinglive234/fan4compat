@@ -91,9 +91,9 @@ public class ShipTransitSmokeTest {
         client.field_1687=new ClientWorld("overworld");client.field_1724=new Player(client.field_1687);
         Utils.ships.ships.addAll(List.of(new Ship(42,"overworld"),new Ship(43,"tardis")));
         Utils.ships.synced=false;ack.invoke(null,client);check(client.field_1724.known.isEmpty(),"no acknowledgement before synchronization");
-        Utils.ships.synced=true;ack.invoke(null,client);ack.invoke(null,client);
+        client.field_1724.known.add(42L);Utils.ships.synced=true;ack.invoke(null,client);ack.invoke(null,client);
         check(client.field_1724.known.equals(Set.of(42L,43L))&&client.field_1724.acknowledgements==2,"received ships in portal dimensions acknowledged once without visiting them");
-        client.field_1687=new ClientWorld("tardis");ack.invoke(null,client);check(client.field_1724.known.equals(Set.of(42L,43L)),"portal-world arrival acknowledges loaded ships");
+        client.field_1687=new ClientWorld("tardis");ack.invoke(null,client);check(client.field_1724.known.equals(Set.of(42L,43L)),"portal-world arrival acknowledges loaded ships");check(client.field_1724.acknowledgements==4,"world transition resends acknowledgements even with known flags preserved");ack.invoke(null,client);check(client.field_1724.acknowledgements==4,"stable world does not resend every tick");
         Player server=new Player(new ServerWorld("tardis"));Wrapper wrapper=new Wrapper(server);
         check((Boolean)reject.invoke(null,new Motion(42),wrapper),"late overworld ship packet rejected in TARDIS");
         check(!(Boolean)reject.invoke(null,new Motion(43),wrapper),"current dimension ship packet retained");

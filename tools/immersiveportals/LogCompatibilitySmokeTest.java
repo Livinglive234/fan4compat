@@ -23,7 +23,7 @@ public class LogCompatibilitySmokeTest {
         public void add(String k,Json v){values.put(k,v);}Json put(String k,Json v){add(k,v);return this;}
     }
     public static class World {
-        final Map<Integer,Object> entities=new HashMap<>();String dimension="overworld";
+        public boolean field_9236;final Map<Integer,Object> entities=new HashMap<>();String dimension="overworld";
         public Object method_8469(int id){return entities.get(id);}public String method_27983(){return dimension;}
         public int method_31607(){return -64;}public int method_31605(){return 384;}
         public ChunkManager method_2935(){return chunks;}final ChunkManager chunks=new ChunkManager();
@@ -85,7 +85,7 @@ public class LogCompatibilitySmokeTest {
     public static class Chunks {public void forEach(ChunkConsumer c){c.accept(-62500,0);}}
     public static class Ship {
         String dimension="overworld";double worldX=100;
-        public String getChunkClaimDimension(){return dimension;}public Chunks getActiveChunksSet(){return new Chunks();}
+        public long getId(){return 42;}public String getChunkClaimDimension(){return dimension;}public Chunks getActiveChunksSet(){return new Chunks();}
         public PortalMotionSmokeTest.Matrix getShipToWorld(){return new PortalMotionSmokeTest.Matrix(worldX+1000000,1,false);}
         public PortalMotionSmokeTest.Matrix getWorldToShip(){return new PortalMotionSmokeTest.Matrix(-worldX-1000000,1,false);}
     }
@@ -243,7 +243,7 @@ public class LogCompatibilitySmokeTest {
             if(kind==0)portal.allowed=false;if(kind==1)portal.removed=true;if(kind==2)portal.valid=false;if(kind==3)portal.distance=65;if(kind==4)Utils.ship.dimension="aether";
             loaders.invoke(null,p,consumer);check(loads.isEmpty(),"portal access/removal/range and ship dimension enforced");
         }
-        Utils.ship.dimension="overworld";portal.valid=true;portal.distance=1;loads.clear();loaders.invoke(null,new Player(exterior),consumer);check(loads.isEmpty(),"only portal origin world watches anchor");
+        Utils.ship.dimension="overworld";portal.valid=true;portal.distance=1;loads.clear();loaders.invoke(null,new Player(exterior),consumer);check(loads.equals(List.of(new ChunkLoader("overworld",-62500,0,0))),"near-player chunks stay watched independently of the portal origin");
     }
     static void sound(Loader loader)throws Exception {
         Method capture=method(loader,"soundphysics.ShipSoundRaycast","capture",Object.class,Object.class,Object.class,int.class),ray=method(loader,"soundphysics.ShipSoundRaycast","rayCast",Object.class,Object.class,Object.class,Object.class,Object.class);
@@ -285,7 +285,7 @@ public class LogCompatibilitySmokeTest {
         for(int i=0;i<count;i++)VerifyAddon.readJar(jars[i]);
         for(Path p:Files.walk(Path.of("build/generated/classes/dev/fan4/compat/mixin")).filter(p->p.toString().endsWith(".class")).toList()) {
             ClassNode n=new ClassNode();new ClassReader(Files.readAllBytes(p)).accept(n,0);
-            if(n.name.contains("ShipGuardDiagnosticMixin")||n.name.contains("StackCodecAliasMixin")||n.name.contains("TardisShipModelCache")||n.name.contains("PortalSync")||n.name.contains("PortalInvalidate")||n.name.contains("ShipAcoustic")||n.name.contains("DoorwayShipLoading")||n.name.contains("ShipChunkPacketMixin")||n.name.contains("PositionPacketAwaiting")||n.name.contains("MixinShipPortalTargetDistance"))VerifyAddon.injectionTargets(n);
+            if(n.name.contains("ShipAcknowledgementRecoveryMixin")||n.name.contains("ShipAcknowledgementFlushMixin")||n.name.contains("ShipGuardDiagnosticMixin")||n.name.contains("StackCodecAliasMixin")||n.name.contains("TardisShipModelCache")||n.name.contains("PortalSync")||n.name.contains("PortalInvalidate")||n.name.contains("ShipAcoustic")||n.name.contains("DoorwayShipLoading")||n.name.contains("ShipChunkPacketMixin")||n.name.contains("PositionPacketAwaiting")||n.name.contains("MixinShipPortalTargetDistance"))VerifyAddon.injectionTargets(n);
             if(VerifyAddon.classes.containsKey("net/minecraft/class_281")&&(n.name.contains("MovementTerrainDiagnosticMixin")||n.name.contains("MovementDiagnosticMixin")||n.name.contains("ShaderCompileScope")||n.name.contains("PositionPacketDimension")||n.name.contains("OptionalRecipeDependencies")||n.name.contains("RecipeStackFormat")||n.name.contains("PortalEntityRetry")))VerifyAddon.injectionTargets(n);
         }
     }
@@ -304,6 +304,15 @@ public class LogCompatibilitySmokeTest {
         move.invoke(null,player,kind,movement,nested);check(current.get()==null,"nested movement clears scope");
         guard.invoke(null,player,true);check(current.get()==null,"unscoped guard does not mutate movement");
     }
+    static void movementDisabled()throws Exception {
+        String old=System.getProperty("fan4compat.movementDebug");System.setProperty("fan4compat.movementDebug","false");
+        try {
+            var helper=new Loader().loadClass("dev.fan4.compat.immersiveportals.MovementDiagnostics");var move=helper.getMethod("move",Object.class,Object.class,Object.class,Object.class);
+            Object entity=new Object(),kind=new Object(),vector=new Object();int[] calls={0};OperationAPI original=args->{check(args[0]==kind&&args[1]==vector,"disabled diagnostics preserve arguments");calls[0]++;return null;};
+            move.invoke(null,entity,kind,vector,original);check(calls[0]==1,"disabled diagnostics run native movement exactly once without Minecraft lookup");
+            helper.getMethod("terrain",Object.class).invoke(null,new Object());
+        }finally{if(old==null)System.clearProperty("fan4compat.movementDebug");else System.setProperty("fan4compat.movementDebug",old);}
+    }
     static void movementBudget()throws Exception {
         var budget=new dev.fan4.compat.immersiveportals.MovementDiagnostics.Budget();Object world=new Object();
         check(budget.take(world,-100),"first diagnostic works with negative nanoTime");
@@ -313,7 +322,7 @@ public class LogCompatibilitySmokeTest {
         check(budget.take(new Object(),100_000_000_000L),"new dimension gets a fresh budget");
     }
     public static void main(String[] args)throws Exception {
-        movementBudget();Loader loader=new Loader();movementForwarding(loader);shader(loader);compileScope(loader);recipes();position(loader);models(loader);accessories(loader);doorway(loader);sound(loader);chunkPackets(loader);stackCodec(loader);if(args.length>0)nativeContracts(args);
+        movementDisabled();movementBudget();Loader loader=new Loader();movementForwarding(loader);shader(loader);compileScope(loader);recipes();position(loader);models(loader);accessories(loader);doorway(loader);sound(loader);chunkPackets(loader);stackCodec(loader);if(args.length>0)nativeContracts(args);
         System.out.println("PASS: shader declarations/context, component-preserving recipes, packet metadata/corrections, model reuse/reload ordered remote entity sync, doorway bootstrap, dimension-aware chunk packets, unload ownership, bounded acoustic rays and native stack codec aliases");
     }
 }

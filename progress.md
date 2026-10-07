@@ -876,3 +876,53 @@ Validation: clean build passed 24 tasks, including generated native selectors,
 movement forwarding, original exception preservation, nested scope restoration,
 budget throttling/caps and bytecode verification. In-game reproduction remains
 necessary to identify the blocking check.
+
+
+## Alpha 27: acknowledgement and missing active chunk recovery
+
+Alpha 26's diagnostic log proves native isCollidingWithUnloadedShips is cancelling
+movement: ship 5 is loaded but initially unknown to the server, and later known to
+the client with missing active shipyard chunks [-1791617,768127/768128/768129].
+At the outer boundary movement in both directions has actualDistance=0 despite
+terrainLoaded=true and shipWorldSynced=true. Rendering the hull does not establish
+that these outer active chunks exist in the client's world cache.
+
+Native VS player construction may populate known IDs without sending C2S ACKs.
+Native ACK handling also discards adds if the authoritative loaded-ships set is
+not ready. Alpha 25's known-flag-based deduplication cannot repair either state.
+Track actual sends independently per client player/world, resend after IP world
+transitions, and forget unloaded IDs so they can be acknowledged on reappearance.
+
+A noncancellable native ACK return hook retains early authenticated adds for
+server-existing ship IDs, bounded to 64 pending IDs per player and ten seconds.
+The existing VS chunk-loading tick flushes only nonempty pending queues, accepts
+IDs after authoritative load, and removes expired, deleted, removed-player and
+explicitly withdrawn requests. Collision/teleport checks are retained.
+
+The existing doorway/base-loader enumeration now also watches active chunks for
+ships spatially intersecting a 48-block region around the physical player, with
+dimension filtering and ship deduplication. This covers outer active chunks while
+approaching or leaving a ship, independently of a live doorway. It uses IP's normal
+loader cadence; no additional periodic full-world ship scan is introduced.
+
+A confirmed native client guard block requests recovery through existing native
+ACK packets: at most eight nearby loaded ships, once per two seconds, up to eight
+rounds per uninterrupted block. On the server, validated same-dimension ships
+within 64 blocks may refresh player tracking and selectively requeue valid already
+delivered watches under the transformed player bounding box plus the native
+one-block margin (at most 64 cells). Pending, invalid, other-player and unrelated
+ship chunk records are unchanged. The normal IP batch/light/attachment delivery
+path is used, not raw packet injection or fabricated chunks. Server recovery is
+also limited to once per ship/player per two seconds.
+
+Diagnostic logging defaults off again, with -Dfan4compat.movementDebug=true to
+reenable the bounded alpha 26 observers if needed. Their native guard observer
+continues to trigger recovery independently of logging. The speculative retreat
+bypass remains excluded.
+
+Validation: clean build passed 25 tasks, including 128-class bytecode validation,
+exact native injection targets, prepopulated known-ID acknowledgement, transition
+resends/stable-world deduplication, deferred add/removal/expiry/disconnect behavior,
+unknown and cross-dimension isolation, selective IP requeueing, client throttling,
+negative-coordinate chunk margins and disabled diagnostic passthrough. Runtime
+verification of the boundary freeze still requires the user's modpack.

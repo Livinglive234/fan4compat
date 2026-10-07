@@ -20,6 +20,8 @@
     "doctorwho.common.TardisShipKeyRangeMixin",
     "immersiveportals.common.ShipPortalTransferMixin",
     "immersiveportals.common.ShipMotionDimensionMixin",
+    "immersiveportals.common.ShipAcknowledgementRecoveryMixin",
+    "immersiveportals.common.ShipAcknowledgementFlushMixin",
     "immersiveportals.common.MovementDiagnosticMixin",
     "immersiveportals.common.ShipGuardDiagnosticMixin",
     "immersiveportals.common.PortalShipWatchMixin",

@@ -5,36 +5,37 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: experimental, 0.1.0-alpha.26.** The original v4 ship fixes were confirmed
+**Status: experimental, 0.1.0-alpha.27.** The original v4 ship fixes were confirmed
 working in game by the pack owner. The pack owner confirmed TARDIS entry, exit, placement and landing in alpha 21.
-The alpha 25 packet-routing, sound and movement fixes still require in-game validation.
+The alpha 27 acknowledgement and chunk recovery fixes still require in-game validation.
 
-## Movement diagnostic build (alpha 26)
+## Ship loading recovery (alpha 27)
 
-This release adds observers to investigate the ship-boundary freeze. Collision,
-movement, teleport acknowledgements and chunk lifetime retain alpha 25 behavior;
-the experimental retreat bypass is excluded.
+Acknowledgements are now sent even when native player construction already marked
+ships known locally, and resent after portal world transitions. Early acknowledgements
+wait briefly for the authoritative server ship to finish loading. Nearby active ship
+chunks remain watched through IP's existing loading cadence, including empty chunks
+outside the visible hull that the VS movement guard needs.
 
-Reproduce the freeze moving toward and away from the ship, then try spectator.
-Send `latest.log`; search for `[Fan4Compat movement]`. `VS_UNLOADED_SHIP_GUARD`
-records a native guard cancellation; `MOVEMENT_CLIPPED` records stalled movement
-without that guard and does not prove which solid block caused it;
-`TERRAIN_CHUNK_MISSING` records a missing current terrain chunk while a movement
-key is pressed. Samples include dimension, position, movement, ship synchronization,
-known/loaded ship IDs, nearby bounds, and missing active chunk coordinates.
-Queries use already available chunks and do not force chunk loading.
+When the native guard blocks the local player, bounded recovery retransmits native
+acknowledgements and selectively requeues valid delivered IP watches near the player.
+Collision, teleport validation and IP's normal chunk batching remain in place.
+These changes require in-game verification against the reported boundary freeze.
 
-Logging is enabled for this diagnostic build, capped at 12 samples per player per
-dimension visit and one every three seconds. Standing still on the ground does
-not consume the budget. Restart the world for another full test. Disable with
-JVM argument `-Dfan4compat.movementDebug=false`.
+Movement diagnostics are available with JVM argument
+`-Dfan4compat.movementDebug=true`; normal builds keep them disabled. Reproduce the
+freeze moving toward and away from the ship, then try spectator and send `latest.log`.
+Search for `[Fan4Compat movement]`. Logging identifies the native guard, ship known/
+loaded state, missing active chunks, stalled movement and terrain availability.
+It is capped at 12 samples per player per dimension visit, one every three seconds.
+Restart the world for another full test.
 
 ## Install
 
 1. Remove previously patched VS jars, including `IP-compat-v4` and `IP-Sable-*`.
 2. Restore the original `ValkyrienSkies-Fabric-MC1.21.1-v3.2.0.jar` with internal
    version `2.4.12-td.9+66a13242ed`.
-3. Add `Fan4Compat-0.1.0-alpha.26.jar` to `mods` on the client and server.
+3. Add `Fan4Compat-0.1.0-alpha.27.jar` to `mods` on the client and server.
 4. Keep the original Immersive Portals, Eureka, Doctor Who Mod and Windchimes jars.
 
 Do not install Fan4Compat alongside earlier patched VS builds. Its mixin plugin

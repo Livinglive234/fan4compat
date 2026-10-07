@@ -8,16 +8,24 @@ import java.util.*;
 /** Bridge the VS player lifecycle skipped by Immersive Portals' dimension transfer. */
 public final class ShipTransitCompat {
     private static final String UTILS="org.valkyrienskies.mod.common.VSGameUtilsKt";
+    private static final Map<Object,Set<Long>> ACKNOWLEDGED=new WeakHashMap<>();
+    private static final Map<Object,java.lang.ref.WeakReference<Object>> ACK_WORLDS=new WeakHashMap<>();
     public static void acknowledgeLoadedShips(Object client) {
         Object world=field(client,"field_1687"),player=field(client,"field_1724");
         if(world==null||player==null)return;
         Object ships=exact(UTILS,"getShipObjectWorld",new String[]{"net.minecraft.class_638"},world);
         if(!(Boolean)call(ships,"isSyncedWithServer"))return;
-        // The client ship world and native known-ship IDs are global across portal worlds.
+        // Native player construction can prepopulate known IDs without sending an ACK.
+        // Track actual sends separately, and resend after an IP world transition.
+        var previous=ACK_WORLDS.get(player);
+        if(previous==null||previous.get()!=world){ACKNOWLEDGED.remove(player);ACK_WORLDS.put(player,new java.lang.ref.WeakReference<>(world));}
+        Set<Long> sent=ACKNOWLEDGED.computeIfAbsent(player,k->new HashSet<>()),loaded=new HashSet<>();
         for(Object ship:(Iterable<?>)call(ships,"getLoadedShips")) {
             long id=((Number)call(ship,"getId")).longValue();
-            if(!(Boolean)call(player,"vs_isKnownShip",id))call(player,"vs_addKnownShip",id);
+            loaded.add(id);
+            if(!sent.contains(id)||!(Boolean)call(player,"vs_isKnownShip",id)){call(player,"vs_addKnownShip",id);sent.add(id);}
         }
+        sent.retainAll(loaded);
     }
     /** Old C2S ship packets can arrive after the IP teleport packet. */
     public static boolean wrongDimensionMotion(Object motion,Object wrapper) {

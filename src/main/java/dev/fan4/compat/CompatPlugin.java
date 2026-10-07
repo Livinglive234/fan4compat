@@ -45,7 +45,7 @@ public final class CompatPlugin implements IMixinConfigPlugin, MixinCanceller {
         if (name.endsWith("PositionPacketDimensionMixin") || name.endsWith("PositionPacketAwaitingMixin") || name.endsWith("DoorwayShipLoadingMixin") || name.endsWith("ShipChunkPacketMixin")) return present("immersive_portals");
         if (name.endsWith("ShipAetherPortalCreationMixin")) return present("aether");
         if (name.endsWith("ShipNetherPortalActivationMixin") || name.endsWith("ShipFramePortalActivationMixin")) return present("immersive_portals");
-        if (name.endsWith("PortalShipWatchMixin") || name.endsWith("ShipPortalTransferMixin") || name.endsWith("ShipMotionDimensionMixin") || name.endsWith("MovementDiagnosticMixin") || name.endsWith("ShipGuardDiagnosticMixin") || name.endsWith("MovementTerrainDiagnosticMixin")) return present("immersive_portals");
+        if (name.endsWith("PortalShipWatchMixin") || name.endsWith("ShipPortalTransferMixin") || name.endsWith("ShipMotionDimensionMixin") || name.endsWith("ShipAcknowledgementRecoveryMixin") || name.endsWith("ShipAcknowledgementFlushMixin") || name.endsWith("MovementDiagnosticMixin") || name.endsWith("ShipGuardDiagnosticMixin") || name.endsWith("MovementTerrainDiagnosticMixin")) return present("immersive_portals");
         if (name.endsWith("JadeHelmMixin")) return present("jade") && present("vs_eureka") && FabricLoader.getInstance().getModContainer("jade").orElseThrow().getMetadata().getVersion().getFriendlyString().equals("15.10.6+fabric");
         if (name.contains("TardisShip")) {
             boolean supported = present("dwm") && Set.of("1.0.38.4").contains(FabricLoader.getInstance().getModContainer("dwm").orElseThrow().getMetadata().getVersion().getFriendlyString());

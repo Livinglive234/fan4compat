@@ -7,7 +7,7 @@ import java.util.*;
 
 /** Temporary bounded observers: no collision, teleport, loading or movement changes. */
 public final class MovementDiagnostics {
-    private static final boolean ENABLED=Boolean.parseBoolean(System.getProperty("fan4compat.movementDebug","true"));
+    private static final boolean ENABLED=Boolean.parseBoolean(System.getProperty("fan4compat.movementDebug","false"));
     private static final String UTILS="org.valkyrienskies.mod.common.VSGameUtilsKt";
     private static final ThreadLocal<Scope> CURRENT=new ThreadLocal<>();
     private static final Map<Object,Budget> BUDGETS=new WeakHashMap<>();
@@ -38,6 +38,7 @@ public final class MovementDiagnostics {
     }
     /** Observe the native return value without changing it. */
     public static void guard(Object entity,boolean blocked) {
+        ShipLoadRecovery.guard(entity,blocked);
         if(!ENABLED||!blocked)return;
         Scope scope=CURRENT.get();if(scope!=null&&scope.entity==entity)scope.guarded=true;
     }

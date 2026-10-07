@@ -16,7 +16,7 @@ public final class ShipTransitGenerator implements Opcodes {
         GenerateAddon.inject(m,"changePlayerDimension(Lnet/minecraft/class_746;Lnet/minecraft/class_638;Lnet/minecraft/class_638;L"+vec+";)V","HEAD",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,helper,"resetShipMotion","(Ljava/lang/Object;)V",false);end(m);GenerateAddon.save(name,w);
         name=ROOT+"mixin/immersiveportals/client/MixinShipKnownShips";w=GenerateAddon.writer(name,"net/minecraft/class_310");
         m=w.visitMethod(ACC_PRIVATE,"fan4$acknowledgeLoadedShips","(L"+CI+";)V",null,null);
-        GenerateAddon.inject(m,"method_1574()V","RETURN",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,helper,"acknowledgeLoadedShips","(Ljava/lang/Object;)V",false);end(m);GenerateAddon.save(name,w);
+        GenerateAddon.inject(m,"method_1574()V","RETURN",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,helper,"acknowledgeLoadedShips","(Ljava/lang/Object;)V",false);m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,ROOT+"immersiveportals/ShipLoadRecovery","tick","(Ljava/lang/Object;)V",false);end(m);GenerateAddon.save(name,w);
         name=ROOT+"mixin/immersiveportals/common/ShipMotionDimensionMixin";w=GenerateAddon.writer(name,"org/valkyrienskies/mod/common/networking/VSGamePackets");
         String packet="org/valkyrienskies/mod/common/networking/PacketPlayerShipMotion",wrapper="org/valkyrienskies/core/internal/world/VsiPlayer";
         m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$rejectOldShipMotion","(L"+packet+";L"+wrapper+";L"+CIR+";)V",null,null);

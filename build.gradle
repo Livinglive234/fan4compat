@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'dev.fan4'
-version = '0.1.0-alpha.26'
+version = '0.1.0-alpha.27'
 
 repositories {
     mavenCentral()
@@ -219,6 +219,7 @@ def shipPortalCreationTest = tasks.register('shipPortalCreationTest', JavaExec) 
 tasks.named('check') { dependsOn shipPortalCreationTest }
 
 def logCompatibilityTest = tasks.register('logCompatibilityTest', JavaExec) {
+    systemProperty 'fan4compat.movementDebug', 'true'
     dependsOn generateAddon, tasks.named('classes'), tasks.named('toolsClasses')
     classpath = sourceSets.tools.runtimeClasspath + sourceSets.main.runtimeClasspath
     mainClass = 'LogCompatibilitySmokeTest'
@@ -227,3 +228,11 @@ def logCompatibilityTest = tasks.register('logCompatibilityTest', JavaExec) {
     }
 }
 tasks.named('check') { dependsOn logCompatibilityTest }
+
+// Recovery fixtures exercise native ACK timing and IP watch ownership.
+def shipLoadRecoveryTest = tasks.register('shipLoadRecoveryTest', JavaExec) {
+    dependsOn tasks.named('classes'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath + sourceSets.main.runtimeClasspath
+    mainClass = 'ShipLoadRecoverySmokeTest'
+}
+tasks.named('check') { dependsOn shipLoadRecoveryTest }
