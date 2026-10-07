@@ -46,12 +46,28 @@ versions. Do not combine it with the earlier patched VS jars.
 | Player transfer | Clear VS attachment, drag/interpolation state and queued positions when IP changes the player's dimension. Reject ship motion packets from another dimension. |
 | Ship acknowledgement | Acknowledge synchronized loaded ships across portal worlds through VS's normal global known-ship API, preserving unloaded-chunk safeguards. |
 
-## Waiting to be Implemented
-- Proper TARDIS waypoint support
-- Elytra wings showing contrails when on back slot, and showing for all elytra types
-- TARDIS biome on Xaero showing as TARDIS (not "dwm.biome.tardis")
-- Fixing Create rendering issues with Immersive Portals and Iris
+## Current open goals and validation
 
+- Create rendering with Immersive Portals and Iris remains open; see
+  [the investigation](docs/create-rendering.md). Flywheel's shader fallback has
+  not been bypassed.
+- Ship waypoint creation/following and immutable selection were implemented in
+  alpha 31; alpha 32 fixes the reported selection callback recursion. Persistence,
+  moving-ship return travel and selection still need full-pack verification.
+- Back-slot/custom elytra contrails and TARDIS biome translations were implemented
+  in alpha 31 and await runtime validation. Custom wing tips use approximate
+  vanilla elytra geometry.
+- Alpha 30's moving-ship exit velocity correction awaits runtime confirmation.
+- Pre-entry ship visibility through reopened doors is a known limitation;
+  further work is deferred at the pack owner's request.
+
+## Repository maintenance
+
+Compatibility sources and tests remain grouped by target mod. Update README.md
+and this progress log alongside compatibility changes. Dependencies, logs and
+experiments stay in ignored work/; clean-build artifacts stay in build/libs.
+The documentation review after alpha 32 reconciles stale open goals and validation
+notes without changing runtime code or the release version.
 
 ## Earlier blocker and correction (alpha.6/7)
 

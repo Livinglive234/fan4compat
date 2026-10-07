@@ -76,6 +76,8 @@ rejects that combination to prevent applying the same fixes twice.
 | Doctor Who Mod ship bridges | `1.0.38.4` only; other DWM versions skip these hooks |
 | Optional log fixes | Iris `1.8.1+mc1.21.1`, Accessories `1.1.0-beta.48+1.21.1`, Sound Physics `1.21.1-1.5.1`, BCLib `30.4.0` |
 | Sable Companion crash observed | `1.6.0`, bundled in Windchimes `1.2.0+1.21.1` |
+| Elytra Contrails fallback | `1.4.7.5-1.21.1` only |
+| Jade helm overlay | `15.10.6+fabric` only |
 | Distant Horizons dynamic-world transfer | `3.3.3` for Fabric 1.21.1 |
 
 The addon intentionally pins the VS implementation because its dimension
@@ -164,30 +166,26 @@ The optional JVM argument `-Dfan4compat.shipDebug=true` overrides the file setti
 
 ## Remaining issues and limits
 
-This addon is a collection of specific bridges, not universal compatibility for
-every mod in the pack. It does not patch Create's code or replace its server
-fixes. Alpha 24 repairs BCLib 30.4.0 custom recipe result keys while preserving
-components, skips only known recipes referencing absent optional dependencies,
-and reuses DWM model roots with per-draw resets and resource-reload invalidation.
-Alpha 25 routes VS watch/unwatch packets through IP for their owning dimension,
-protects delivered portal watches from VS unloads, waits for teleport acknowledgements
-before applying custom ship motion, and bounds acoustic traces to cloned blocks.
-BCLib's native stack decoder also accepts the `id` alias directly.
-ChestTracker persistence errors remain outside this addon. Shader and full-pack
-behavior still require runtime testing.
+Create/Flywheel with active Iris shaders remains an open compatibility task.
+Flywheel's backend fallback is intentional in the inspected version; enabling it
+requires a shader integration, rather than removing its guard. No specific
+contraption rendering failure has yet been reproduced. See
+[the investigation](docs/create-rendering.md).
 
-Ship recall and moving portal endpoints have been confirmed in game. The new
-entry collision, opening animation, sonic message and remote-view changes still
-need in-game validation. Alpha.6 adds ship acknowledgement and transfer-state
-bridges for the observed movement freeze and client/server position mismatch;
-these also need an in-game crossing check. Portal endpoints update
-on server ticks; smooth interpolation during fast ship movement is not verified.
+Ship visibility through reopened TARDIS doors before exiting remains a known
+limitation, and further work on that view is deferred. TARDIS entry, exit,
+placement and landing were confirmed in alpha 21; this does not validate every
+later change. Alpha 30's moving-ship exit velocity correction and alpha 31/32's
+waypoint, contrail and biome changes still need full-pack testing. Verify that
+ship waypoints survive save/reload, follow a moving ship, and remain selectable
+without the reported screen crash.
+
 Ship recall targets the supporting deck beneath the player, rather than a deck
-viewed from elsewhere. The ship must stay loaded during the flight.
-
-Portal traversal by ships, ships in remote portal worlds, and all shader/render
+viewed from elsewhere. The ship must stay loaded during the flight. Portal
+traversal by ships, ships in remote portal worlds, and all shader/render
 combinations remain unverified. Client connectivity restoration deliberately
 targets the active player world; the existing VS queue drains against that world.
+ChestTracker persistence errors remain outside this addon's current scope.
 
 ## Build
 
@@ -229,7 +227,7 @@ Test in a copy of the world, starting with the original VS jar and Fan4Compat.
    the console shows world coordinates, and both portal directions track the
    doors. Enter and exit with the ship stopped, then moving. Open the doors from
    inside and check that the portal appears attached immediately and the ship is
-   visible outside. Set a sonic destination on the deck and check world coordinates
+   visible after exiting; pre-entry ship visibility is a known limitation. Set a sonic destination on the deck and check world coordinates
    followed by `(On ship)`; repeat on terrain to check the ordinary message.
    Check repeated crossings without commands, stationary entry, inventory and
    dimension agreement, then repeat while moving. Check closed-door and nearby deck collisions. Repeat after save/reload. Block the landing space and verify failure
@@ -254,6 +252,8 @@ Compatibility code is grouped by the mod being integrated with Valkyrien Skies:
 | `distanthorizons` | Initialize destination DH levels during dimension changes |
 | `sable` | Handle Sable Companion's default VS fallback |
 | `iris`, `accessories`, `bclib`, `soundphysics` | Version-specific shader, portal entity, recipe and acoustic bridges |
+| `elytratrails` | Fallback wing-tip samples for custom and accessory elytra rendering |
+| `jade` | Hide the overlay while piloting a Eureka helm |
 | `shared` | Reflection, ship geometry, generation and verification utilities |
 
 Runtime Java packages are under `src/main/java/dev/fan4/compat/<folder>`.
@@ -270,3 +270,16 @@ package. Packaging checks verify all configured mixins, the plugin and the Fabri
 entrypoint exist in the JAR. Any future package move must update these references
 and the generators' helper class names together. Mod ID, configuration filename
 and saved-data keys are independent of these Java package names.
+
+## Maintenance conventions
+
+Keep runtime helpers, generators and tests grouped by the mod they support.
+Use `shared` only for utilities used across integrations. Keep investigations in
+`docs/` and temporary dependencies, logs and experiments in ignored `work/`.
+Generated classes and release JARs belong in ignored `build/`; the Gradle wrapper
+JAR is intentionally tracked.
+
+Update this README and `PROGRESS.md` with each compatibility change, including
+supported versions, user-visible behavior and outstanding runtime validation.
+Keep completed implementations separate from open goals and preserve historical
+results as history. Produce release artifacts with `./gradlew clean build`.
