@@ -926,3 +926,23 @@ resends/stable-world deduplication, deferred add/removal/expiry/disconnect behav
 unknown and cross-dimension isolation, selective IP requeueing, client throttling,
 negative-coordinate chunk margins and disabled diagnostic passthrough. Runtime
 verification of the boundary freeze still requires the user's modpack.
+
+
+## Alpha 28: bootstrap ship tracking from pending portal watches
+
+Reopening the TARDIS creates a new portal pair; the existing pre-spawn hook already
+attaches both portals, and the pose cache includes their identities. The VS core
+watcher nevertheless required IP chunks to have been delivered before bridging
+the player's dimension/distance. That can prevent pending doorway chunk requests
+from bootstrapping ship metadata after remote tracking had been disconnected.
+
+The core watcher now accepts a valid IP request for that exact player, ship
+dimension and active chunk, including pending delivery. Packet redirect/drop
+checks still require delivered watches. Invalid/deleted watches release tracking;
+synthetic observers retain native behavior. No new polling or permanent ticket
+is added. Regression fixtures cover pending requests, invalidation, cross-world
+isolation and preservation of the delivered-only packet check. Full modpack
+validation of outside-open -> enter -> close -> reopen inside remains necessary.
+
+Validation: clean offline build passed all 25 tasks and bytecode verification
+for 128 addon classes against the supplied VS, IP and DWM jars.

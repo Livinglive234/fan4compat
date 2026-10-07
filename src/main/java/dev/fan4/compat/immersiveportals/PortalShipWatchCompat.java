@@ -1,16 +1,27 @@
 package dev.fan4.compat.immersiveportals;
 
+import java.util.Map;
+
 import static dev.fan4.compat.shared.CompatCalls.*;
 
-/** Keep VS tracking tied to IP's delivered chunk watches, including remote dimensions. */
+/** Track requested portal chunks before delivery; keep packet checks tied to delivered watches. */
 public final class PortalShipWatchCompat {
     private static final String UTILS="org.valkyrienskies.mod.common.VSGameUtilsKt";
     public static boolean watched(Object wrapper,Object ship,long chunk) {
+        return watch(wrapper,ship,chunk,false);
+    }
+    private static boolean watch(Object wrapper,Object ship,long chunk,boolean requested) {
         // VS also watches through synthetic ShipObserverPlayer instances without getPlayer().
         if(!type("org.valkyrienskies.mod.common.util.MinecraftPlayer").isInstance(wrapper))return false;
         Object player=call(wrapper,"getPlayer");
         if(player==null||!type("net.minecraft.class_3222").isInstance(player))return false;
         Object dimension=call(type(UTILS),"getResourceKey",call(ship,"getChunkClaimDimension"));
+        if(requested) {
+            Map<?,?> records=(Map<?,?>)exact("qouteall.imm_ptl.core.chunk_loading.ImmPtlChunkTracking","getWatchRecordForChunk",
+                new String[]{"net.minecraft.class_5321","int","int"},dimension,(int)(chunk>>32),(int)chunk);
+            Object record=records==null?null:records.get(player);
+            return record!=null&&(Boolean)field(record,"isValid");
+        }
         return (Boolean)exact("qouteall.imm_ptl.core.chunk_loading.ImmPtlChunkTracking","isPlayerWatchingChunk",
             new String[]{"net.minecraft.class_3222","net.minecraft.class_5321","int","int"},
             player,dimension,(int)(chunk>>32),(int)chunk);
@@ -29,7 +40,7 @@ public final class PortalShipWatchCompat {
     }
     public static Object playerPosition(Object player,Object destination) {
         Scope scope=CURRENT.get();
-        if(scope!=null)scope.watched=watched(player,scope.ship,scope.chunk);
+        if(scope!=null)scope.watched=watch(player,scope.ship,scope.chunk,true);
         return call(player,"getPosition",destination);
     }
     public static boolean dimensionEligible(boolean original) {

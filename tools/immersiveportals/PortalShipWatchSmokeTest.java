@@ -13,7 +13,15 @@ public class PortalShipWatchSmokeTest {
     public static class Observer {public Object getPosition(Object target){return target;}}
     public static class Ship {String dimension;Ship(String d){dimension=d;}public String getChunkClaimDimension(){return dimension;}}
     public static class Utils {public static String getResourceKey(String d){return d;}}
+    public static class Record {public boolean isValid;Record(boolean valid){isValid=valid;}}
     public static class Tracking {
+        static Map<String,Record> pending=new HashMap<>();
+        public static Map<Player,Record> getWatchRecordForChunk(String dimension,int x,int z) {
+            String key=dimension+":"+x+":"+z;
+            Record record=pending.get(key);
+            if(record==null&&watched.contains(key))record=new Record(true);
+            return record==null?null:Map.of(owner,record);
+        }
         static Set<String> watched=new HashSet<>();static Player owner;
         public static boolean isPlayerWatchingChunk(Player p,String dimension,int x,int z){return p==owner&&watched.contains(dimension+":"+x+":"+z);}
     }
@@ -113,6 +121,15 @@ public class PortalShipWatchSmokeTest {
             check(!(Boolean)dim.invoke(null,false),"unwatched remote ship rejected");
             check((Boolean)dim.invoke(null,true),"normal dimension preserved");
             check((Double)dist.invoke(null,9000d)==9000d,"normal distance preserved");
+            Tracking.pending.put("overworld:-100:200",new Record(true));
+            position.invoke(null,player,destination);
+            check((Boolean)dim.invoke(null,false),"reopened portal requests ship tracking before chunk delivery");
+            check((Double)dist.invoke(null,9000d)==-1d,"pending portal watch bridges distance");
+            check(!(Boolean)helper.getMethod("watched",Object.class,Object.class,long.class).invoke(null,player,ship,((long)-100<<32)|200L),"packet delivery checks still reject undelivered chunks");
+            Tracking.pending.get("overworld:-100:200").isValid=false;
+            position.invoke(null,player,destination);
+            check(!(Boolean)dim.invoke(null,false),"invalid pending watch cannot retain ship");
+            Tracking.pending.clear();
             Tracking.watched.add("overworld:-100:200");
             position.invoke(null,player,destination);
             check((Boolean)dim.invoke(null,false),"portal watch bridges dimension");
