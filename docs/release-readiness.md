@@ -1,7 +1,22 @@
 # Release readiness and wishlist
 
-Current build: 0.1.0-alpha.35. This is a proposed release checklist, not a claim
-that the remaining runtime checks have passed.
+Current build: 0.1.0-alpha.35. Validation status below separates singleplayer
+confirmation from checks still outstanding.
+
+## Confirmed singleplayer checks
+
+On 2026-10-07 the pack owner confirmed the first three gameplay categories from
+the release discussion as checked and working in a singleplayer world:
+
+| Category | Singleplayer | Dedicated server |
+| --- | --- | --- |
+| Moving-ship TARDIS entry/exit, landing and placement | Confirmed | Pending |
+| Ship waypoint return after travel and world restart | Confirmed | Pending |
+| Save/reload, inventory preservation and repeated crossings without freezes/crashes | Confirmed | Pending |
+
+This report does not establish dedicated-server results or an explicit shader
+on/off comparison. The remaining step toward beta is that multiplayer/shader
+validation, plus any optional-integration smoke checks not already performed.
 
 ## Move from alpha to beta
 
@@ -26,9 +41,10 @@ integrations should also be checked with their target mods absent.
   chunk loading or increasing memory/tick cost. No reproducible crash, lost
   inventory, corrupted saved data or broken core interaction remains unresolved.
 
-The pack owner has confirmed core TARDIS behavior and several QoL fixes in prior
-builds. Those results narrow the remaining checks but do not replace a regression
-pass on the final candidate. Log warning count alone is not a release criterion.
+The singleplayer categories above are confirmed by the pack owner; do not treat
+them as still untested. Repeat the corresponding workflows on a dedicated
+server. If runtime code changes before release, repeat affected checks on the
+new candidate. Log warning count alone is not a release criterion.
 
 After this pass, publish 0.1.0-beta.1 with exact supported versions, installation
 instructions, test results and known limitations. No new feature is required

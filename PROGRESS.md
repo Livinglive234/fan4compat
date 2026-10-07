@@ -59,9 +59,8 @@ versions. Do not combine it with the earlier patched VS jars.
   not been bypassed.
 - Ship waypoint creation/following and immutable selection were implemented in
   alpha 31; alpha 32 fixes the reported selection callback recursion. The pack
-  owner confirms the waypoint UI working. Return travel to an unchanged ship
-  still needs confirmation; the later unavailable-ship report followed ship
-  disassembly and reassembly.
+  owner confirms waypoint UI and return travel after restart in singleplayer.
+  Dedicated-server checks remain pending. Reassembly replaces the saved ship ID.
 - Back-slot/custom elytra contrails and TARDIS biome translations were implemented
   in alpha 31 and are now confirmed working by the pack owner. Custom wing tips
   use approximate vanilla elytra geometry.
@@ -1160,3 +1159,12 @@ wishlist. Document the alpha-to-beta regression checks and beta-to-stable releas
 process in docs/release-readiness.md. The feature set need not expand before beta;
 final-candidate core behavior, save/reload, waypoint return and dedicated-server
 validation remain necessary. Runtime code and alpha 35 version are unchanged.
+
+## Singleplayer release checks confirmed (2026-10-07)
+
+The pack owner confirms the first three gameplay categories in the release
+checklist: moving-ship TARDIS entry/exit/landing/placement, ship waypoint return
+after travel and restart, and save/reload/inventory preservation/repeated crossings
+without freezes or crashes. These are singleplayer results. Update current
+README/checklist status; dedicated-server and explicit shader on/off comparison
+remain outstanding. No runtime change or release-version bump is made.

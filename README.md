@@ -61,8 +61,8 @@ vanilla-sized wing tips. Other Elytra Contrails versions skip this hook.
 The missing TARDIS biome translations are supplied, including the key reported
 by Xaero. Create/Flywheel rendering remains open; see [the investigation](docs/create-rendering.md).
 The pack owner confirmed waypoint UI, contrails and the TARDIS biome label working.
-Return travel to an unchanged ship still needs confirmation: the subsequent
-unavailable-ship report followed disassembly and reassembly.
+Return travel using ship waypoints is now confirmed in singleplayer, including
+a world restart. Reassembly still requires a new waypoint for the new ship ID.
 
 ## Ship loading recovery (alpha 27)
 
@@ -209,7 +209,9 @@ It is not a blocker for releasing the existing feature set. TARDIS entry, exit,
 placement and landing were confirmed in alpha 21; this does not validate every
 later change. The pack owner subsequently confirmed moving-ship exits, ship
 waypoint UI, contrails and the TARDIS biome label working in the latest build.
-Return travel to an unchanged saved ship still needs confirmation.
+Ship waypoint return after travel and restart, save/reload and inventory
+preservation are now confirmed in singleplayer. Dedicated-server verification
+and an explicit shader on/off comparison remain outstanding.
 That confirmation covers the tested setup; every shader and wing variant has
 not been individually verified.
 
@@ -225,11 +227,12 @@ establish a new regression in the current build.
 
 ## Release readiness and future work
 
-The next step toward beta is a regression pass on one candidate build, installed
-on client and dedicated server, including repeated moving-ship TARDIS crossings,
-waypoint return after restart, save/reload and the supported shader setup. Builds
-already pass automated checks; runtime evidence is the remaining gate. A stable
-release follows beta playtesting and resolution of reproducible core regressions.
+Singleplayer testing now confirms the core TARDIS workflows, ship waypoint return
+after restart, save/reload, inventory preservation and repeated crossings.
+The next step toward beta is dedicated-server verification of those workflows
+and an explicit comparison with the supported shaders enabled and disabled.
+Builds already pass automated checks. A stable release follows beta playtesting
+and resolution of reproducible core regressions.
 See [the checklist and wishlist](docs/release-readiness.md). No release stage has
 been changed by this documentation update.
 
