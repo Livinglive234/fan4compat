@@ -7,7 +7,7 @@ It does not overwrite existing mod jars.
 
 **Status: experimental, 0.1.0-alpha.32.** The original v4 ship fixes were confirmed
 working in game by the pack owner. The pack owner confirmed TARDIS entry, exit, placement and landing in alpha 21.
-The pack owner also confirmed moving-ship exits, ship waypoints, contrails and the TARDIS biome label in the latest build. Ship visibility through reopened doors before exiting remains a known limitation.
+The pack owner also confirmed moving-ship exits, waypoint UI, contrails and the TARDIS biome label in the latest build. Ship visibility through reopened doors before exiting remains a known limitation.
 
 ## Alpha 32 waypoint screen crash fix
 
@@ -21,7 +21,10 @@ Ship waypoint creation now reads DWM's nested `tardisTag`, so it preserves the
 ship identity and local landing address even while the ship moves during naming.
 Create a new waypoint while landed on the ship; existing ordinary world waypoints
 are not automatically rebound. Ship waypoints keep the existing access rules,
-hide coordinates, and cannot be updated.
+hide coordinates, and cannot be updated. They bind to a persistent VS ship ID.
+Disassembling and reassembling a ship can replace that ID; a waypoint to the old
+ship then reports that the ship is unavailable. Save a new waypoint while landed
+on the reassembled ship. Waypoints are not rebound to another ship by proximity.
 
 Elytra Contrails `1.4.7.5-1.21.1` receives fallback wing emitters when a gliding
 player's custom or accessory renderer supplies none. The fallback uses a vanilla
@@ -31,7 +34,9 @@ vanilla-sized wing tips. Other Elytra Contrails versions skip this hook.
 
 The missing TARDIS biome translations are supplied, including the key reported
 by Xaero. Create/Flywheel rendering remains open; see [the investigation](docs/create-rendering.md).
-The pack owner confirmed ship waypoints, contrails and the TARDIS biome label working in the latest build.
+The pack owner confirmed waypoint UI, contrails and the TARDIS biome label working.
+Return travel to an unchanged ship still needs confirmation: the subsequent
+unavailable-ship report followed disassembly and reassembly.
 
 ## Ship loading recovery (alpha 27)
 
@@ -176,7 +181,8 @@ Ship visibility through reopened TARDIS doors before exiting remains a known
 limitation, and further work on that view is deferred. TARDIS entry, exit,
 placement and landing were confirmed in alpha 21; this does not validate every
 later change. The pack owner subsequently confirmed moving-ship exits, ship
-waypoints, contrails and the TARDIS biome label working in the latest build.
+waypoint UI, contrails and the TARDIS biome label working in the latest build.
+Return travel to an unchanged saved ship still needs confirmation.
 That confirmation covers the tested setup; every shader and wing variant has
 not been individually verified.
 

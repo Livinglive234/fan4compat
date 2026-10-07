@@ -27,7 +27,7 @@ versions. Do not combine it with the earlier patched VS jars.
   before standalone packaging. This does not validate every later addon change.
 - TARDIS key recall lands on the ship deck with DWM 1.0.38.4.
 - The TARDIS portal follows the moving exterior, with some occasional disappearance glitching
-- Latest-build testing confirms moving-ship exits, ship waypoints, contrails and
+- Latest-build testing confirms moving-ship exits, waypoint UI, contrails and
   the TARDIS biome label working (pack owner report, 2026-10-07).
 
 ## Implemented bridges (validation varies by area)
@@ -55,7 +55,9 @@ versions. Do not combine it with the earlier patched VS jars.
   not been bypassed.
 - Ship waypoint creation/following and immutable selection were implemented in
   alpha 31; alpha 32 fixes the reported selection callback recursion. The pack
-  owner now confirms ship waypoints working in the latest build.
+  owner confirms the waypoint UI working. Return travel to an unchanged ship
+  still needs confirmation; the later unavailable-ship report followed ship
+  disassembly and reassembly.
 - Back-slot/custom elytra contrails and TARDIS biome translations were implemented
   in alpha 31 and are now confirmed working by the pack owner. Custom wing tips
   use approximate vanilla elytra geometry.
@@ -1073,3 +1075,13 @@ The pack owner reports that biome labels, contrails, exits onto moving ships and
 ship waypoints are working. Current status sections now record that confirmation;
 earlier pending-validation entries above describe the status at those releases.
 No runtime changes or new release build are needed for this documentation update.
+
+## Ship waypoint identity clarification (2026-10-07)
+
+The subsequent "ship is not available" report occurred after travelling away and
+then disassembling/reassembling the saved ship. Ship waypoints store the VS ship
+ID and ship-local landing address; replacement ships can have different IDs.
+The old waypoint must reject that replacement instead of silently binding to it.
+Save a new waypoint while landed on the reassembled ship. This report does not
+establish a lookup failure for an unchanged ship; that return-trip validation is
+still outstanding. Runtime code and release version remain unchanged.
