@@ -35,7 +35,23 @@ public final class TardisQolGenerator implements Opcodes {
     static void screen()throws Exception{
         String name=ROOT+"mixin/doctorwho/client/TardisShipWaypointQolMixin",screen="net/drgmes/dwm/blocks/tardis/consoleunits/screens/TardisConsoleUnitMonitorWaypointsScreen";ClassWriter w=GenerateAddon.writer(name,screen);
         MethodVisitor m=w.visitMethod(ACC_PRIVATE,"fan4$shipWaypointFields","(L"+CI+";)V",null,null);GenerateAddon.inject(m,"update()V","RETURN",false);forward(m,"updateScreen",0);
-        label(w,"shipSelected");GenerateAddon.save(name,w);
+        coordinateLabel(w);GenerateAddon.save(name,w);
+        name=ROOT+"mixin/doctorwho/client/TardisShipWaypointStatusMixin";
+        w=GenerateAddon.writer(name,screen+"$WaypointsListWidget$WaypointEntry");
+        m=w.visitMethod(ACC_PRIVATE,"fan4$deletedShipName","(L"+CIR+";)V",null,null);
+        GenerateAddon.inject(m,"getText()Lnet/minecraft/class_2561;","RETURN",true);
+        m.visitCode();m.visitVarInsn(ALOAD,1);m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,1);
+        m.visitMethodInsn(INVOKEVIRTUAL,CIR,"getReturnValue","()Ljava/lang/Object;",false);
+        m.visitMethodInsn(INVOKESTATIC,H,"waypointText","(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",false);
+        m.visitMethodInsn(INVOKEVIRTUAL,CIR,"setReturnValue","(Ljava/lang/Object;)V",false);end(m);GenerateAddon.save(name,w);
+    }
+    static void coordinateLabel(ClassWriter w){
+        String ctx="net/minecraft/class_332",renderer="net/minecraft/class_327",text="net/minecraft/class_2561";
+        MethodVisitor m=w.visitMethod(ACC_PRIVATE,"fan4$shipCoordinateStatus","(L"+ctx+";L"+renderer+";L"+text+";IIIZ)I",null,null);
+        TardisBridgeGenerator.redirect(m,"renderAdditional(L"+ctx+";IIF)V","L"+ctx+";method_51439(L"+renderer+";L"+text+";IIIZ)I");
+        m.visitCode();for(int i=0;i<=3;i++)m.visitVarInsn(ALOAD,i);for(int i=4;i<=7;i++)m.visitVarInsn(ILOAD,i);
+        m.visitMethodInsn(INVOKESTATIC,H,"coordinateLabel","(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;IIIZ)I",false);
+        m.visitInsn(IRETURN);m.visitMaxs(0,0);m.visitEnd();
     }
     static void label(ClassWriter w,String helper){
         String ctx="net/minecraft/class_332",renderer="net/minecraft/class_327",text="net/minecraft/class_2561";

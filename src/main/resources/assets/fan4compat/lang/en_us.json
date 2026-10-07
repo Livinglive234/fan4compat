@@ -1,3 +1,4 @@
 {
-  "fan4compat.waypoint.ship_unavailable": "This waypoint's ship is unavailable."
+  "fan4compat.waypoint.ship_unavailable": "This waypoint's ship is unavailable.",
+  "fan4compat.waypoint.ship_deleted": "This ship has been deleted or reassembled"
 }

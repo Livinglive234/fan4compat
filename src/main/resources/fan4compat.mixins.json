@@ -59,6 +59,7 @@
     "immersiveportals.client.MixinShipPortalMotionRender",
     "immersiveportals.client.MixinShipPortalMotionCleanup",
     "doctorwho.client.TardisShipWaypointQolMixin",
+    "doctorwho.client.TardisShipWaypointStatusMixin",
     "jade.client.JadeHelmMixin",
     "doctorwho.client.TardisShipWaypointCreationQolMixin",
     "iris.client.ShaderCompileScopeMixin",

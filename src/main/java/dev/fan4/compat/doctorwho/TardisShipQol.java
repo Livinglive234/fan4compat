@@ -7,6 +7,7 @@ import static dev.fan4.compat.doctorwho.TardisShipCompat.*;
 
 /** Optional DWM QoL hooks, preserving native waypoint codecs and access gates. */
 public final class TardisShipQol {
+    private static final String DELETED_WAYPOINTS="fan4compatDeletedShipWaypoints";
     private static final String DWM="net.drgmes.dwm.",FLIGHT=DWM+"common.tardis.systems.TardisSystemFlight";
     private record Chase(Point origin,double ticksPerBlock,int overhead,int required,long shipId) {}
     private record CreateAnchor(long ship,long raw,long displayed,String facing) {}
@@ -44,6 +45,7 @@ public final class TardisShipQol {
         return Math.max(prior,(int)Math.min(Integer.MAX_VALUE,overhead+Math.ceil(Math.max(0,distance)*ticksPerBlock)));
     }
     public static void writeFlight(Object flight,Object tag){
+        writeWaypointStatus(flight,tag);
         Chase chase=CHASES.get(flight);if(chase==null)return;
         call(tag,"method_10582","fan4compatChase",chase.origin.x()+","+chase.origin.y()+","+chase.origin.z()+","+chase.ticksPerBlock+","+chase.overhead+","+chase.required+","+chase.shipId);
     }
@@ -103,7 +105,45 @@ public final class TardisShipQol {
         }
         call(state,"setDestinationDimension",call(entry,"dimension"));call(state,"setDestinationPosition",call(entry,"blockPos"));call(state,"setDestinationFacing",call(entry,"facing"));
         rememberShipTarget(state,ship,call(entry,"blockPos"),world);
-        call(state,"markConsoleTilesUpdated");return true;
+        call(state,"markConsoleTilesUpdated");
+        call(player,"method_7353",field(type(DWM+"DWM$TEXTS"),"MONITOR_WAYPOINT_LOADED"),true);return true;
+    }
+    /** Server snapshots use all ship data, including ships whose chunks are unloaded. */
+    private static void writeWaypointStatus(Object flight,Object tag){
+        Object state=field(flight,"tardis"),world=call(state,"getWorld");
+        if((Boolean)field(world,"field_9236"))return;
+        Object server=call(world,"method_8503");if(server==null)return;
+        Object ships=exact("org.valkyrienskies.mod.common.VSGameUtilsKt","getShipObjectWorld",
+            new String[]{"net.minecraft.server.MinecraftServer"},server);
+        Object all=call(ships,"getAllShips");List<String> deleted=new ArrayList<>();
+        for(Object entry:(List<?>)field(flight,"waypoints")){
+            ShipWaypoint anchor=waypoint(entry);
+            if(anchor!=null&&call(all,"getById",anchor.shipId())==null)deleted.add((String)call(entry,"id"));
+        }
+        call(tag,"method_10582",DELETED_WAYPOINTS,String.join("\n",deleted));
+    }
+    public static boolean deletedWaypoint(Object screen,Object entry){
+        if(entry==null||waypoint(entry)==null)return false;
+        Object tag=call(call(field(screen,"tag"),"method_10562","tardisTag"),"method_10562","TardisSystemFlight");
+        String id=(String)call(entry,"id"),deleted=(String)call(tag,"method_10558",DELETED_WAYPOINTS);
+        return Arrays.asList(deleted.split("\n")).contains(id);
+    }
+    public static Object waypointText(Object row,Object text){
+        Object screen=field(field(row,"this$0"),"parent"),entry=field(row,"waypointEntry");
+        return deletedWaypoint(screen,entry)?call(text,"method_27692",field(type("net.minecraft.class_124"),"field_1055")):text;
+    }
+    /** Reuse the native coordinate label position; wrap within the detail column. */
+    public static int coordinateLabel(Object screen,Object context,Object renderer,Object text,int x,int y,int color,boolean shadow){
+        if(text==field(type(DWM+"DWM$TEXTS"),"MONITOR_WAYPOINTS_COORDS")&&shipSelected(screen)){
+            Object entry=field(field(screen,"selected"),"waypointEntry");
+            if(deletedWaypoint(screen,entry)){
+                Object message=call(type("net.minecraft.class_2561"),"method_43471","fan4compat.waypoint.ship_deleted");
+                int width=((Number)call(field(screen,"nameField"),"method_25368")).intValue();
+                call(context,"method_51440",renderer,message,x,y,Math.max(1,width),color);
+            }
+            return 0;
+        }
+        return ((Number)call(context,"method_51439",renderer,text,x,y,color,shadow)).intValue();
     }
     private static Object copyWaypoint(Object entry,String id,Object position,Object facing,Object name){
         return createExact(DWM+"common.tardis.systems.flight.TardisFlightWaypointEntry",

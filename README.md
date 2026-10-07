@@ -5,9 +5,24 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: experimental, 0.1.0-alpha.32.** The original v4 ship fixes were confirmed
+**Status: experimental, 0.1.0-alpha.33.** The original v4 ship fixes were confirmed
 working in game by the pack owner. The pack owner confirmed TARDIS entry, exit, placement and landing in alpha 21.
 The pack owner also confirmed moving-ship exits, waypoint UI, contrails and the TARDIS biome label in the latest build. Ship visibility through reopened doors before exiting remains a known limitation.
+
+## Alpha 33 deleted ship waypoints
+
+Ship waypoints whose original ship ID no longer exists show a crossed-out name
+in the waypoint list. Selecting one shows **This ship has been deleted or
+reassembled** in the coordinate area. The message wraps within the detail column.
+You can still remove the waypoint; it remains immutable and preserves normal
+access rules. Successfully loading an available ship waypoint also shows DWM's
+normal **Waypoint loaded** message.
+
+Status is supplied by the server when the console data is refreshed (reopen the
+waypoint screen after deleting a ship). The check uses all registered ship data,
+so an existing ship whose chunks are unloaded is not marked deleted. Names and
+saved anchors are unchanged, and a reassembled ship with a new ID does not revive
+the old waypoint. This display change still needs in-game verification.
 
 ## Alpha 32 waypoint screen crash fix
 
@@ -64,7 +79,7 @@ Restart the world for another full test.
 1. Remove previously patched VS jars, including `IP-compat-v4` and `IP-Sable-*`.
 2. Restore the original `ValkyrienSkies-Fabric-MC1.21.1-v3.2.0.jar` with internal
    version `2.4.12-td.9+66a13242ed`.
-3. Add `Fan4Compat-0.1.0-alpha.32.jar` to `mods` on the client and server.
+3. Add `Fan4Compat-0.1.0-alpha.33.jar` to `mods` on the client and server.
 4. Keep the original Immersive Portals, Eureka, Doctor Who Mod and Windchimes jars.
 
 Do not install Fan4Compat alongside earlier patched VS builds. Its mixin plugin

@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.32**.
+Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.33**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is experimental; a successful build does not
@@ -1085,3 +1085,23 @@ The old waypoint must reject that replacement instead of silently binding to it.
 Save a new waypoint while landed on the reassembled ship. This report does not
 establish a lookup failure for an unchanged ship; that return-trip validation is
 still outstanding. Runtime code and release version remain unchanged.
+
+## Alpha 33: deleted ship waypoint display
+
+Write an authoritative missing-ship-ID snapshot into the existing flight NBT used
+by console screens. Use VS all-ship data rather than loaded ship/chunk state.
+Keep names, IDs, access rules, native waypoint codecs and removal behavior intact.
+The waypoint list applies strikethrough only to confirmed missing ship IDs.
+Selecting such an entry replaces the normally hidden coordinate label with
+"This ship has been deleted or reassembled", wrapped to the detail column width.
+Status refreshes with console data; reopen the screen after deleting a ship.
+
+Regression fixtures cover unloaded-but-existing ships, removed IDs, replacement
+IDs, fresh status recovery, client non-authority, ordinary waypoints, name styling
+and the exact native coordinate placement. In-game display verification is pending.
+
+Validation: clean alpha 33 build passed all 26 tasks, exact DWM injection checks,
+standalone packaging and stack/type verification for 131 addon classes.
+
+Successful ship waypoint application also sends DWM's native MONITOR_WAYPOINT_LOADED
+message ("Waypoint loaded"). Rejected/missing ship targets never show success.
