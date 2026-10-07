@@ -46,6 +46,19 @@ public final class PortalMotionCompat {
         if(a==null){CLIENT.remove(portal);clearHistory(portal);return;}
         Attachment old=CLIENT.put(portal,a);if(!a.equals(old))clearHistory(portal);
     }
+    /** VS already applies deck motion separately from the player's walking velocity. */
+    public static Object pointVelocity(Object portal,Object entity,Object original) {
+        Attachment a=CLIENT.get(portal);if(a==null)return original;
+        Object client=call(type("net.minecraft.class_310"),"method_1551");
+        if(entity!=field(client,"field_1724"))return original;
+        Object world=field(client,"field_1687");if(world==null)return original;
+        Object ships=exact(UTILS,"getShipObjectWorld",new String[]{"net.minecraft.class_638"},world);
+        Object ship=call(call(ships,"getLoadedShips"),"getById",a.ship);if(ship==null)return original;
+        Object side=call(call(portal,"getPortalState"),a.destination?"getOtherSideState":"getThisSideState");
+        if(!call(type(UTILS),"getResourceKey",call(ship,"getChunkClaimDimension")).equals(call(side,"dimension")))return original;
+        Object zero=vec(new Point(0,0,0));
+        return createExact("qouteall.imm_ptl.core.teleportation.TeleportationUtil$PortalPointVelocity",new String[]{"net.minecraft.class_243","net.minecraft.class_243"},zero,zero);
+    }
     /** Let native ship dragging settle before the moving reverse portal can recross the arrival. */
     public static void crossed(Object teleportation) {
         Object portal=call(teleportation,"portal");Attachment a=CLIENT.get(portal);
@@ -59,6 +72,8 @@ public final class PortalMotionCompat {
         if(ship==null||!call(type(UTILS),"getResourceKey",call(ship,"getChunkClaimDimension")).equals(call(world,"method_27983")))return;
         Object drag=call(player,"getDraggingInformation");
         call(drag,"setLastShipStoodOn",a.ship);call(drag,"setTicksSinceStoodOnShip",0);
+        // Velocity is already in the deck frame; the boarding impulse would subtract motion again.
+        call(drag,"setShouldImpulseMovement",false);
     }
     public static void cleanupClient() {
         for(var entry:entries())clearHistory(entry.getKey());

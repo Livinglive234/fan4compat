@@ -46,7 +46,8 @@ public class PortalMotionSmokeTest {
     public static class Render {public static float getPartialTick(){return .5f;}}
     public static class Crossing {public static long teleportationCounter=1;static int cooldown;public static void disableTeleportFor(int ticks){cooldown=ticks;}}
     public static class Player {final Drag drag=new Drag();public Drag getDraggingInformation(){return drag;}}
-    public static class Drag {Long ship;int ticks=100;public void setLastShipStoodOn(Long id){ship=id;}public void setTicksSinceStoodOnShip(int value){ticks=value;}}
+    public record Velocity(Vec thisSidePointVelocity,Vec otherSidePointVelocity) {}
+    public static class Drag {Long ship;int ticks=100;boolean impulse;public void setLastShipStoodOn(Long id){ship=id;impulse=true;}public void setTicksSinceStoodOnShip(int value){ticks=value;}public void setShouldImpulseMovement(boolean value){impulse=value;}}
     public record Teleportation(Portal portal) {}
     public static class Tag {Map<String,String> values=new HashMap<>();public void method_10582(String k,String v){values.put(k,v);}public boolean method_10545(String k){return values.containsKey(k);}public String method_10558(String k){return values.get(k);}}
     static Side side(String dimension,double x){return new Side(dimension,new Vec(x,0,0),new Orientation(new Vec(1,0,0),new Vec(0,1,0)),1,2,0);}
@@ -74,6 +75,7 @@ public class PortalMotionSmokeTest {
         try{PortalMotionCompat.Attachment.decode(a.encode().replace(",1.0,2.0",",NaN,2.0"));throw new AssertionError("non-finite metadata accepted");}catch(IllegalArgumentException expected){}
         PortalMotionCompat.FrameHistory h=new PortalMotionCompat.FrameHistory();check(h.advance(1,"first")==null,"first frame safe");check(h.advance(2,"second").equals("first"),"consecutive frame history");check(h.advance(4,"gap")==null,"gap does not reuse old crossing state");
         Map<String,String> names=new HashMap<>();String[][] mappings={{"net.minecraft.class_243","Vec"},{"net.minecraft.class_310","Client"},{"net.minecraft.class_638","World"},{"org.valkyrienskies.mod.common.VSGameUtilsKt","Utils"},{"org.valkyrienskies.core.api.ships.properties.ShipTransform","Transform"},{"org.valkyrienskies.core.impl.shadow.Eg","Native"},{"qouteall.q_misc_util.my_util.DQuaternion","Orientation"},{"qouteall.imm_ptl.core.portal.animation.UnilateralPortalState","Side"},{"qouteall.imm_ptl.core.render.context_management.RenderStates","Render"},{"qouteall.imm_ptl.core.teleportation.ClientTeleportationManager","Crossing"}};
+        names.put("qouteall.imm_ptl.core.teleportation.TeleportationUtil$PortalPointVelocity","PortalMotionSmokeTest$Velocity");
         for(String[] n:mappings)names.put(n[0],"PortalMotionSmokeTest$"+n[1]);
         String helperName="dev.fan4.compat.immersiveportals.PortalMotionCompat";
         ClassLoader loader=new ClassLoader(PortalMotionSmokeTest.class.getClassLoader()){
@@ -104,9 +106,18 @@ public class PortalMotionSmokeTest {
         Utils.ships.ship=null;Crossing.teleportationCounter++;frame.invoke(null,false);check(outer.animation.clientLastFramePortalState==null,"unloaded ship clears crossing history");
         read.invoke(null,inner,new Tag());Utils.ships.ship=new Ship();int innerUpdates=inner.updates;frame.invoke(null,false);check(inner.updates==innerUpdates,"detached portal no longer follows ship");
         read.invoke(null,inner,inTag);
+        var velocity=helper.getMethod("pointVelocity",Object.class,Object.class,Object.class);
+        Velocity moving=new Velocity(new Vec(.5,.02,-.2),new Vec(.5,.02,-.2));
+        Player local=(Player)Client.client.field_1724;
+        Velocity deck=(Velocity)velocity.invoke(null,inner,local,moving);at(deck.thisSidePointVelocity(),0,0,0);at(deck.otherSidePointVelocity(),0,0,0);
+        deck=(Velocity)velocity.invoke(null,outer,local,moving);at(deck.thisSidePointVelocity(),0,0,0);at(deck.otherSidePointVelocity(),0,0,0);
+        check(velocity.invoke(null,inner,new Player(),moving)==moving,"other entities retain native portal velocity");
+        Portal ordinary=new Portal(inner.state);check(velocity.invoke(null,ordinary,local,moving)==moving,"ordinary portals retain native motion transfer");
+        Ship loaded=Utils.ships.ship;Utils.ships.ship=null;check(velocity.invoke(null,inner,local,moving)==moving,"missing ship retains native velocity");Utils.ships.ship=loaded;
         var crossed=helper.getMethod("crossed",Object.class);crossed.invoke(null,new Teleportation(inner));
         check(Crossing.cooldown==5,"ship arrival uses bounded native teleport settling interval");
         Player arrived=(Player)Client.client.field_1724;check(Long.valueOf(42).equals(arrived.drag.ship)&&arrived.drag.ticks==0,"arrival resumes native ship dragging");
+        check(!arrived.drag.impulse,"deck-relative arrival does not receive a second boarding impulse");
         check(outer.animation.clientLastFramePortalState==null,"crossing clears pre-transfer portal history");
         arrived.drag.ship=null;crossed.invoke(null,new Teleportation(outer));check(arrived.drag.ship==null,"interior arrival is not attached to exterior ship");
         Crossing.cooldown=0;crossed.invoke(null,new Teleportation(new Portal(inner.state)));check(Crossing.cooldown==0,"ordinary portals keep native crossing behavior");

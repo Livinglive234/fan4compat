@@ -16,7 +16,12 @@ public final class PortalMotionGenerator implements Opcodes {
         m.visitCode();m.visitVarInsn(ILOAD,0);m.visitMethodInsn(INVOKESTATIC,helper,"beforeCrossing","(Z)V",false);end(m);
         String crossing="qouteall/imm_ptl/core/teleportation/TeleportationUtil$Teleportation";
         m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$settleShipArrival","(L"+crossing+";FL"+ci+";)V",null,null);
-        GenerateAddon.inject(m,"teleportPlayer(L"+crossing+";F)V","TAIL",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,helper,"crossed","(Ljava/lang/Object;)V",false);end(m);GenerateAddon.save(name,w);
+        GenerateAddon.inject(m,"teleportPlayer(L"+crossing+";F)V","TAIL",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,helper,"crossed","(Ljava/lang/Object;)V",false);end(m);
+        String portal="qouteall/imm_ptl/core/portal/Portal",entity="net/minecraft/class_1297",velocity="qouteall/imm_ptl/core/teleportation/TeleportationUtil$PortalPointVelocity",vec="net/minecraft/class_243";
+        m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$deckRelativeVelocity","(L"+portal+";L"+entity+";L"+velocity+";L"+vec+";)L"+velocity+";",null,null);
+        a=m.visitAnnotation("Lorg/spongepowered/asm/mixin/injection/ModifyArg;",true);arr=a.visitArray("method");arr.visit(null,"teleportPlayer(L"+crossing+";F)V");arr.visitEnd();a.visit("index",2);a.visit("remap",false);a.visit("require",1);a.visit("allow",1);
+        at=a.visitAnnotation("at","Lorg/spongepowered/asm/mixin/injection/At;");at.visit("value","INVOKE");at.visit("target","Lqouteall/imm_ptl/core/teleportation/TeleportationUtil;transformEntityVelocity(L"+portal+";L"+entity+";L"+velocity+";L"+vec+";)V");at.visit("ordinal",0);at.visit("remap",false);at.visitEnd();a.visitEnd();
+        m.visitCode();m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,1);m.visitVarInsn(ALOAD,2);m.visitMethodInsn(INVOKESTATIC,helper,"pointVelocity","(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",false);m.visitTypeInsn(CHECKCAST,velocity);m.visitInsn(ARETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
         name=root+"mixin/immersiveportals/client/MixinShipPortalMotionRender";w=GenerateAddon.writer(name,"org/valkyrienskies/core/impl/game/ships/ShipObjectClientWorld");
         m=w.visitMethod(ACC_PRIVATE,"fan4$attachShipDoorToRenderPose","(DL"+ci+";)V",null,null);
         GenerateAddon.inject(m,"updateRenderTransforms(D)V","RETURN",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,helper,"afterRenderTransforms","(Ljava/lang/Object;)V",false);end(m);GenerateAddon.save(name,w);

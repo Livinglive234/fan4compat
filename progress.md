@@ -967,3 +967,27 @@ Existing loading safeguards remain; alpha 29 changes only moving crossing
 settling. Regression fixtures cover native drag attachment, settling, history
 cleanup, interior and ordinary portal isolation. The forward-facing exit at
 10 m/s still needs validation in the full pack.
+
+
+## Alpha 30: avoid duplicated portal and deck velocity
+
+The user reports being flung off the ship after alpha 29 stopped immediate
+recrossing. IP transformEntityVelocity subtracts source portal-point motion and
+adds destination portal-point motion to the player's velocity. VS moves attached
+players with the deck separately; setLastShipStoodOn also enables a boarding
+impulse that subtracts deck motion from velocity on its next drag pass.
+
+For the local client player crossing a registered, loaded ship doorway, pass
+zero portal-point velocities into IP's existing transform. Rotation, scaling and
+the player's walking velocity still use the original IP transformation. Native
+ship dragging supplies deck motion, and the already-relative arrival disables
+the redundant boarding impulse. Other entities, ordinary portals, mismatched
+ship dimensions and missing ship metadata retain original point velocities.
+The five-tick settling interval remains. Pre-entry ship visibility is deferred.
+
+Fixtures cover both doorway directions, other players, ordinary portals, missing
+metadata and impulse suppression. The actual moving ship exit still requires
+full-pack testing.
+
+Validation: clean alpha 30 build passed all 25 tasks and bytecode verification
+for 128 addon classes against the supplied native jars.
