@@ -52,6 +52,9 @@ public final class CompatPlugin implements IMixinConfigPlugin, MixinCanceller {
             boolean supported = present("dwm") && Set.of("1.0.38.4").contains(FabricLoader.getInstance().getModContainer("dwm").orElseThrow().getMetadata().getVersion().getFriendlyString());
             return supported && (!(name.endsWith("TardisShipPortalMixin") || name.endsWith("TardisShipPortalDataMixin") || name.endsWith("TardisShipCollisionMixin") || name.endsWith("TardisShipExteriorShapeMixin")) || present("immersive_portals"));
         }
+        if (name.endsWith("WwooDhGenerationMixin")) return present("wwoo") && present("distanthorizons")
+            && FabricLoader.getInstance().getModContainer("wwoo").orElseThrow().getMetadata().getVersion().getFriendlyString().equals("2.6.7")
+            && FabricLoader.getInstance().getModContainer("distanthorizons").orElseThrow().getMetadata().getVersion().getFriendlyString().equals("3.3.3");
         if (name.endsWith("DhDynamicDimensionMixin")) return present("distanthorizons") && FabricLoader.getInstance().getModContainer("distanthorizons").orElseThrow().getMetadata().getVersion().getFriendlyString().equals("3.3.3");
         if (name.contains(".client.MixinShip")) return present("immersive_portals");
         if (name.endsWith("SableCompatMixin")) return hasSable();

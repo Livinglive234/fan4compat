@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.33**.
+Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.34**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is experimental; a successful build does not
@@ -50,6 +50,8 @@ versions. Do not combine it with the earlier patched VS jars.
 
 ## Current goals and validation status
 
+- WWOO / DH lightweight-generation grid seams: alpha 34 adds an experimental
+  one-chunk neighbour border. Fresh-LOD in-game comparison is pending.
 - Create rendering with Immersive Portals and Iris remains open; see
   [the investigation](docs/create-rendering.md). Flywheel's shader fallback has
   not been bypassed.
@@ -1105,3 +1107,22 @@ standalone packaging and stack/type verification for 131 addon classes.
 
 Successful ship waypoint application also sends DWM's native MONITOR_WAYPOINT_LOADED
 message ("Waypoint loaded"). Rejected/missing ship targets never show success.
+
+## Alpha 34: experimental lightweight WWOO / DH neighbour border
+
+The pack owner requests a fix that preserves lightweight LOD generation.
+Inspected exact public WWOO 2.6.7 and DH 3.3.3 jars: DH's native batch border is
+zero, while WWOO contains terrain features that extend across chunk boundaries.
+Add one temporary neighbour ring only to Overworld FEATURES batches targeting
+FEATURES, gated to these exact versions. Preserve existing nonzero padding,
+native requested output coordinates, other modes and dimensions. No full-save
+chunk generation, permanent tickets or cache deletion is introduced.
+
+This is a candidate boundary fix, not a confirmed runtime solution to the grid.
+Existing LOD caches stay unchanged; compare fresh LODs with and without JVM
+property -Dfan4compat.wwooBorder=false. Generation costs increase according to
+batch size. See docs/wwoo-distant-horizons.md for evidence and test procedure.
+
+Validation: clean alpha 34 build passed all 27 tasks, packaging and bytecode
+stack/type checks for 133 addon classes. Exact DH field contracts and extracted
+native allocation math pass, as do cross-border feature and scope fixtures.

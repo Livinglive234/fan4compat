@@ -5,9 +5,28 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: experimental, 0.1.0-alpha.33.** The original v4 ship fixes were confirmed
+**Status: experimental, 0.1.0-alpha.34.** The original v4 ship fixes were confirmed
 working in game by the pack owner. The pack owner confirmed TARDIS entry, exit, placement and landing in alpha 21.
 The pack owner also confirmed moving-ship exits, waypoint UI, contrails and the TARDIS biome label in the latest build. Ship visibility through reopened doors before exiting remains a known limitation.
+
+## Alpha 34 WWOO / Distant Horizons border experiment
+
+With WWOO **2.6.7** and Distant Horizons **3.3.3**, Overworld `FEATURES`
+generation gets one temporary ring of neighbouring chunks. DH's inspected batch
+path uses zero border; WWOO's cross-chunk terrain features can need neighbouring
+generation. The added ring is intended to reduce section-edge artifacts while
+keeping DH's lightweight generator. This is an experimental fix, not yet
+confirmed against the reported grid lines in game.
+
+It does not select **Full - Save Chunks**, add permanent chunk tickets, or change
+DH's requested output area. Generation does additional work around each batch;
+the cost depends on batch size. Other modes, dimensions and versions retain
+their original behavior. To compare with the unpatched path, restart with
+`-Dfan4compat.wwooBorder=false`.
+
+Test newly generated LODs first. Existing cached LODs are not automatically
+rewritten, and DH's original WWOO warning remains visible. See
+[the investigation and test procedure](docs/wwoo-distant-horizons.md).
 
 ## Alpha 33 deleted ship waypoints
 
@@ -79,7 +98,7 @@ Restart the world for another full test.
 1. Remove previously patched VS jars, including `IP-compat-v4` and `IP-Sable-*`.
 2. Restore the original `ValkyrienSkies-Fabric-MC1.21.1-v3.2.0.jar` with internal
    version `2.4.12-td.9+66a13242ed`.
-3. Add `Fan4Compat-0.1.0-alpha.33.jar` to `mods` on the client and server.
+3. Add `Fan4Compat-0.1.0-alpha.34.jar` to `mods` on the client and server.
 4. Keep the original Immersive Portals, Eureka, Doctor Who Mod and Windchimes jars.
 
 Do not install Fan4Compat alongside earlier patched VS builds. Its mixin plugin
@@ -98,6 +117,7 @@ rejects that combination to prevent applying the same fixes twice.
 | Sable Companion crash observed | `1.6.0`, bundled in Windchimes `1.2.0+1.21.1` |
 | Elytra Contrails fallback | `1.4.7.5-1.21.1` only |
 | Jade helm overlay | `15.10.6+fabric` only |
+| WWOO lightweight generation border | WWOO `2.6.7` with DH `3.3.3` only; experimental |
 | Distant Horizons dynamic-world transfer | `3.3.3` for Fabric 1.21.1 |
 
 The addon intentionally pins the VS implementation because its dimension
@@ -270,6 +290,7 @@ Compatibility code is grouped by the mod being integrated with Valkyrien Skies:
 | `immersiveportals` | Portal crossing, remote ship/chunk watching and client render alignment |
 | `valkyrienskies` | Physics-stage dimension mutation queue |
 | `eureka` | Optional ship debug logging and settings |
+| `wwoo` | Experimental neighbour border for DH lightweight WWOO generation |
 | `distanthorizons` | Initialize destination DH levels during dimension changes |
 | `sable` | Handle Sable Companion's default VS fallback |
 | `iris`, `accessories`, `bclib`, `soundphysics` | Version-specific shader, portal entity, recipe and acoustic bridges |
