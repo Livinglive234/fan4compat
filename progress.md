@@ -47,10 +47,10 @@ versions. Do not combine it with the earlier patched VS jars.
 | Ship acknowledgement | Acknowledge synchronized loaded ships across portal worlds through VS's normal global known-ship API, preserving unloaded-chunk safeguards. |
 
 ## Waiting to be Implemented
-Proper TARDIS waypoint support
-Elytra wings showing contrails when on back slot, and showing for all elytra types
-TARDIS biome on Xaero showing as TARDIS (not "dwm.biome.tardis")
-Fixing Create rendering issues with Immersive Portals and Iris
+- Proper TARDIS waypoint support
+- Elytra wings showing contrails when on back slot, and showing for all elytra types
+- TARDIS biome on Xaero showing as TARDIS (not "dwm.biome.tardis")
+- Fixing Create rendering issues with Immersive Portals and Iris
 
 
 ## Earlier blocker and correction (alpha.6/7)
