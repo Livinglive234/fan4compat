@@ -133,7 +133,7 @@ public final class TardisShipQol {
     public static boolean shipSelected(Object screen){Object selection=field(screen,"selected");return selection!=null&&waypoint(field(selection,"waypointEntry"))!=null;}
     public static void updateScreen(Object screen){
         if(!shipSelected(screen))return;
-        for(String name:List.of("xField","yField","zField")){Object widget=field(screen,name);if(widget!=null){call(widget,"method_1852","");call(widget,"method_1862",false);call(widget,"method_25365",false);call(widget,"method_1888",false);}}
+        for(String name:List.of("xField","yField","zField")){Object widget=field(screen,name);if(widget!=null){call(widget,"method_1862",false);call(widget,"method_25365",false);call(widget,"method_1888",false);}}
         Object name=field(screen,"nameField");if(name!=null)call(name,"method_1888",false);
         for(String button:List.of("updateButton","resetNameButton","resetXButton","resetYButton","resetZButton")){Object widget=field(screen,button);if(widget!=null){writeField(widget,"field_22763",false);writeField(widget,"field_22764",false);}}
     }

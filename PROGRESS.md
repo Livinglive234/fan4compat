@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.31**.
+Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.32**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is experimental; a successful build does not
@@ -1032,3 +1032,18 @@ Validation: clean alpha 31 build passed all 26 tasks, packaging and bytecode
 verification for 130 addon classes, including exact contrail and Minecraft
 renderer API/injection checks. The three implemented fixes still require
 modpack testing; Create rendering remains an open goal.
+
+
+## Alpha 32: ship waypoint selection stack overflow
+
+The supplied alpha 31 trace shows updateScreen calling TextFieldWidget.setText,
+which triggers DWM's coordinate change listener and update(), recursively
+reentering updateScreen until StackOverflowError. Hide and disable coordinate
+widgets without rewriting their text; the coordinate label is already hidden.
+The original fixture had no text listener and missed this behavior. It now
+executes reentrant change callbacks, verifies that hiding fires none, and that
+a native text update refreshes once without recursive clearing. Ordinary
+waypoints and saved ship anchors remain unchanged.
+
+Validation: clean alpha 32 build passed all 26 tasks and bytecode verification
+for 130 addon classes, including the reentrant waypoint text-listener regression.
