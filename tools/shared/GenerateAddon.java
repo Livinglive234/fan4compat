@@ -30,6 +30,7 @@ public class GenerateAddon implements Opcodes {
         ValkyrienSkiesGenerator.dimensionMixin();
         SableGenerator.sableMixin();
         EurekaGenerator.debugMixin();
+        EurekaGenerator.warningMixin();
         DistantHorizonsGenerator.dhDimensionMixin();
         ImmersivePortalsGenerator.chunkCacheDuckMixin();
         TardisBridgeGenerator.generate();

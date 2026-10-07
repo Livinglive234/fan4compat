@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "dev.fan4.compat.CompatPlugin",
   "mixins": [
+    "eureka.common.EurekaPortalWarningMixin",
     "valkyrienskies.common.DynamicDimensionMixin",
     "sable.common.SableCompatMixin",
     "distanthorizons.common.DhDynamicDimensionMixin",

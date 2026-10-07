@@ -55,6 +55,7 @@ public final class CompatPlugin implements IMixinConfigPlugin, MixinCanceller {
         if (name.endsWith("DhDynamicDimensionMixin")) return present("distanthorizons") && FabricLoader.getInstance().getModContainer("distanthorizons").orElseThrow().getMetadata().getVersion().getFriendlyString().equals("3.3.3");
         if (name.contains(".client.MixinShip")) return present("immersive_portals");
         if (name.endsWith("SableCompatMixin")) return hasSable();
+        if (name.endsWith("EurekaPortalWarningMixin")) return present("immersive_portals") && present("vs_eureka");
         if (name.endsWith("EurekaDebugMixin")) return present("vs_eureka") && FabricLoader.getInstance().getModContainer("vs_eureka").orElseThrow().getMetadata().getVersion().getFriendlyString().equals("1.5.3-beta.4-td.4+b0d9511582");
         return true;
     }

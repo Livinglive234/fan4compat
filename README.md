@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: experimental, 0.1.0-alpha.35.** The original v4 ship fixes were confirmed
+**Status: experimental, 0.1.0-alpha.36.** The original v4 ship fixes were confirmed
 working in game by the pack owner. The pack owner confirmed TARDIS entry, exit, placement and landing in alpha 21.
 The pack owner also confirmed moving-ship exits, waypoint UI, contrails and the TARDIS biome label in the latest build. Ship visibility through reopened doors before exiting remains a known limitation.
 
@@ -90,7 +90,7 @@ Restart the world for another full test.
 1. Remove previously patched VS jars, including `IP-compat-v4` and `IP-Sable-*`.
 2. Restore the original `ValkyrienSkies-Fabric-MC1.21.1-v3.2.0.jar` with internal
    version `2.4.12-td.9+66a13242ed`.
-3. Add `Fan4Compat-0.1.0-alpha.35.jar` to `mods` on the client and server.
+3. Add `Fan4Compat-0.1.0-alpha.36.jar` to `mods` on the client and server.
 4. Keep the original Immersive Portals, Eureka, Doctor Who Mod and Windchimes jars.
 
 Do not install Fan4Compat alongside earlier patched VS builds. Its mixin plugin
@@ -183,6 +183,10 @@ Other mod releases need another compatibility audit.
 * Measure ship flights in world coordinates. Ship trips use ordinary demat/remat
   because DWM's flyover animation assumes stationary world block positions;
   the saved flyover lever setting remains intact for ordinary trips.
+
+Immersive Portals’ Eureka incompatibility notice is suppressed while Fan4Compat
+and Eureka are installed. Other mod warnings (including Create), shader warnings
+and severe incompatibility checks remain active. This does not edit IP settings.
 
 ## Eureka debug option
 

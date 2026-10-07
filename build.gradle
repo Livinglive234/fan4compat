@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'dev.fan4'
-version = '0.1.0-alpha.35'
+version = '0.1.0-alpha.36'
 
 repositories {
     mavenCentral()
@@ -247,3 +247,12 @@ tasks.named('check') { dependsOn shipLoadRecoveryTest }
     }
  }
  tasks.named('check') { dependsOn tasks.named('wingTrailTest') }
+
+tasks.register('eurekaWarningTest', JavaExec) {
+    dependsOn generateAddon, tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'EurekaWarningSmokeTest'
+    args generatedClasses.get().asFile.absolutePath
+    if (project.hasProperty('ipJar')) args project.property('ipJar')
+}
+tasks.named('check') { dependsOn tasks.named('eurekaWarningTest') }

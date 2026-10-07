@@ -1,10 +1,17 @@
 # Fan4Compat progress
 
-Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.35**.
+Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.36**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is experimental; a successful build does not
 establish that portal traversal works correctly in the full modpack.
+
+## Alpha 36: Eureka warning
+
+Suppress only Immersive Portals’ `vs_eureka` compatibility notice via its warning
+visibility check. Requires both IP and Eureka. Saved settings, other mod notices,
+shader warnings and severe incompatibility checks are unchanged. Clean build and
+exact supplied-IP selector verification; in-game notice check remains pending.
 
 ## Target versions
 
