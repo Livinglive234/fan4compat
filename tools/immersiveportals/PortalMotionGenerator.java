@@ -13,7 +13,10 @@ public final class PortalMotionGenerator implements Opcodes {
         AnnotationVisitor a=m.visitAnnotation("Lorg/spongepowered/asm/mixin/injection/Inject;",true);
         AnnotationVisitor arr=a.visitArray("method");arr.visit(null,"manageTeleportation(Z)V");arr.visitEnd();a.visit("remap",false);a.visit("require",1);a.visit("allow",1);
         arr=a.visitArray("at");AnnotationVisitor at=arr.visitAnnotation(null,"Lorg/spongepowered/asm/mixin/injection/At;");at.visit("value","INVOKE");at.visit("target","Lqouteall/imm_ptl/core/portal/animation/ClientPortalAnimationManagement;foreachCustomAnimatedPortals(Ljava/util/function/Consumer;)V");at.visit("ordinal",0);at.visit("remap",false);at.visitEnd();arr.visitEnd();a.visitEnd();
-        m.visitCode();m.visitVarInsn(ILOAD,0);m.visitMethodInsn(INVOKESTATIC,helper,"beforeCrossing","(Z)V",false);end(m);GenerateAddon.save(name,w);
+        m.visitCode();m.visitVarInsn(ILOAD,0);m.visitMethodInsn(INVOKESTATIC,helper,"beforeCrossing","(Z)V",false);end(m);
+        String crossing="qouteall/imm_ptl/core/teleportation/TeleportationUtil$Teleportation";
+        m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$settleShipArrival","(L"+crossing+";FL"+ci+";)V",null,null);
+        GenerateAddon.inject(m,"teleportPlayer(L"+crossing+";F)V","TAIL",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,helper,"crossed","(Ljava/lang/Object;)V",false);end(m);GenerateAddon.save(name,w);
         name=root+"mixin/immersiveportals/client/MixinShipPortalMotionRender";w=GenerateAddon.writer(name,"org/valkyrienskies/core/impl/game/ships/ShipObjectClientWorld");
         m=w.visitMethod(ACC_PRIVATE,"fan4$attachShipDoorToRenderPose","(DL"+ci+";)V",null,null);
         GenerateAddon.inject(m,"updateRenderTransforms(D)V","RETURN",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,helper,"afterRenderTransforms","(Ljava/lang/Object;)V",false);end(m);GenerateAddon.save(name,w);

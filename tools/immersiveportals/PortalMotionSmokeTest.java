@@ -39,12 +39,15 @@ public class PortalMotionSmokeTest {
         public Object getTransformProvider(){return provider;}public Transform getRenderTransform(){return render;}
     }
     public static class Ships {Ship ship=new Ship();boolean synced=true;public boolean isSyncedWithServer(){return synced;}public Ships getLoadedShips(){return this;}public Ship getById(long id){return id==42?ship:null;}}
-    public static class World {}
-    public static class Client {public World field_1687=new World();public Object field_1724=new Object();static Client client=new Client();public static Client method_1551(){return client;}}
+    public static class World {public String method_27983(){return "overworld";}}
+    public static class Client {public World field_1687=new World();public Object field_1724=new Player();static Client client=new Client();public static Client method_1551(){return client;}}
     public static class Utils {static Ships ships=new Ships();public static Ships getShipObjectWorld(World w){return ships;}public static String getResourceKey(String d){return d;}}
     public static class Native {static int calls;public static Transform a(Transform previous,Transform current,double partial){calls++;return new Transform(new Matrix(previous.matrix.tx+(current.matrix.tx-previous.matrix.tx)*partial,current.matrix.scale,current.matrix.rotate));}}
     public static class Render {public static float getPartialTick(){return .5f;}}
-    public static class Crossing {public static long teleportationCounter=1;}
+    public static class Crossing {public static long teleportationCounter=1;static int cooldown;public static void disableTeleportFor(int ticks){cooldown=ticks;}}
+    public static class Player {final Drag drag=new Drag();public Drag getDraggingInformation(){return drag;}}
+    public static class Drag {Long ship;int ticks=100;public void setLastShipStoodOn(Long id){ship=id;}public void setTicksSinceStoodOnShip(int value){ticks=value;}}
+    public record Teleportation(Portal portal) {}
     public static class Tag {Map<String,String> values=new HashMap<>();public void method_10582(String k,String v){values.put(k,v);}public boolean method_10545(String k){return values.containsKey(k);}public String method_10558(String k){return values.get(k);}}
     static Side side(String dimension,double x){return new Side(dimension,new Vec(x,0,0),new Orientation(new Vec(1,0,0),new Vec(0,1,0)),1,2,0);}
     static void check(boolean value,String why){if(!value)throw new AssertionError(why);}
@@ -100,6 +103,13 @@ public class PortalMotionSmokeTest {
         Crossing.teleportationCounter++;frame.invoke(null,false);
         Utils.ships.ship=null;Crossing.teleportationCounter++;frame.invoke(null,false);check(outer.animation.clientLastFramePortalState==null,"unloaded ship clears crossing history");
         read.invoke(null,inner,new Tag());Utils.ships.ship=new Ship();int innerUpdates=inner.updates;frame.invoke(null,false);check(inner.updates==innerUpdates,"detached portal no longer follows ship");
+        read.invoke(null,inner,inTag);
+        var crossed=helper.getMethod("crossed",Object.class);crossed.invoke(null,new Teleportation(inner));
+        check(Crossing.cooldown==5,"ship arrival uses bounded native teleport settling interval");
+        Player arrived=(Player)Client.client.field_1724;check(Long.valueOf(42).equals(arrived.drag.ship)&&arrived.drag.ticks==0,"arrival resumes native ship dragging");
+        check(outer.animation.clientLastFramePortalState==null,"crossing clears pre-transfer portal history");
+        arrived.drag.ship=null;crossed.invoke(null,new Teleportation(outer));check(arrived.drag.ship==null,"interior arrival is not attached to exterior ship");
+        Crossing.cooldown=0;crossed.invoke(null,new Teleportation(new Portal(inner.state)));check(Crossing.cooldown==0,"ordinary portals keep native crossing behavior");
         helper.getMethod("cleanupClient").invoke(null);updates=outer.updates;frame.invoke(null,false);check(outer.updates==updates,"disconnect cleanup clears registrations");
         System.out.println("PASS: paired endpoint attachment, fast movement, rotation/scale, frame/tick history, unload, detach and animation isolation");
         if(args.length>1)contracts(args[1],args[2],args[3]);

@@ -946,3 +946,24 @@ validation of outside-open -> enter -> close -> reopen inside remains necessary.
 
 Validation: clean offline build passed all 25 tasks and bytecode verification
 for 128 addon classes against the supplied VS, IP and DWM jars.
+
+
+## Alpha 29: moving ship arrival settling
+
+The alpha 28 log shows rapid alternating teleports through the new doorway pair.
+The reported ship speed was about 10 m/s with the TARDIS facing forward;
+stationary exits work. The reverse exterior portal sweeps across the stationary
+arrival eye position within a few frames.
+
+Successful attached doorway crossings clear pre-transfer animation history and
+use IP's native five-tick teleport settling interval. Exterior arrivals resume
+native dragging on the synchronized destination ship, after checking dimension;
+interior arrivals remain detached. TAIL injection avoids extending the interval
+on rejected teleports. Ordinary portals retain their existing behavior.
+
+Per user direction, work on pre-entry ship visibility through reopened doors is
+deferred. The proposed doorway delivery refresh was removed before publication.
+Existing loading safeguards remain; alpha 29 changes only moving crossing
+settling. Regression fixtures cover native drag attachment, settling, history
+cleanup, interior and ordinary portal isolation. The forward-facing exit at
+10 m/s still needs validation in the full pack.

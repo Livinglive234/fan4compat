@@ -46,6 +46,20 @@ public final class PortalMotionCompat {
         if(a==null){CLIENT.remove(portal);clearHistory(portal);return;}
         Attachment old=CLIENT.put(portal,a);if(!a.equals(old))clearHistory(portal);
     }
+    /** Let native ship dragging settle before the moving reverse portal can recross the arrival. */
+    public static void crossed(Object teleportation) {
+        Object portal=call(teleportation,"portal");Attachment a=CLIENT.get(portal);
+        if(a==null)return;
+        call(type("qouteall.imm_ptl.core.teleportation.ClientTeleportationManager"),"disableTeleportFor",5);
+        for(var entry:entries())clearHistory(entry.getKey());
+        if(!a.destination)return;
+        Object client=call(type("net.minecraft.class_310"),"method_1551"),world=field(client,"field_1687"),player=field(client,"field_1724");
+        if(world==null||player==null)return;
+        Object ships=exact(UTILS,"getShipObjectWorld",new String[]{"net.minecraft.class_638"},world),ship=call(call(ships,"getLoadedShips"),"getById",a.ship);
+        if(ship==null||!call(type(UTILS),"getResourceKey",call(ship,"getChunkClaimDimension")).equals(call(world,"method_27983")))return;
+        Object drag=call(player,"getDraggingInformation");
+        call(drag,"setLastShipStoodOn",a.ship);call(drag,"setTicksSinceStoodOnShip",0);
+    }
     public static void cleanupClient() {
         for(var entry:entries())clearHistory(entry.getKey());
         CLIENT.clear();HISTORY.clear();

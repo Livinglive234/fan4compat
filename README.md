@@ -5,9 +5,9 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: experimental, 0.1.0-alpha.28.** The original v4 ship fixes were confirmed
+**Status: experimental, 0.1.0-alpha.29.** The original v4 ship fixes were confirmed
 working in game by the pack owner. The pack owner confirmed TARDIS entry, exit, placement and landing in alpha 21.
-The alpha 28 reopened-doorway ship tracking fix still requires in-game validation.
+Alpha 29 settles moving ship arrivals; in-game validation remains necessary. Ship visibility through reopened doors before exiting remains a known limitation.
 
 ## Ship loading recovery (alpha 27)
 
@@ -35,7 +35,7 @@ Restart the world for another full test.
 1. Remove previously patched VS jars, including `IP-compat-v4` and `IP-Sable-*`.
 2. Restore the original `ValkyrienSkies-Fabric-MC1.21.1-v3.2.0.jar` with internal
    version `2.4.12-td.9+66a13242ed`.
-3. Add `Fan4Compat-0.1.0-alpha.28.jar` to `mods` on the client and server.
+3. Add `Fan4Compat-0.1.0-alpha.29.jar` to `mods` on the client and server.
 4. Keep the original Immersive Portals, Eureka, Doctor Who Mod and Windchimes jars.
 
 Do not install Fan4Compat alongside earlier patched VS builds. Its mixin plugin
