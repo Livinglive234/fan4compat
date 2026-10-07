@@ -7,7 +7,7 @@ It does not overwrite existing mod jars.
 
 **Status: experimental, 0.1.0-alpha.32.** The original v4 ship fixes were confirmed
 working in game by the pack owner. The pack owner confirmed TARDIS entry, exit, placement and landing in alpha 21.
-Alpha 30 keeps ship doorway velocity in the deck frame; in-game validation remains necessary. Ship visibility through reopened doors before exiting remains a known limitation.
+The pack owner also confirmed moving-ship exits, ship waypoints, contrails and the TARDIS biome label in the latest build. Ship visibility through reopened doors before exiting remains a known limitation.
 
 ## Alpha 32 waypoint screen crash fix
 
@@ -31,7 +31,7 @@ vanilla-sized wing tips. Other Elytra Contrails versions skip this hook.
 
 The missing TARDIS biome translations are supplied, including the key reported
 by Xaero. Create/Flywheel rendering remains open; see [the investigation](docs/create-rendering.md).
-All three new fixes require validation in the full modpack.
+The pack owner confirmed ship waypoints, contrails and the TARDIS biome label working in the latest build.
 
 ## Ship loading recovery (alpha 27)
 
@@ -175,10 +175,10 @@ contraption rendering failure has yet been reproduced. See
 Ship visibility through reopened TARDIS doors before exiting remains a known
 limitation, and further work on that view is deferred. TARDIS entry, exit,
 placement and landing were confirmed in alpha 21; this does not validate every
-later change. Alpha 30's moving-ship exit velocity correction and alpha 31/32's
-waypoint, contrail and biome changes still need full-pack testing. Verify that
-ship waypoints survive save/reload, follow a moving ship, and remain selectable
-without the reported screen crash.
+later change. The pack owner subsequently confirmed moving-ship exits, ship
+waypoints, contrails and the TARDIS biome label working in the latest build.
+That confirmation covers the tested setup; every shader and wing variant has
+not been individually verified.
 
 Ship recall targets the supporting deck beneath the player, rather than a deck
 viewed from elsewhere. The ship must stay loaded during the flight. Portal

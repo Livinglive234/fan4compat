@@ -27,8 +27,10 @@ versions. Do not combine it with the earlier patched VS jars.
   before standalone packaging. This does not validate every later addon change.
 - TARDIS key recall lands on the ship deck with DWM 1.0.38.4.
 - The TARDIS portal follows the moving exterior, with some occasional disappearance glitching
+- Latest-build testing confirms moving-ship exits, ship waypoints, contrails and
+  the TARDIS biome label working (pack owner report, 2026-10-07).
 
-## Implemented, with runtime validation still pending
+## Implemented bridges (validation varies by area)
 
 | Area | Current implementation |
 | --- | --- |
@@ -46,18 +48,19 @@ versions. Do not combine it with the earlier patched VS jars.
 | Player transfer | Clear VS attachment, drag/interpolation state and queued positions when IP changes the player's dimension. Reject ship motion packets from another dimension. |
 | Ship acknowledgement | Acknowledge synchronized loaded ships across portal worlds through VS's normal global known-ship API, preserving unloaded-chunk safeguards. |
 
-## Current open goals and validation
+## Current goals and validation status
 
 - Create rendering with Immersive Portals and Iris remains open; see
   [the investigation](docs/create-rendering.md). Flywheel's shader fallback has
   not been bypassed.
 - Ship waypoint creation/following and immutable selection were implemented in
-  alpha 31; alpha 32 fixes the reported selection callback recursion. Persistence,
-  moving-ship return travel and selection still need full-pack verification.
+  alpha 31; alpha 32 fixes the reported selection callback recursion. The pack
+  owner now confirms ship waypoints working in the latest build.
 - Back-slot/custom elytra contrails and TARDIS biome translations were implemented
-  in alpha 31 and await runtime validation. Custom wing tips use approximate
-  vanilla elytra geometry.
-- Alpha 30's moving-ship exit velocity correction awaits runtime confirmation.
+  in alpha 31 and are now confirmed working by the pack owner. Custom wing tips
+  use approximate vanilla elytra geometry.
+- Alpha 30's moving-ship exit velocity correction is now confirmed working by
+  the pack owner in the latest build.
 - Pre-entry ship visibility through reopened doors is a known limitation;
   further work is deferred at the pack owner's request.
 
@@ -1063,3 +1066,10 @@ waypoints and saved ship anchors remain unchanged.
 
 Validation: clean alpha 32 build passed all 26 tasks and bytecode verification
 for 130 addon classes, including the reentrant waypoint text-listener regression.
+
+## Latest-build runtime confirmation (2026-10-07)
+
+The pack owner reports that biome labels, contrails, exits onto moving ships and
+ship waypoints are working. Current status sections now record that confirmation;
+earlier pending-validation entries above describe the status at those releases.
+No runtime changes or new release build are needed for this documentation update.
