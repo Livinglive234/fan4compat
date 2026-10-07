@@ -1,0 +1,7 @@
+Fan4Compat bundles MixinSquared 0.2.0-beta.6, by Bawnorton, under the MIT license.
+Its license is included separately as LICENSE_MixinSquared.
+https://github.com/Bawnorton/MixinSquared
+
+ASM, Fabric Loader and Sponge Mixin are build-time dependencies and are not
+redistributed as separate libraries by this addon. Existing VS, IP, Eureka,
+Doctor Who Mod and Windchimes jars are not included or altered.

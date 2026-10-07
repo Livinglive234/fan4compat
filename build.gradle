@@ -1,0 +1,229 @@
+plugins {
+    id 'java'
+}
+
+group = 'dev.fan4'
+version = '0.1.0-alpha.26'
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://maven.fabricmc.net/'
+        content { includeGroup 'net.fabricmc' }
+    }
+    maven {
+        url = 'https://maven.enjarai.dev/mirrors/'
+        content { includeGroup 'com.github.bawnorton.mixinsquared' }
+        metadataSources { artifact() }
+    }
+}
+
+configurations {
+    bundledLibrary
+    compileOnly.extendsFrom bundledLibrary
+    testImplementation.extendsFrom compileOnly
+}
+
+sourceSets {
+    tools {
+        java.srcDirs = ['tools']
+        compileClasspath += files(layout.buildDirectory.dir('classes/java/main'))
+    }
+}
+tasks.named('compileToolsJava') { dependsOn tasks.named('compileJava') }
+
+dependencies {
+    compileOnly('net.fabricmc:fabric-loader:0.19.5') { transitive = false }
+    compileOnly('net.fabricmc:sponge-mixin:0.16.5+mixin.0.8.7') { transitive = false }
+    compileOnly 'org.ow2.asm:asm-tree:9.7.1'
+    bundledLibrary('com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0') { transitive = false }
+    toolsImplementation 'org.ow2.asm:asm:9.7.1'
+    toolsImplementation 'org.ow2.asm:asm-tree:9.7.1'
+    toolsImplementation 'org.ow2.asm:asm-analysis:9.7.1'
+    toolsImplementation 'org.ow2.asm:asm-commons:9.7.1'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+    options.compilerArgs += ['-proc:none']
+}
+
+def generatedClasses = layout.buildDirectory.dir('generated/classes')
+def clientIntermediate = layout.buildDirectory.dir('generated/client-intermediate')
+def generateAddon = tasks.register('generateAddon', JavaExec) {
+    dependsOn tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'GenerateAddon'
+    outputs.dir generatedClasses
+    inputs.files sourceSets.tools.output
+    doFirst {
+        delete generatedClasses, clientIntermediate
+        systemProperty 'fan4compat.generatedClasses', generatedClasses.get().asFile.absolutePath
+        systemProperty 'fan4compat.clientIntermediate', clientIntermediate.get().asFile.absolutePath
+    }
+}
+sourceSets.main.output.dir(generatedClasses, builtBy: generateAddon)
+
+tasks.named('processResources') {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') { expand version: project.version }
+}
+
+['DimensionQueueTest', 'CompatCancellationTest', 'ShipPoseTest', 'CompatCallsTest'].each { testMain ->
+    def regression = tasks.register(testMain.uncapitalize(), JavaExec) {
+        dependsOn tasks.named('testClasses')
+        classpath = sourceSets.test.runtimeClasspath
+        mainClass = testMain
+    }
+    tasks.named('test') { dependsOn regression }
+}
+
+def verificationClasses = tasks.register('collectVerificationClasses', Sync) {
+    dependsOn tasks.named('classes'), generateAddon
+    from(sourceSets.main.output.classesDirs)
+    from(generatedClasses)
+    into layout.buildDirectory.dir('verification/classes')
+}
+def verifyBytecode = tasks.register('verifyBytecode', JavaExec) {
+    dependsOn verificationClasses, tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'VerifyAddon'
+    args layout.buildDirectory.dir('verification/classes').get().asFile.absolutePath
+}
+def portalTransitionTest = tasks.register('portalTransitionTest', JavaExec) {
+    dependsOn generateAddon, tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'PortalTransitionSmokeTest'
+    args generatedClasses.get().asFile.absolutePath
+}
+
+tasks.named('jar') {
+    archiveBaseName = 'Fan4Compat'
+    from(configurations.bundledLibrary) {
+        into 'META-INF/jars'
+        rename { 'mixinsquared-fabric.jar' }
+    }
+    from('LICENSE') { rename { 'LICENSE_Fan4Compat' } }
+    from('LICENSE_MixinSquared', 'NOTICE')
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+def addonVersion = project.version.toString()
+def addonJar = tasks.named('jar', Jar).flatMap { it.archiveFile }
+def verifyJar = tasks.register('verifyJar') {
+    dependsOn tasks.named('jar')
+    inputs.file addonJar
+    doLast {
+        def artifact = addonJar.get().asFile
+        def zip = new java.util.zip.ZipFile(artifact)
+        try {
+            assert zip.getEntry('META-INF/jars/mixinsquared-fabric.jar') != null
+            assert zip.getEntry('dev/fan4/compat/mixin/valkyrienskies/common/DynamicDimensionMixin.class') != null
+            assert !zip.entries().toList().any { it.name.startsWith('org/valkyrienskies/') }
+            def metadata = new groovy.json.JsonSlurper().parse(zip.getInputStream(zip.getEntry('fabric.mod.json')))
+            assert metadata.version == addonVersion
+            metadata.mixins.each { configName ->
+                assert zip.getEntry(configName) != null : "Missing mixin config: ${configName}"
+                def config = new groovy.json.JsonSlurper().parse(zip.getInputStream(zip.getEntry(configName)))
+                assert zip.getEntry(config.plugin.replace('.', '/') + '.class') != null : "Missing mixin plugin: ${config.plugin}"
+                (config.mixins + config.client).each { mixin ->
+                    def classPath = (config.package + '.' + mixin).replace('.', '/') + '.class'
+                    assert zip.getEntry(classPath) != null : "Missing configured mixin: ${classPath}"
+                }
+            }
+            metadata.entrypoints.values().flatten().each { entrypoint ->
+                assert zip.getEntry(entrypoint.replace('.', '/') + '.class') != null : "Missing entrypoint: ${entrypoint}"
+            }
+            // Read every entry so corrupt archive data fails the build.
+            zip.entries().toList().findAll { !it.directory }.each { zip.getInputStream(it).withCloseable { input -> input.readAllBytes() } }
+        } finally {
+            zip.close()
+        }
+        println "PASS: standalone addon packaging (${artifact.name})"
+    }
+}
+def tardisShipTest = tasks.register('tardisShipTest', JavaExec) {
+    dependsOn tasks.named('classes'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath + sourceSets.main.runtimeClasspath
+    mainClass = 'TardisShipSmokeTest'
+    args layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath
+    if (project.hasProperty('vsJar') && project.hasProperty('ipJar') && project.hasProperty('dwmJar')) {
+        args project.property('vsJar'), project.property('ipJar'), project.property('dwmJar')
+    }
+}
+def shipTransitTest = tasks.register('shipTransitTest', JavaExec) {
+    dependsOn tasks.named('classes'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath + sourceSets.main.runtimeClasspath
+    mainClass = 'ShipTransitSmokeTest'
+    args layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath
+    if (project.hasProperty('vsJar') && project.hasProperty('ipJar')) {
+        args project.property('vsJar'), project.property('ipJar')
+    }
+}
+def portalInteractionTest = tasks.register('portalInteractionTest', JavaExec) {
+    dependsOn tasks.named('classes'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath + sourceSets.main.runtimeClasspath
+    mainClass = 'PortalInteractionSmokeTest'
+    args layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath,
+         generatedClasses.get().asFile.absolutePath
+}
+tasks.named('check') { dependsOn verifyBytecode, verifyJar, portalTransitionTest, tardisShipTest, shipTransitTest, portalInteractionTest }
+
+tasks.named('wrapper') {
+    gradleVersion = '8.14.3'
+    distributionType = Wrapper.DistributionType.BIN
+    distributionUrl = 'https://downloads.gradle.org/distributions/gradle-8.14.3-bin.zip'
+    distributionSha256Sum = 'bd71102213493060956ec229d946beee57158dbd89d0e62b91bca0fa2c5f3531'
+    networkTimeout = 30000
+}
+
+def portalShipWatchTest = tasks.register('portalShipWatchTest', JavaExec) {
+    dependsOn tasks.named('classes'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath + sourceSets.main.runtimeClasspath
+    mainClass = 'PortalShipWatchSmokeTest'
+    args layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath
+    args generatedClasses.get().asFile.absolutePath
+    if (project.hasProperty('vsJar')) { args project.property('vsJar') }
+}
+tasks.named('check') { dependsOn portalShipWatchTest }
+
+def portalMotionTest = tasks.register('portalMotionTest', JavaExec) {
+    dependsOn tasks.named('classes'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath + sourceSets.main.runtimeClasspath
+    mainClass = 'PortalMotionSmokeTest'
+    args layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath
+    if (project.hasProperty('vsJar') && project.hasProperty('ipJar')) {
+        args project.property('vsJar'), project.property('ipJar'), generatedClasses.get().asFile.absolutePath
+    }
+}
+tasks.named('check') { dependsOn portalMotionTest }
+
+ tasks.register('tardisQolTest', JavaExec) {
+    dependsOn tasks.named('classes'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath + sourceSets.main.runtimeClasspath
+    mainClass = 'TardisQolSmokeTest'
+    args layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath
+    if (project.hasProperty('dwmJar')) args project.property('dwmJar')
+ }
+ tasks.named('check') { dependsOn tasks.named('tardisQolTest') }
+
+def shipPortalCreationTest = tasks.register('shipPortalCreationTest', JavaExec) {
+    dependsOn generateAddon, tasks.named('classes'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath + sourceSets.main.runtimeClasspath
+    mainClass = 'ShipPortalCreationSmokeTest'
+    if (project.hasProperty('aetherJar') && project.hasProperty('ipJar')) {
+        args project.property('aetherJar'), project.property('ipJar')
+    }
+}
+tasks.named('check') { dependsOn shipPortalCreationTest }
+
+def logCompatibilityTest = tasks.register('logCompatibilityTest', JavaExec) {
+    dependsOn generateAddon, tasks.named('classes'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath + sourceSets.main.runtimeClasspath
+    mainClass = 'LogCompatibilitySmokeTest'
+    for (def propertyName : ['vsJar', 'ipJar', 'dwmJar', 'accessoriesJar', 'soundPhysicsJar', 'bclibJar', 'codecJar', 'minecraftJar', 'intermediaryJar']) {
+        if (project.hasProperty(propertyName)) args project.property(propertyName)
+    }
+}
+tasks.named('check') { dependsOn logCompatibilityTest }

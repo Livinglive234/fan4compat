@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "fan4compat",
+  "version": "${version}",
+  "name": "Fan4Compat",
+  "description": "Fabric 1.21.1 bridges for Valkyrien Skies, Immersive Portals, dynamic dimensions, and Sable Companion.",
+  "license": "MIT",
+  "contact": {
+    "sources": "https://github.com/Livinglive234/fan4compat"
+  },
+  "environment": "*",
+  "mixins": [
+    "fan4compat.mixins.json"
+  ],
+  "entrypoints": {
+    "main": [
+      "dev.fan4.compat.eureka.CompatSettings"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "1.21.1",
+    "java": ">=21",
+    "valkyrienskies": "=2.4.12-td.9+66a13242ed",
+    "mixinsquared": ">=0.2.0-beta.6"
+  },
+  "jars": [
+    {
+      "file": "META-INF/jars/mixinsquared-fabric.jar"
+    }
+  ]
+}

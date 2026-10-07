@@ -1,0 +1,7 @@
+/build/
+/.gradle/
+/dependencies/
+/generated-client/
+__pycache__/
+
+/work/

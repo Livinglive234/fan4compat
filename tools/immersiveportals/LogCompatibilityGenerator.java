@@ -1,0 +1,64 @@
+import org.objectweb.asm.*;
+
+/** Narrow fixes for the exact log's IP, Iris, BCLib and Accessories contracts. */
+public final class LogCompatibilityGenerator implements Opcodes {
+    static final String ROOT=GenerateAddon.ROOT,CI=GenerateAddon.CI,CIR="org/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable",OP="com/llamalad7/mixinextras/injector/wrapoperation/Operation";
+    static void end(MethodVisitor m){m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();}
+    static void generate()throws Exception {position();shader();accessories();recipes();loading();sound();models();}
+    static void position()throws Exception {
+        String name=ROOT+"mixin/immersiveportals/common/PositionPacketDimensionMixin";ClassWriter w=GenerateAddon.writer(name,"net/minecraft/class_8609");
+        MethodVisitor m=w.visitMethod(ACC_PRIVATE,"fan4$stampDimension","(Lnet/minecraft/class_2596;Lnet/minecraft/class_7648;L"+CI+";)V",null,null);GenerateAddon.inject(m,"method_52391(Lnet/minecraft/class_2596;Lnet/minecraft/class_7648;)V","HEAD",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,1);m.visitMethodInsn(INVOKESTATIC,ROOT+"immersiveportals/PositionPacketCompat","prepare","(Ljava/lang/Object;Ljava/lang/Object;)V",false);end(m);GenerateAddon.save(name,w);
+        name=ROOT+"mixin/immersiveportals/common/PositionPacketAwaitingMixin";w=GenerateAddon.writer(name,"qouteall/imm_ptl/core/teleportation/ServerTeleportationManager");
+        m=w.visitMethod(ACC_PRIVATE,"fan4$clearOldCorrection","(Lnet/minecraft/class_3222;Lnet/minecraft/class_3218;Lnet/minecraft/class_3218;Lnet/minecraft/class_243;L"+CI+";)V",null,null);GenerateAddon.inject(m,"changePlayerDimension(Lnet/minecraft/class_3222;Lnet/minecraft/class_3218;Lnet/minecraft/class_3218;Lnet/minecraft/class_243;)V","RETURN",false);m.visitCode();m.visitVarInsn(ALOAD,1);m.visitMethodInsn(INVOKESTATIC,ROOT+"immersiveportals/PositionPacketCompat","clearOldAwaiting","(Ljava/lang/Object;)V",false);end(m);GenerateAddon.save(name,w);
+    }
+    static void shader()throws Exception {
+        String name=ROOT+"mixin/iris/client/ShaderCompileScopeMixin",args="Lnet/minecraft/class_281$class_282;Ljava/lang/String;Ljava/io/InputStream;Ljava/lang/String;Lnet/minecraft/class_5913;",selector="method_34416("+args+")I",helper=ROOT+"iris/ShaderCompileCompat";
+        ClassWriter w=GenerateAddon.writer(name,"net/minecraft/class_281");MethodVisitor m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$compileScope","("+args+"L"+OP+";)I",null,null);
+        AnnotationVisitor a=m.visitAnnotation("Lcom/llamalad7/mixinextras/injector/wrapmethod/WrapMethod;",true),arr=a.visitArray("method");arr.visit(null,selector);arr.visitEnd();a.visit("remap",false);a.visitEnd();m.visitCode();
+        Label begin=new Label(),finish=new Label(),fail=new Label();m.visitTryCatchBlock(begin,finish,fail,null);m.visitLabel(begin);m.visitVarInsn(ALOAD,5);m.visitInsn(ICONST_5);m.visitTypeInsn(ANEWARRAY,"java/lang/Object");for(int i=0;i<5;i++){m.visitInsn(DUP);m.visitIntInsn(BIPUSH,i);m.visitVarInsn(ALOAD,i);m.visitInsn(AASTORE);}m.visitMethodInsn(INVOKEINTERFACE,OP,"call","([Ljava/lang/Object;)Ljava/lang/Object;",true);m.visitTypeInsn(CHECKCAST,"java/lang/Integer");m.visitMethodInsn(INVOKEVIRTUAL,"java/lang/Integer","intValue","()I",false);m.visitVarInsn(ISTORE,6);m.visitLabel(finish);m.visitMethodInsn(INVOKESTATIC,helper,"clearContext","()V",false);m.visitVarInsn(ILOAD,6);m.visitInsn(IRETURN);m.visitLabel(fail);m.visitVarInsn(ASTORE,6);m.visitMethodInsn(INVOKESTATIC,helper,"clearContext","()V",false);m.visitVarInsn(ALOAD,6);m.visitInsn(ATHROW);m.visitMaxs(0,0);m.visitEnd();
+        m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$declareDhFarPlane","(Ljava/util/List;)Ljava/util/List;",null,null);a=m.visitAnnotation("Lorg/spongepowered/asm/mixin/injection/ModifyArg;",true);arr=a.visitArray("method");arr.visit(null,selector);arr.visitEnd();a.visit("index",1);a.visit("require",1);a.visit("remap",false);AnnotationVisitor at=a.visitAnnotation("at","Lorg/spongepowered/asm/mixin/injection/At;");at.visit("value","INVOKE");at.visit("target","Lcom/mojang/blaze3d/platform/GlStateManager;glShaderSource(ILjava/util/List;)V");at.visit("remap",false);at.visitEnd();a.visitEnd();m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,helper,"declarations","(Ljava/util/List;)Ljava/util/List;",false);m.visitInsn(ARETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+    }
+    static void accessories()throws Exception {
+        for(String packet:new String[]{"SyncContainerData","SyncEntireContainer","InvalidateEntityCache"}) {
+            String owner="io/wispforest/accessories/networking/client/"+packet,name=ROOT+"mixin/accessories/client/Portal"+packet+"Mixin",selector="handlePacket(L"+owner+";Lnet/minecraft/class_1657;)V",helper=ROOT+"accessories/PortalEntitySyncCompat";
+            ClassWriter w=GenerateAddon.writer(name,owner);MethodVisitor m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$deferUntilSpawn","(L"+owner+";Lnet/minecraft/class_1657;L"+CI+";)V",null,null);GenerateAddon.inject(m,selector,"HEAD",true);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,1);m.visitMethodInsn(INVOKESTATIC,helper,"defer","(Ljava/lang/Object;Ljava/lang/Object;)Z",false);Label done=new Label();m.visitJumpInsn(IFEQ,done);m.visitVarInsn(ALOAD,2);m.visitMethodInsn(INVOKEVIRTUAL,CI,"cancel","()V",false);m.visitLabel(done);end(m);
+            m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$portalWorldEntity","(Lnet/minecraft/class_1937;I)Lnet/minecraft/class_1297;",null,null);TardisBridgeGenerator.redirect(m,selector,"Lnet/minecraft/class_1937;method_8469(I)Lnet/minecraft/class_1297;");m.visitCode();m.visitVarInsn(ALOAD,0);m.visitVarInsn(ILOAD,1);m.visitMethodInsn(INVOKESTATIC,helper,"entity","(Ljava/lang/Object;I)Ljava/lang/Object;",false);m.visitTypeInsn(CHECKCAST,"net/minecraft/class_1297");m.visitInsn(ARETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+        }
+        String name=ROOT+"mixin/accessories/client/PortalEntityRetryMixin";ClassWriter w=GenerateAddon.writer(name,"net/minecraft/class_310");MethodVisitor m=w.visitMethod(ACC_PRIVATE,"fan4$retryEntitySync","(L"+CI+";)V",null,null);GenerateAddon.inject(m,"method_1574()V","RETURN",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,ROOT+"accessories/PortalEntitySyncCompat","tick","(Ljava/lang/Object;)V",false);end(m);GenerateAddon.save(name,w);
+    }
+    static void recipes()throws Exception {
+        String name=ROOT+"mixin/bclib/common/RecipeStackFormatMixin";ClassWriter w=GenerateAddon.writer(name,"net/minecraft/class_1863");String args="Lnet/minecraft/class_2960;Lcom/google/gson/JsonObject;Lnet/minecraft/class_7225$class_7874;";
+        MethodVisitor m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$customStackFormat","("+args+"L"+CIR+";)V",null,null);GenerateAddon.inject(m,"method_17720("+args+")Lnet/minecraft/class_8786;","HEAD",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,1);m.visitMethodInsn(INVOKESTATIC,ROOT+"bclib/RecipeDataCompat","repair","(Ljava/lang/Object;Ljava/lang/Object;)V",false);end(m);GenerateAddon.save(name,w);
+        name=ROOT+"mixin/minecraft/common/OptionalRecipeDependenciesMixin";w=GenerateAddon.writer(name,"net/minecraft/class_1863");m=w.visitMethod(ACC_PRIVATE,"fan4$optionalRecipeDependencies","(Ljava/util/Map;)Ljava/util/Map;",null,null);
+        AnnotationVisitor a=m.visitAnnotation("Lorg/spongepowered/asm/mixin/injection/ModifyVariable;",true),arr=a.visitArray("method");arr.visit(null,"method_20705(Ljava/util/Map;Lnet/minecraft/class_3300;Lnet/minecraft/class_3695;)V");arr.visitEnd();a.visit("argsOnly",true);a.visit("ordinal",0);a.visit("require",1);a.visit("remap",false);AnnotationVisitor at=a.visitAnnotation("at","Lorg/spongepowered/asm/mixin/injection/At;");at.visit("value","HEAD");at.visitEnd();a.visitEnd();m.visitCode();m.visitVarInsn(ALOAD,1);m.visitMethodInsn(INVOKESTATIC,ROOT+"bclib/RecipeDataCompat","available","(Ljava/util/Map;)Ljava/util/Map;",false);m.visitInsn(ARETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+    }
+    static void loading()throws Exception {
+        String name=ROOT+"mixin/immersiveportals/common/DoorwayShipLoadingMixin";ClassWriter w=GenerateAddon.writer(name,"qouteall/imm_ptl/core/chunk_loading/ChunkVisibility");MethodVisitor m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$anchoredShipLoaders","(Lnet/minecraft/class_3222;Ljava/util/function/Consumer;L"+CI+";)V",null,null);GenerateAddon.inject(m,"foreachBaseChunkLoaders(Lnet/minecraft/class_3222;Ljava/util/function/Consumer;)V","RETURN",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,1);m.visitMethodInsn(INVOKESTATIC,ROOT+"immersiveportals/DoorwayShipLoading","loaders","(Ljava/lang/Object;Ljava/util/function/Consumer;)V",false);end(m);GenerateAddon.save(name,w);
+    }
+    static void sound()throws Exception {
+        String name=ROOT+"mixin/soundphysics/client/ShipAcousticRaycastMixin",args="Lnet/minecraft/class_1922;Lnet/minecraft/class_243;Lnet/minecraft/class_243;Lnet/minecraft/class_2338;",result="Lnet/minecraft/class_3965;";
+        ClassWriter w=GenerateAddon.writer(name,"com/sonicether/soundphysics/utils/RaycastUtils");MethodVisitor m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$shipAcousticRay","("+args+"L"+OP+";)"+result,null,null);
+        AnnotationVisitor a=m.visitAnnotation("Lcom/llamalad7/mixinextras/injector/wrapmethod/WrapMethod;",true),arr=a.visitArray("method");arr.visit(null,"rayCast("+args+")"+result);arr.visitEnd();a.visit("remap",false);a.visitEnd();m.visitCode();for(int i=0;i<5;i++)m.visitVarInsn(ALOAD,i);m.visitMethodInsn(INVOKESTATIC,ROOT+"soundphysics/ShipSoundRaycast","rayCast","(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",false);m.visitTypeInsn(CHECKCAST,"net/minecraft/class_3965");m.visitInsn(ARETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+        name=ROOT+"mixin/soundphysics/client/ShipAcousticSnapshotMixin";w=GenerateAddon.writer(name,"com/sonicether/soundphysics/world/ClonedClientLevel");m=w.visitMethod(ACC_PRIVATE,"fan4$cloneShipAcoustics","(Lnet/minecraft/class_638;Lnet/minecraft/class_2338;JIL"+CI+";)V",null,null);GenerateAddon.inject(m,"<init>(Lnet/minecraft/class_638;Lnet/minecraft/class_2338;JI)V","RETURN",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,1);m.visitVarInsn(ALOAD,2);m.visitVarInsn(ILOAD,5);m.visitMethodInsn(INVOKESTATIC,ROOT+"soundphysics/ShipSoundRaycast","capture","(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;I)V",false);end(m);GenerateAddon.save(name,w);
+
+    }
+
+    static void models()throws Exception {
+        String base="net/drgmes/dwm/blocks/tardis/";
+        String[][] targets={
+            {base+"consoleunits/tardisconsoleunitimperial/TardisConsoleUnitImperialBlockRenderer",base+"consoleunits/tardisconsoleunitimperial/TardisConsoleUnitImperialBlockEntity"},
+            {base+"consoleunits/tardisconsoleunittoyota/TardisConsoleUnitToyotaBlockRenderer",base+"consoleunits/tardisconsoleunittoyota/TardisConsoleUnitToyotaBlockEntity"},
+            {base+"engines/tardisenginetoyota/TardisEngineToyotaBlockRenderer",base+"engines/tardisenginetoyota/TardisEngineToyotaBlockEntity"},
+            {base+"misc/tardistoyotaspinner/TardisToyotaSpinnerBlockRenderer",base+"misc/tardistoyotaspinner/TardisToyotaSpinnerBlockEntity"},
+            {"net/drgmes/dwm/fabric/renderers/items/BaseItemRenderer",null}};
+        for(int i=0;i<targets.length;i++) {
+            boolean item=targets[i][1]==null;
+            String name=ROOT+"mixin/doctorwho/client/TardisShipModelCache"+i+"Mixin",context=item?"net/minecraft/class_5599":"net/minecraft/class_5614$class_5615",method=item?"method_32072":"method_32140";
+            String selector=item?"render(Lnet/minecraft/class_1799;Lnet/minecraft/class_811;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;II)V":"render(L"+targets[i][1]+";FLnet/minecraft/class_4587;Lnet/minecraft/class_4597;II)V";
+            ClassWriter w=GenerateAddon.writer(name,targets[i][0]);
+            MethodVisitor m=w.visitMethod(ACC_PRIVATE,"fan4$cachedModel","(L"+context+";Lnet/minecraft/class_5601;)Lnet/minecraft/class_630;",null,null);
+            TardisBridgeGenerator.redirect(m,selector,"L"+context+";"+method+"(Lnet/minecraft/class_5601;)Lnet/minecraft/class_630;");m.visitCode();m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,1);m.visitVarInsn(ALOAD,2);m.visitLdcInsn(method);m.visitMethodInsn(INVOKESTATIC,ROOT+"doctorwho/ModelBakeCompat","root","(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;",false);m.visitTypeInsn(CHECKCAST,"net/minecraft/class_630");m.visitInsn(ARETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+        }
+    }
+
+}
