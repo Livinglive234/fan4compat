@@ -204,7 +204,8 @@ contraption rendering failure has yet been reproduced. See
 [the investigation](docs/create-rendering.md).
 
 Ship visibility through reopened TARDIS doors before exiting remains a known
-limitation, and further work on that view is deferred. TARDIS entry, exit,
+limitation and is now on the [wishlist](docs/release-readiness.md#wishlist--forward-thinking).
+It is not a blocker for releasing the existing feature set. TARDIS entry, exit,
 placement and landing were confirmed in alpha 21; this does not validate every
 later change. The pack owner subsequently confirmed moving-ship exits, ship
 waypoint UI, contrails and the TARDIS biome label working in the latest build.
@@ -218,9 +219,19 @@ ship views and all shader/render combinations remain unverified. Portal
 compatibility is scoped to player crossings and views of ship-mounted doorways. Client connectivity restoration deliberately
 targets the active player world; the existing VS queue drains against that world.
 ChestTracker persistence errors remain outside this addon's current scope.
-Other unresolved resource/model warnings are tracked in
-[log follow-ups](docs/log-followups.md); older logs do not establish a new
-regression in the current build.
+Older resource/model warning candidates are accepted as low priority by the pack
+owner and tracked in [log follow-ups](docs/log-followups.md). Older logs do not
+establish a new regression in the current build.
+
+## Release readiness and future work
+
+The next step toward beta is a regression pass on one candidate build, installed
+on client and dedicated server, including repeated moving-ship TARDIS crossings,
+waypoint return after restart, save/reload and the supported shader setup. Builds
+already pass automated checks; runtime evidence is the remaining gate. A stable
+release follows beta playtesting and resolution of reproducible core regressions.
+See [the checklist and wishlist](docs/release-readiness.md). No release stage has
+been changed by this documentation update.
 
 ## Build
 

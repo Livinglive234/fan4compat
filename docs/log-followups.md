@@ -4,6 +4,8 @@ Reviewed 2026-10-07. Current release: alpha 35. The newest supplied crash excerp
 is the alpha 31 waypoint selection stack overflow, addressed in alpha 32. The
 most recent full startup log reviewed here is alpha 28; its warnings are evidence
 of unresolved candidates, not proof that every issue persists in alpha 35.
+The pack owner accepts the resource/model candidates below as low priority;
+they are not release blockers without a demonstrated functional problem.
 
 | Candidate | Observed evidence | Next useful check |
 | --- | --- | --- |

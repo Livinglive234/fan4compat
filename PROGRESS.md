@@ -50,9 +50,8 @@ versions. Do not combine it with the earlier patched VS jars.
 
 ## Current goals and validation status
 
-- Audit unresolved Amendments/Porting Lib model-loader warnings and cosmetic
-  IronChest/BetterEnd resource warnings; see docs/log-followups.md. These were
-  observed in older logs and are not yet reproduced on alpha 35.
+- Older Amendments/Porting Lib and IronChest/BetterEnd cosmetic warning
+  candidates are accepted as low priority; see docs/log-followups.md.
 - WWOO / DH grid seams remain unresolved. The alpha 34 border experiment was
   removed in alpha 35 at the pack owner's request.
 - Create rendering with Immersive Portals and Iris remains open; see
@@ -68,8 +67,8 @@ versions. Do not combine it with the earlier patched VS jars.
   use approximate vanilla elytra geometry.
 - Alpha 30's moving-ship exit velocity correction is now confirmed working by
   the pack owner in the latest build.
-- Pre-entry ship visibility through reopened doors is a known limitation;
-  further work is deferred at the pack owner's request.
+- Pre-entry ship visibility through reopened/new TARDIS doorways is now a
+  wishlist item, not a release blocker; see docs/release-readiness.md.
 
 ## Repository maintenance
 
@@ -1152,3 +1151,12 @@ Forge/NeoForge loader names) are the most useful additional rendering audit.
 IronChest's invalid texture path and BetterEnd music-disc texture fallbacks are
 lower-priority cosmetic candidates. See docs/log-followups.md for evidence and
 limits. No new alpha version or rebuild is needed for this documentation commit.
+
+## Release planning and wishlist
+
+The pack owner accepts the remaining cosmetic log candidates as low priority
+and requests exterior-ship visibility through reopened/new TARDIS doors on the
+wishlist. Document the alpha-to-beta regression checks and beta-to-stable release
+process in docs/release-readiness.md. The feature set need not expand before beta;
+final-candidate core behavior, save/reload, waypoint return and dedicated-server
+validation remain necessary. Runtime code and alpha 35 version are unchanged.
