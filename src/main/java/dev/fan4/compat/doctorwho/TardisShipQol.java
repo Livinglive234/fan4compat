@@ -113,7 +113,7 @@ public final class TardisShipQol {
     public static void rememberCreation(Object screen){
         Object parent=field(screen,"parentScreen"),origin=field(screen,"originBlockPos");
         if(parent==null||origin==null||!type(DWM+"blocks.tardis.consoleunits.screens.TardisConsoleUnitMonitorWaypointsScreen").isInstance(parent))return;
-        Object tag=field(parent,"tag");if(!(Boolean)call(tag,"method_10545","fan4compatCurrentShip"))return;
+        Object tag=call(field(parent,"tag"),"method_10562","tardisTag");if(!(Boolean)call(tag,"method_10545","fan4compatCurrentShip"))return;
         long displayed=((Number)call(tag,"method_10537","fan4compatWorld_currPosition")).longValue();
         if(packed(origin)!=displayed)return;
         CREATIONS.put(screen,new CreateAnchor(((Number)call(tag,"method_10537","fan4compatCurrentShip")).longValue(),((Number)call(tag,"method_10537","fan4compatCurrentRaw")).longValue(),displayed,(String)call(tag,"method_10558","fan4compatCurrentFacing")));

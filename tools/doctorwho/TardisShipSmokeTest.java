@@ -70,7 +70,7 @@ public class TardisShipSmokeTest implements Opcodes {
         public void markConsoleTilesUpdated(){consoleUpdates++;}
     }
     public static class Tag {
-        final Map<String,Object> values=new HashMap<>();public void method_10544(String k,long v){values.put(k,v);}public void method_10582(String k,String v){values.put(k,v);}
+        final Map<String,Object> values=new HashMap<>();public Tag method_10562(String k){return (Tag)values.getOrDefault(k,new Tag());}public void method_10544(String k,long v){values.put(k,v);}public void method_10582(String k,String v){values.put(k,v);}
         public long method_10537(String k){return ((Number)values.getOrDefault(k,0L)).longValue();}public String method_10558(String k){return (String)values.getOrDefault(k,"");}public boolean method_10545(String k){return values.containsKey(k);}
     }
     public static class Portal {

@@ -277,7 +277,7 @@ public class LogCompatibilitySmokeTest {
         Map<String,String> types=new HashMap<>(),methods=new HashMap<>(),fields=new HashMap<>();String owner="";
         for(String line:lines){String[] p=line.split("\t");if(p[0].equals("c")){owner=p[1];types.put(owner,p[2]);}else if(p.length==5&&p[1].equals("m"))methods.put(owner+"."+p[3]+p[2],p[4]);else if(p.length==5&&p[1].equals("f"))fields.put(owner+"."+p[3],p[4]);}
         Remapper remap=new Remapper(){public String map(String n){return types.getOrDefault(n,n);}public String mapMethodName(String o,String n,String d){return methods.getOrDefault(o+"."+n+d,n);}public String mapFieldName(String o,String n,String d){return fields.getOrDefault(o+"."+n,n);}};
-        Set<String> needed=Set.of("net/minecraft/class_1297","net/minecraft/class_281","net/minecraft/class_8609","net/minecraft/class_1863","net/minecraft/class_310");
+        Set<String> needed=Set.of("net/minecraft/class_1297","net/minecraft/class_281","net/minecraft/class_8609","net/minecraft/class_1863","net/minecraft/class_310","net/minecraft/class_922","net/minecraft/class_563","net/minecraft/class_5607");
         try(ZipFile z=new ZipFile(minecraft)){for(ZipEntry entry:Collections.list(z.entries()))if(entry.getName().endsWith(".class")&&needed.contains(types.getOrDefault(entry.getName().substring(0,entry.getName().length()-6),""))){ClassNode n=new ClassNode();new ClassReader(z.getInputStream(entry)).accept(new ClassRemapper(n,remap),0);VerifyAddon.classes.put(n.name,n);}}
     }
     static void nativeContracts(String[] jars)throws Exception {

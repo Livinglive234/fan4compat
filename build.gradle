@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'dev.fan4'
-version = '0.1.0-alpha.30'
+version = '0.1.0-alpha.31'
 
 repositories {
     mavenCentral()
@@ -236,3 +236,14 @@ def shipLoadRecoveryTest = tasks.register('shipLoadRecoveryTest', JavaExec) {
     mainClass = 'ShipLoadRecoverySmokeTest'
 }
 tasks.named('check') { dependsOn shipLoadRecoveryTest }
+
+ tasks.register('wingTrailTest', JavaExec) {
+    dependsOn tasks.named('classes'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath + sourceSets.main.runtimeClasspath
+    mainClass = 'WingTrailSmokeTest'
+    args layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath
+    if (project.hasProperty('elytraTrailsJar') && project.hasProperty('minecraftJar') && project.hasProperty('intermediaryJar')) {
+        args project.property('elytraTrailsJar'), project.property('minecraftJar'), project.property('intermediaryJar')
+    }
+ }
+ tasks.named('check') { dependsOn tasks.named('wingTrailTest') }

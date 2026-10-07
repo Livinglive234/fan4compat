@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.21**.
+Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.31**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is experimental; a successful build does not
@@ -998,3 +998,37 @@ full-pack testing.
 
 Validation: clean alpha 30 build passed all 25 tasks and bytecode verification
 for 128 addon classes against the supplied native jars.
+
+
+## Alpha 31: waypoint creation, contrails and biome naming
+
+Fixed the waypoint creation hook to read the nested monitor `tardisTag`, matching
+DWM's actual screen data. The previous fixture used a flat tag and missed the
+runtime bug. The corrected fixture names a waypoint while the ship moves,
+verifies its ship identity/local address, then exercises authoritative selection,
+access denial, coordinate hiding, immutable entries and missing-ship rejection.
+Existing ordinary waypoints remain ordinary; create a new waypoint on the ship.
+
+For Elytra Contrails 1.4.7.5-1.21.1, capture a vanilla-sized fallback wing model
+inside the player's rendered body transform only when a gliding player has no
+existing emitter samples. This covers back-slot and custom renderers without
+a whitelist of item IDs. The normal trail manager still owns configuration,
+speed/gliding gates, rendering and lifetime. Native samples remain preferred.
+Invisible players, nonplayers and shader shadow passes receive no fallback.
+Custom wing shapes may need geometry-specific emitters for exact tip placement.
+
+Supply `dwm.biome.tardis` and `biome.dwm.tardis` English translations as TARDIS.
+DWM's remaining language entries are unchanged.
+
+Create investigation: Flywheel 1.0.6-44 deliberately disables INSTANCING and
+INDIRECT with active Iris shaders. The available 1.21.1 Iris/Flywheel bridge
+builds inspected are NeoForge, not a compatible Fabric artifact. See
+[docs/create-rendering.md](docs/create-rendering.md) for pinned versions, evidence
+and the port/render-state work still required. No shader guard is bypassed and
+IP's incompatibility warning is retained. No specific missing contraption has
+yet been identified by the user; warning text alone is not that reproduction.
+
+Validation: clean alpha 31 build passed all 26 tasks, packaging and bytecode
+verification for 130 addon classes, including exact contrail and Minecraft
+renderer API/injection checks. The three implemented fixes still require
+modpack testing; Create rendering remains an open goal.

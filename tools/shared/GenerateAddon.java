@@ -43,6 +43,7 @@ public class GenerateAddon implements Opcodes {
         LogCompatibilityGenerator.generate();
         ShipChunkPacketGenerator.generate();
         StackCodecGenerator.generate();
+        WingTrailGenerator.generate();
         System.out.println("Generated standalone dimension, ship lifecycle, Sable and optional debug mixins.");
     }
 }

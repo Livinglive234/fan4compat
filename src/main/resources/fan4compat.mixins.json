@@ -72,7 +72,8 @@
     "doctorwho.client.TardisShipModelCache1Mixin",
     "doctorwho.client.TardisShipModelCache2Mixin",
     "doctorwho.client.TardisShipModelCache3Mixin",
-    "doctorwho.client.TardisShipModelCache4Mixin"
+    "doctorwho.client.TardisShipModelCache4Mixin",
+    "elytratrails.client.WingTrailFallbackMixin"
   ],
   "injectors": {
     "defaultRequire": 1
