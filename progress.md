@@ -26,7 +26,7 @@ versions. Do not combine it with the earlier patched VS jars.
 - The original ship rendering and interaction fixes worked in the tested setup
   before standalone packaging. This does not validate every later addon change.
 - TARDIS key recall lands on the ship deck with DWM 1.0.38.4.
-- The TARDIS portal follows the moving exterior, with some trailing delay reported.
+- The TARDIS portal follows the moving exterior, with some occasional disappearance glitching
 
 ## Implemented, with runtime validation still pending
 
@@ -45,6 +45,13 @@ versions. Do not combine it with the earlier patched VS jars.
 | Sonic destination message | Show world coordinates followed by `(On ship)` while keeping the actual target ship-local. |
 | Player transfer | Clear VS attachment, drag/interpolation state and queued positions when IP changes the player's dimension. Reject ship motion packets from another dimension. |
 | Ship acknowledgement | Acknowledge synchronized loaded ships across portal worlds through VS's normal global known-ship API, preserving unloaded-chunk safeguards. |
+
+## Waiting to be Implemented
+Proper TARDIS waypoint support
+Elytra wings showing contrails when on back slot, and showing for all elytra types
+TARDIS biome on Xaero showing as TARDIS (not "dwm.biome.tardis")
+Fixing Create rendering issues with Immersive Portals and Iris
+
 
 ## Earlier blocker and correction (alpha.6/7)
 
