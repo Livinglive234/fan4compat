@@ -50,6 +50,9 @@ versions. Do not combine it with the earlier patched VS jars.
 
 ## Current goals and validation status
 
+- Audit unresolved Amendments/Porting Lib model-loader warnings and cosmetic
+  IronChest/BetterEnd resource warnings; see docs/log-followups.md. These were
+  observed in older logs and are not yet reproduced on alpha 35.
 - WWOO / DH grid seams remain unresolved. The alpha 34 border experiment was
   removed in alpha 35 at the pack owner's request.
 - Create rendering with Immersive Portals and Iris remains open; see
@@ -199,8 +202,8 @@ fixes are not claimed by this change.
 4. Opening from inside showed the portal moving through the air into position,
    and the ship was missing from the view outside. Alpha.5 addressed spawning
    animation and remote chunk notification; the complete view remains unverified.
-5. Sonic message formatting, smooth fast-motion tracking, full shader combinations,
-   and passage of ships themselves through portals remain unverified.
+5. Sonic message formatting, smooth fast-motion tracking and full shader
+   combinations remain unverified.
 
 ## Validation completed
 
@@ -703,8 +706,6 @@ waypoint creation during movement, access/update restrictions, authoritative
 application, missing ships and helm/passenger/dismount overlay behavior. Runtime
 Minecraft testing remains with the user.
 
-Aether: no whole-ship dimension transfer is implemented here. A nearby portal
-alone does not transfer a ship; player/entity crossings can leave the ship behind.
 The user's custom Aether immersive-portals build has not been runtime-tested.
 
 
@@ -804,8 +805,7 @@ snapshot coordinate conversion/nearest hits. New selectors and invocation points
 were checked against exact IP, DWM, Accessories, Sound Physics and the official
 Minecraft 1.21.1 classes remapped with Fabric intermediary mappings. Full-pack
 Minecraft testing, especially freshly opening the doorway after landing, remains
-with the user. No new debug logs, ChestTracker changes or whole-ship dimension
-transfer behavior were introduced.
+with the user. No new debug logs or ChestTracker changes were introduced.
 
 
 ## Alpha 25: dimension-aware ship chunk packets and movement/audio follow-up
@@ -1139,3 +1139,16 @@ No DH settings, LOD cache, or saved world data are changed.
 Validation: clean alpha 35 build passed all 26 tasks and stack/type verification
 for 131 addon classes. JAR inspection confirms the WWOO helper/mixin are absent
 and the existing DH dynamic-dimension mixin remains packaged.
+
+## Documentation scope and remaining log follow-ups
+
+At the pack owner's request, remove out-of-scope portal validation goals and
+historical scope notes. Portal compatibility covers player
+crossings and ship-mounted doorway views. Existing player transfer code remains
+necessary for TARDIS entry and exit; no runtime changes are made in this review.
+
+Recheck earlier log findings: unresolved model-loader fallbacks (Amendments and
+Forge/NeoForge loader names) are the most useful additional rendering audit.
+IronChest's invalid texture path and BetterEnd music-disc texture fallbacks are
+lower-priority cosmetic candidates. See docs/log-followups.md for evidence and
+limits. No new alpha version or rebuild is needed for this documentation commit.

@@ -213,11 +213,14 @@ That confirmation covers the tested setup; every shader and wing variant has
 not been individually verified.
 
 Ship recall targets the supporting deck beneath the player, rather than a deck
-viewed from elsewhere. The ship must stay loaded during the flight. Portal
-traversal by ships, ships in remote portal worlds, and all shader/render
-combinations remain unverified. Client connectivity restoration deliberately
+viewed from elsewhere. The ship must stay loaded during the flight. Remote
+ship views and all shader/render combinations remain unverified. Portal
+compatibility is scoped to player crossings and views of ship-mounted doorways. Client connectivity restoration deliberately
 targets the active player world; the existing VS queue drains against that world.
 ChestTracker persistence errors remain outside this addon's current scope.
+Other unresolved resource/model warnings are tracked in
+[log follow-ups](docs/log-followups.md); older logs do not establish a new
+regression in the current build.
 
 ## Build
 
@@ -265,7 +268,8 @@ Test in a copy of the world, starting with the original VS jar and Fan4Compat.
    dimension agreement, then repeat while moving. Check closed-door and nearby deck collisions. Repeat after save/reload. Block the landing space and verify failure
    instead of a ground landing.
 4. Restore Windchimes and check startup, nearby ship rendering and interaction.
-5. Check stationary portal views before testing ship movement near portals.
+5. Check stationary and moving ship-mounted TARDIS doorways with shaders
+   enabled and disabled.
 
 The standalone build and static verification are not substitutes for these
 runtime checks. In particular, the new dimension queue is covered by isolated
