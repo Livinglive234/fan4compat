@@ -7,7 +7,6 @@
     "valkyrienskies.common.DynamicDimensionMixin",
     "sable.common.SableCompatMixin",
     "distanthorizons.common.DhDynamicDimensionMixin",
-    "wwoo.common.WwooDhGenerationMixin",
     "doctorwho.common.TardisShipStateMixin",
     "doctorwho.common.TardisShipPortalMixin",
     "doctorwho.common.TardisShipRecallMixin",

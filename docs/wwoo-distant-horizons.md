@@ -1,4 +1,4 @@
-# WWOO / Distant Horizons grid investigation
+# WWOO / Distant Horizons grid investigation (withdrawn experiment)
 
 Inspected: WWOO Fabric 2.6.7 and Distant Horizons 3.3.3 for Minecraft 1.21.1.
 The user's logs include DH's explicit warning about WWOO LOD section grid lines.
@@ -28,30 +28,15 @@ reuse or existing-chunk shortcuts. Smaller requests have a higher relative cost;
 this is not a measurement of CPU time. Full Minecraft chunk generation and
 permanent chunk tickets are not enabled.
 
-## Validation
+## Experiment withdrawn in alpha 35
 
-The standalone checks execute the actual helper, verify the exact native field
-selector and reflected fields, and execute an extracted copy of DH's native
-allocation math. A deterministic radius-seven cross-border disk fixture compares
-the retained interior against a larger reference area, including negative chunk
-coordinates. It reproduces clipped edges without overlap and matches the
-reference with one ring. These checks do not run Minecraft or prove the whole
-WWOO feature set matches normal world generation.
+The pack owner requested removal because visual benefit had not been established
+and the extra generation work was not justified. Alpha 35 removes the helper,
+mixin, generator, version gate and experiment-specific tests. No WWOO generation
+patch is active. The `fan4compat.wwooBorder` switch no longer does anything.
 
-In the user's pack:
-
-1. Install alpha 34 on the client and the server performing DH generation. Keep
-   the same DH generator plan and FEATURES chunk generator mode.
-2. Compare newly generated LODs from a high viewpoint in a fresh test world using
-   the same seed and data packs. Check section boundaries with shaders both on
-   and off, then approach the terrain to compare against real chunks.
-3. Compare the same scene after restarting with
-   `-Dfan4compat.wwooBorder=false`. Compare generation throughput as well.
-4. Existing cached LODs are not invalidated automatically. Test fresh data first;
-   rebuilding a cache is a separate operation, not part of this addon patch.
-
-If the same grid remains in fresh LODs with the border enabled, record whether
-it is missing terrain/vegetation, color bands, lighting, or geometry cracks.
-Compression, approximate surface generation and shaders can also produce grid
-patterns and require a separate diagnosis. DH's generic WWOO warning remains;
-no warning is suppressed before runtime validation.
+Alpha 34 passed standalone checks of the border scope, native allocation math
+and a simplified cross-border feature fixture. Those checks did not run
+Minecraft or prove that the reported full-pack grid lines would disappear.
+WWOO / DH grid seams remain unresolved; no LOD cache or DH user configuration
+was changed during either implementation or removal.

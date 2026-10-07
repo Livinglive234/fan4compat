@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.34**.
+Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.35**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is experimental; a successful build does not
@@ -50,8 +50,8 @@ versions. Do not combine it with the earlier patched VS jars.
 
 ## Current goals and validation status
 
-- WWOO / DH lightweight-generation grid seams: alpha 34 adds an experimental
-  one-chunk neighbour border. Fresh-LOD in-game comparison is pending.
+- WWOO / DH grid seams remain unresolved. The alpha 34 border experiment was
+  removed in alpha 35 at the pack owner's request.
 - Create rendering with Immersive Portals and Iris remains open; see
   [the investigation](docs/create-rendering.md). Flywheel's shader fallback has
   not been bypassed.
@@ -1126,3 +1126,16 @@ batch size. See docs/wwoo-distant-horizons.md for evidence and test procedure.
 Validation: clean alpha 34 build passed all 27 tasks, packaging and bytecode
 stack/type checks for 133 addon classes. Exact DH field contracts and extracted
 native allocation math pass, as do cross-border feature and scope fixtures.
+
+## Alpha 35: withdraw WWOO neighbour-border experiment
+
+The pack owner requests removal. Delete the experimental runtime helper, mixin
+registration, generator, version gate and dedicated fixtures/build task. Remove
+its empty source/tool folders. DH returns to its original generation path; its
+existing dynamic-dimension compatibility remains. Retain investigation notes as
+history and update the README/current goals to mark WWOO grid seams unresolved.
+No DH settings, LOD cache, or saved world data are changed.
+
+Validation: clean alpha 35 build passed all 26 tasks and stack/type verification
+for 131 addon classes. JAR inspection confirms the WWOO helper/mixin are absent
+and the existing DH dynamic-dimension mixin remains packaged.
