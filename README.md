@@ -5,20 +5,22 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.4.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.5.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
 Distant Horizons LOD and terrain fade draws are skipped while Immersive Portals
 renders a portal view; Iris also ignores the main view's cached DH frame during
-those draws. Main-view DH rendering stays enabled. Portal destinations use normal
+those draws. Beta 5 also substitutes a far-depth sampler for Iris's DH depth
+textures during portal views; shader packs can otherwise sample stale terrain
+even when the DH frame flag is disabled. Main-view DH rendering stays enabled. Portal destinations use normal
 Minecraft terrain distance; this does not implement distant LODs through portals
 or stop background world generation. Requires supported DH/IP (and Iris for the
 shader guard), without requiring VS. Visual checks with shaders on/off are pending.
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 4 release notes](docs/releases/0.1.0-beta.4.md) ·
+[Beta 5 release notes](docs/releases/0.1.0-beta.5.md) ·
 [Release validation and wishlist](docs/release-readiness.md)
 
 ## Alpha 35: remove the WWOO border experiment
@@ -99,7 +101,7 @@ Restart the world for another full test.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.4.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.5.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.

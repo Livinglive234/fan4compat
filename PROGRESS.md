@@ -1,10 +1,24 @@
 # Fan4Compat progress
 
-Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.4**.
+Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.5**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 5: shader DH depth sampler isolation
+
+Pack owner reports beta 4 still shows source-world DH terrain through portals
+with BSL 10.1.5; shaders off is correct. Iris dynamically binds DH depth samplers
+without consulting checkFrame, so the earlier frame flag did not prevent stale
+texture sampling. During portal views only, both DH depth getters now return a
+one-pixel depth texture filled with 1.0 (no terrain hit). Cache per DHCompat
+instance and delete/reset on clearPipeline; leave main-view samplers unchanged.
+Uses OpenGL 3.2-compatible texture operations and restores texture binding even
+on allocation failure. No clearing shared DH textures or global shader settings.
+Tests cover nested/main-view selection, reuse, teardown/recreation, far-depth
+format/buffer and failed-allocation cleanup with a test GL backend. Native Iris
+selectors and clean build pass; actual BSL visual confirmation remains pending.
 
 ## Beta 4: Eureka severe notices and DH portal rendering
 

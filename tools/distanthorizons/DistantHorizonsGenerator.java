@@ -32,6 +32,24 @@ public final class DistantHorizonsGenerator implements Opcodes {
         m.visitMethodInsn(INVOKESTATIC,"qouteall/imm_ptl/core/render/context_management/PortalRendering","isRendering","()Z",false);
         Label done=new Label();m.visitJumpInsn(IFEQ,done);m.visitVarInsn(ALOAD,0);m.visitFieldInsn(GETSTATIC,"java/lang/Boolean","FALSE","Ljava/lang/Boolean;");
         m.visitMethodInsn(INVOKEVIRTUAL,"org/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable","setReturnValue","(Ljava/lang/Object;)V",false);
-        m.visitLabel(done);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+        m.visitLabel(done);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();
+        FieldVisitor texture=w.visitField(ACC_PRIVATE,"fan4$emptyDepth","I",null,null);
+        texture.visitAnnotation("Lorg/spongepowered/asm/mixin/Unique;",true).visitEnd();texture.visitEnd();
+        for(String getter:new String[]{"getDepthTex","getDepthTexNoTranslucent"}) {
+            m=w.visitMethod(ACC_PRIVATE,"fan4$portal"+getter,"(Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V",null,null);
+            GenerateAddon.inject(m,getter+"()I","HEAD",true);m.visitCode();
+            m.visitMethodInsn(INVOKESTATIC,"qouteall/imm_ptl/core/render/context_management/PortalRendering","isRendering","()Z",false);
+            Label nativeDepth=new Label(),ready=new Label();m.visitJumpInsn(IFEQ,nativeDepth);
+            m.visitVarInsn(ALOAD,0);m.visitFieldInsn(GETFIELD,name,"fan4$emptyDepth","I");m.visitJumpInsn(IFNE,ready);
+            m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,ROOT+"iris/PortalDepthTexture","create","()I",false);m.visitFieldInsn(PUTFIELD,name,"fan4$emptyDepth","I");
+            m.visitLabel(ready);m.visitVarInsn(ALOAD,1);m.visitVarInsn(ALOAD,0);m.visitFieldInsn(GETFIELD,name,"fan4$emptyDepth","I");
+            m.visitMethodInsn(INVOKESTATIC,"java/lang/Integer","valueOf","(I)Ljava/lang/Integer;",false);
+            m.visitMethodInsn(INVOKEVIRTUAL,"org/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable","setReturnValue","(Ljava/lang/Object;)V",false);
+            m.visitLabel(nativeDepth);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();
+        }
+        m=w.visitMethod(ACC_PRIVATE,"fan4$releasePortalDepth","(Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;)V",null,null);
+        GenerateAddon.inject(m,"clearPipeline()V","HEAD",false);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitFieldInsn(GETFIELD,name,"fan4$emptyDepth","I");
+        m.visitMethodInsn(INVOKESTATIC,ROOT+"iris/PortalDepthTexture","delete","(I)V",false);m.visitVarInsn(ALOAD,0);m.visitInsn(ICONST_0);m.visitFieldInsn(PUTFIELD,name,"fan4$emptyDepth","I");
+        m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
     }
 }
