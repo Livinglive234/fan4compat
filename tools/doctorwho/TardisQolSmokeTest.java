@@ -14,7 +14,8 @@ public final class TardisQolSmokeTest implements Opcodes {
         public boolean isEnabled(){return true;}public boolean inProgress(){return step!=Step.NONE;}public void addWaypointEntry(Waypoint entry){waypoints.add(entry);}
     }
     public static class QolState extends TardisShipSmokeTest.State {
-        public final Flight flight=new Flight();public boolean access=true;int accessChecks,dirty;
+        public final Flight flight=new Flight();public boolean access=true,attached=true;int accessChecks,dirty;
+        @Override public TardisShipSmokeTest.World getWorld(){return attached?world:null;}
         QolState(){flight.tardis=this;}
         public TardisShipSmokeTest.Key getCurrentExteriorDimension(){return world.key;}public TardisShipSmokeTest.Key getDestinationExteriorDimension(){return world.key;}
         public void setDestinationDimension(TardisShipSmokeTest.Key key){}
@@ -76,6 +77,10 @@ public final class TardisQolSmokeTest implements Opcodes {
         check(!(Boolean)deleted.invoke(null,screen,saved),"existing unloaded ship is not deleted");
         DrawContext draw=new DrawContext();label.invoke(null,screen,draw,new Object(),Texts.MONITOR_WAYPOINTS_COORDS,12,45,0xffffff,true);check(draw.wrapped==0&&draw.ordinary==0,"available ship hides coordinate label without warning");
         QolUtils.registry.all.remove(42L);write.invoke(null,state.flight,status);check((Boolean)deleted.invoke(null,screen,saved),"deleted ship status reaches screen through native nested flight tag");
+        state.attached=false;write.invoke(null,state.flight,status);
+        check((Boolean)deleted.invoke(null,screen,saved),"detached-world save preserves last known waypoint status");
+        state.attached=true;
+        Flight detached=new Flight();write.invoke(null,detached,new TardisShipSmokeTest.Tag());
         Row row=new Row();row.this$0.parent=screen;row.waypointEntry=saved;Text text=new Text(saved.name());Object struck=h.getMethod("waypointText",Object.class,Object.class).invoke(null,row,text);check(struck==text&&text.struck,"deleted ship row name is struck through without changing saved name");
         label.invoke(null,screen,draw,new Object(),Texts.MONITOR_WAYPOINTS_COORDS,12,45,0xffffff,true);check(draw.wrapped==1&&draw.x==12&&draw.y==45&&draw.width==150&&draw.message.value.equals("fan4compat.waypoint.ship_deleted"),"deleted warning wraps at native coordinate area");
         screen.selected=new Selection(request);label.invoke(null,screen,draw,new Object(),Texts.MONITOR_WAYPOINTS_COORDS,12,45,0xffffff,true);check(draw.ordinary==1&&draw.wrapped==1,"ordinary waypoint keeps coordinates");row.waypointEntry=request;Text normal=new Text(request.name());h.getMethod("waypointText",Object.class,Object.class).invoke(null,row,normal);check(!normal.struck,"ordinary waypoint names retain style");

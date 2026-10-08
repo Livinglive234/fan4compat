@@ -1,10 +1,19 @@
 # Fan4Compat progress
 
-Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.2**.
+Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.3**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 3: detached TARDIS waypoint saves
+
+The beta 2 server log exposed a null world in waypoint-status serialization while
+saving console chunk 0,0. Skip only the world-dependent status refresh when the
+TARDIS/world context is absent; preserve existing status and continue flight NBT
+serialization. Regression covers detached-world save with existing deleted status
+and a missing TARDIS state. Clean build and native selector checks pass; full-pack
+server save/restart confirmation remains pending.
 
 ## Beta 2: dedicated-server VS static lookup fix
 

@@ -110,8 +110,11 @@ public final class TardisShipQol {
     }
     /** Server snapshots use all ship data, including ships whose chunks are unloaded. */
     private static void writeWaypointStatus(Object flight,Object tag){
-        Object state=field(flight,"tardis"),world=call(state,"getWorld");
-        if((Boolean)field(world,"field_9236"))return;
+        Object state=field(flight,"tardis");if(state==null)return;
+        Object world=call(state,"getWorld");
+        // Detached console states can be serialized without an attached world.
+        // Preserve their saved data; missing world context is not a deleted ship.
+        if(world==null||(Boolean)field(world,"field_9236"))return;
         Object server=call(world,"method_8503");if(server==null)return;
         Object ships=exact("org.valkyrienskies.mod.common.VSGameUtilsKt","getShipObjectWorld",
             new String[]{"net.minecraft.server.MinecraftServer"},server);
