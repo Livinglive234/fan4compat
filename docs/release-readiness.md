@@ -1,12 +1,14 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.8**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.9**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
 Both client and server should run this build for Eureka server notices.
 Beta 7 adds the Freecam tick-boundary fix; beta 8 adjusts nearby LOD clipping only
-for its active camera in unloaded terrain. Test approaching distant LODs, backing
+for its active camera in unloaded terrain. The pack owner reports beta 8 failed
+with BSL only; beta 9 targets BSL 10.1.5 terrain/water distance discard. In-game
+confirmation remains pending. Test approaching distant LODs, backing
 away, returning to loaded terrain, disabling Freecam and normal player movement.
 
 A beta 1 dedicated-server log exposed a client-only classloading crash during
@@ -36,7 +38,7 @@ changes. Log warning count alone is not a release criterion.
 
 Beta 1 freezes the current supported feature set. Exact supported versions,
 installation instructions and known limitations remain in the README and
-[release notes](releases/0.1.0-beta.8.md).
+[release notes](releases/0.1.0-beta.9.md).
 
 ## Move from beta to stable
 

@@ -29,5 +29,20 @@ public final class FreecamGenerator implements Opcodes {
         GenerateAddon.inject(m,"fillUniformData(Lcom/seibel/distanthorizons/api/methods/events/sharedParameterObjects/DhApiRenderParam;)V","RETURN",false);
         m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,GenerateAddon.ROOT+"freecam/FreecamTickCompat","lodClip","(Ljava/lang/Object;)V",false);
         m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+
+        String shaderHelper=GenerateAddon.ROOT+"freecam/FreecamShaderCompat";
+        name=GenerateAddon.ROOT+"mixin/freecam/client/FreecamBslShaderMixin";
+        w=GenerateAddon.writer(name,"net/irisshaders/iris/pipeline/transform/TransformPatcher");
+        m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$bslFreecamSource","(Ljava/lang/String;)Ljava/lang/String;",null,null);
+        a=m.visitAnnotation("Lorg/spongepowered/asm/mixin/injection/ModifyVariable;",true);
+        selectors=a.visitArray("method");selectors.visit(null,"patchDHTerrain(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lit/unimi/dsi/fastutil/objects/Object2ObjectMap;)Ljava/util/Map;");selectors.visitEnd();
+        a.visit("argsOnly",true);a.visit("index",5);a.visit("require",1);a.visit("remap",false);at=a.visitAnnotation("at","Lorg/spongepowered/asm/mixin/injection/At;");at.visit("value","HEAD");at.visitEnd();a.visitEnd();
+        m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,shaderHelper,"source","(Ljava/lang/String;)Ljava/lang/String;",false);m.visitInsn(ARETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+        name=GenerateAddon.ROOT+"mixin/freecam/client/FreecamBslUniformMixin";
+        w=GenerateAddon.writer(name,"net/irisshaders/iris/compat/dh/IrisLodRenderProgram");
+        m=w.visitMethod(ACC_PRIVATE,"fan4$bslFreecamUniform","(Lorg/joml/Matrix4fc;Lorg/joml/Matrix4fc;IFL"+GenerateAddon.CI+";)V",null,null);
+        GenerateAddon.inject(m,"fillUniformData(Lorg/joml/Matrix4fc;Lorg/joml/Matrix4fc;IF)V","RETURN",false);
+        m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,shaderHelper,"uniforms","(Ljava/lang/Object;)V",false);
+        m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
     }
 }

@@ -23,7 +23,7 @@ public final class CompatibilityRules {
         if(!name.startsWith(prefix))return false;
         String path=name.substring(prefix.length()),simple=path.substring(path.lastIndexOf('.')+1);
         boolean vs=supported(mods,"valkyrienskies"),ip=supported(mods,"immersive_portals");
-        if(path.startsWith("freecam."))return supported(mods,"freecam")&&supported(mods,"distanthorizons");
+        if(path.startsWith("freecam."))return supported(mods,"freecam")&&supported(mods,"distanthorizons")&&(!simple.startsWith("FreecamBsl")||supported(mods,"iris"));
         if(path.startsWith("valkyrienskies."))return vs;
         if(path.startsWith("sable."))return vs&&sable;
         if(path.startsWith("immersiveportals."))return vs&&ip;

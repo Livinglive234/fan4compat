@@ -34,3 +34,7 @@ Player portal transfer code is required; it does not transfer ships between worl
 The build's featureLinkAudit rejects unconfigured generated mixins and packaged
 classes with no reference path from an active mixin, plugin or entrypoint. This
 checks structural reachability; it does not replace in-game regression testing.
+
+Freecam BSL support: `freecam/FreecamShaderCompat`, generated `FreecamBslShaderMixin`
+and `FreecamBslUniformMixin` target the BSL DH overlap discard through Iris.
+`FreecamShaderTest` covers source selection and per-draw uniform restoration.

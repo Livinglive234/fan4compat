@@ -17,7 +17,7 @@ public final class FreecamTickCompat {
         return active(entity);
     }
     /** No full terrain exists here to cover DH's normal near-camera exclusion. */
-    private static boolean unloadedCamera() {
+    public static boolean unloadedCamera() {
         Class<?> freecam=type("net.xolt.freecam.Freecam");
         if(!(Boolean)call(freecam,"isEnabled"))return false;
         Object camera=call(freecam,"getFreeCamera");if(!active(camera))return false;

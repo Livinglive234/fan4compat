@@ -47,6 +47,8 @@
     "freecam.client.FreecamUnloadedTickMixin",
     "freecam.client.FreecamLodNearClipMixin",
     "freecam.client.FreecamLodClipUniformMixin",
+    "freecam.client.FreecamBslShaderMixin",
+    "freecam.client.FreecamBslUniformMixin",
     "pointblank.client.StaleGunAnimationMixin",
     "pointblank.client.StaleGunDrawMixin",
     "pointblank.client.OffhandGunDrawMixin",

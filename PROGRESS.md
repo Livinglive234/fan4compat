@@ -1,10 +1,26 @@
 # Fan4Compat progress
 
-Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.8**.
+Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.9**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 9: BSL Freecam distance discard
+
+Pack owner reports beta 8 did not resolve disappearing terrain and confirms it
+occurs only with BSL enabled. BSL 10.1.5 independently discards nearby DH terrain
+and water using the vanilla far-distance uniform. Iris shader compilation now
+adds a dedicated bool to that exact rule, and the DH program updates it each draw
+only for the active Freecam in an unloaded chunk. Original behavior returns in
+loaded terrain, normal player views, disabled Freecam and portal views. Unrelated
+shader code is unchanged; comments cannot activate the rewrite.
+
+Validation: clean build, optional gates, native Iris/DH selectors, source rewrite
+and uniform restoration regressions. Actual preprocessed BSL 10.1.5 terrain/water
+stages for Overworld, Nether and End parse with Iris's bundled GLSL parser before
+and after rewriting. GPU compilation and in-game visual confirmation remain
+pending. Destination portal LOD work stays paused.
 
 ## Beta 5: shader DH depth sampler isolation
 
