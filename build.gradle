@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'dev.fan4'
-version = '0.1.0-alpha.36'
+version = '0.1.0-alpha.37'
 
 repositories {
     mavenCentral()
@@ -256,3 +256,12 @@ tasks.register('eurekaWarningTest', JavaExec) {
     if (project.hasProperty('ipJar')) args project.property('ipJar')
 }
 tasks.named('check') { dependsOn tasks.named('eurekaWarningTest') }
+
+tasks.register('pointBlankTest', JavaExec) {
+    dependsOn generateAddon, tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'PointBlankSmokeTest'
+    args generatedClasses.get().asFile.absolutePath
+    if (project.hasProperty('pointBlankJar')) args project.property('pointBlankJar')
+}
+tasks.named('check') { dependsOn tasks.named('pointBlankTest') }

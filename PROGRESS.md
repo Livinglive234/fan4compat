@@ -1,10 +1,23 @@
 # Fan4Compat progress
 
-Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.36**.
+Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.37**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is experimental; a successful build does not
 establish that portal traversal works correctly in the full modpack.
+
+## Alpha 37: Point Blank stale animation crash
+
+Latest supplied log crashes in Point Blank Fabric 2.2.0
+`DynamicGeoListener.getControllers`: an air item is cast to `GunItem` during
+`onDrawing` / `tryDraw`. A client-only, version-gated HEAD guard returns an
+empty controller map for null or non-gun stacks, so all listener callbacks can
+safely iterate it. Valid guns and gun subclasses continue through native code.
+The initiating inventory/state transition is not established by the log.
+Verified against the exact public 2.2.0 Fabric jar and regression fixtures;
+clean build passes. In-game weapon switching/drawing checks remain pending.
+Accessories missing-entity sync errors also recur; they are separate from this
+crash and have not been hidden by this patch.
 
 ## Alpha 36: Eureka warning
 

@@ -31,6 +31,7 @@ public class GenerateAddon implements Opcodes {
         SableGenerator.sableMixin();
         EurekaGenerator.debugMixin();
         EurekaGenerator.warningMixin();
+        PointBlankGenerator.generate();
         DistantHorizonsGenerator.dhDimensionMixin();
         ImmersivePortalsGenerator.chunkCacheDuckMixin();
         TardisBridgeGenerator.generate();
