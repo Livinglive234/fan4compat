@@ -3,7 +3,7 @@
   "id": "fan4compat",
   "version": "${version}",
   "name": "Fan4Compat",
-  "description": "Fabric 1.21.1 bridges for Valkyrien Skies, Immersive Portals, dynamic dimensions, and Sable Companion.",
+  "description": "Optional Fabric 1.21.1 fixes for installed supported mods and mod combinations.",
   "license": "MIT",
   "contact": {
     "sources": "https://github.com/Livinglive234/fan4compat"
@@ -21,7 +21,6 @@
     "fabricloader": ">=0.16.0",
     "minecraft": "1.21.1",
     "java": ">=21",
-    "valkyrienskies": "=2.4.12-td.9+66a13242ed",
     "mixinsquared": ">=0.2.0-beta.6"
   },
   "jars": [

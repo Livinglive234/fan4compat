@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: experimental, 0.1.0-alpha.37.** The original v4 ship fixes were confirmed
+**Status: experimental, 0.1.0-alpha.38.** The original v4 ship fixes were confirmed
 working in game by the pack owner. The pack owner confirmed TARDIS entry, exit, placement and landing in alpha 21.
 The pack owner also confirmed moving-ship exits, waypoint UI, contrails and the TARDIS biome label in the latest build. Ship visibility through reopened doors before exiting remains a known limitation.
 
@@ -87,14 +87,22 @@ Restart the world for another full test.
 
 ## Install
 
-1. Remove previously patched VS jars, including `IP-compat-v4` and `IP-Sable-*`.
-2. Restore the original `ValkyrienSkies-Fabric-MC1.21.1-v3.2.0.jar` with internal
-   version `2.4.12-td.9+66a13242ed`.
-3. Add `Fan4Compat-0.1.0-alpha.37.jar` to `mods` on the client and server.
-4. Keep the original Immersive Portals, Eureka, Doctor Who Mod and Windchimes jars.
+1. Add `Fan4Compat-0.1.0-alpha.38.jar` to `mods` on the client and server.
+2. Install whichever supported target mods you want. No gameplay mod is required
+   by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
+   MixinSquared is bundled in the addon.
+3. If using ship fixes, use the original supported VS jar, not earlier patched
+   `IP-compat-v4` / `IP-Sable-*` builds. Unsupported versions skip their hooks
+   and dependent bridges, with a startup warning; they do not block the addon.
 
-Do not install Fan4Compat alongside earlier patched VS builds. Its mixin plugin
-rejects that combination to prevent applying the same fixes twice.
+Fixes activate only when their required combination is installed at supported
+versions. With Point Blank + Doctor Who Mod alone, the gun animation crash fix
+and DWM model-cache reuse apply. TARDIS ship features require supported VS;
+portal-specific ship hooks also require supported Immersive Portals. Accessories
+and Iris portal fixes require IP but do not require VS. DH dynamic dimensions,
+BCLib recipe fixes and Elytra Contrails fallback can activate independently.
+Sound Physics ship acoustics and Jade helm hiding require VS (Jade also Eureka).
+No target mods installed means no compatibility mixins apply.
 
 ## Supported builds
 
@@ -111,7 +119,7 @@ rejects that combination to prevent applying the same fixes twice.
 | Jade helm overlay | `15.10.6+fabric` only |
 | Distant Horizons dynamic-world transfer | `3.3.3` for Fabric 1.21.1 |
 
-The addon intentionally pins the VS implementation because its dimension
+The ship hooks intentionally pin the VS implementation because their dimension
 lifecycle targets include names from that build's obfuscated physics core.
 Other mod releases need another compatibility audit.
 

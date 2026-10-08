@@ -1,10 +1,25 @@
 # Fan4Compat progress
 
-Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.37**.
+Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.38**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is experimental; a successful build does not
 establish that portal traversal works correctly in the full modpack.
+
+## Alpha 38: optional integrations
+
+Remove VS from mandatory loader dependencies and replace global VS/IP startup
+rejection with metadata-only supported-version gates. Missing/unsupported mods
+skip their hooks and dependent bridges. Unknown integration groups fail closed.
+All ship hooks require supported VS; IP ship hooks also require supported IP.
+DWM model caches, Point Blank, DH, BCLib and contrails run independently;
+Accessories/Iris require IP, ship acoustics require VS, Jade requires VS/Eureka.
+Startup reports installed unsupported versions once without blocking other fixes.
+Mixin cancellation now requires both supported VS and IP. Fabric Loader,
+Minecraft/Java and bundled MixinSquared remain infrastructure dependencies.
+Regression matrix covers every registered mixin, no targets, target-only setups,
+Point Blank + DWM, absent VS/IP and unsupported versions. Full in-game launch
+checks with reduced mod sets remain pending; clean build and bytecode tests pass.
 
 ## Alpha 37: Point Blank stale animation crash
 
@@ -39,7 +54,8 @@ exact supplied-IP selector verification; in-game notice check remains pending.
 | Sable / Windchimes | Observed Sable Companion `1.6.0`, bundled in Windchimes `1.2.0+1.21.1` |
 
 Install the latest Fan4Compat jar on client and server, replacing older addon
-versions. Do not combine it with the earlier patched VS jars.
+versions. If using VS ship fixes, use the original supported VS jar. Unsupported VS
+versions skip ship hooks and dependent bridges. Target mods are optional.
 
 ## Confirmed in game
 
