@@ -2,6 +2,14 @@ import org.objectweb.asm.*;
 public final class ShipLoadRecoveryGenerator implements Opcodes {
     static void generate()throws Exception {
         String root=GenerateAddon.ROOT,ci=GenerateAddon.CI,cir="org/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable",helper=root+"immersiveportals/ShipLoadRecovery";
+        String guard=root+"mixin/immersiveportals/common/ShipGuardRecoveryMixin";
+        ClassWriter guardWriter=GenerateAddon.writer(guard,"org/valkyrienskies/mod/common/util/EntityShipCollisionUtils");
+        MethodVisitor observer=guardWriter.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$recoverGuard","(Lnet/minecraft/class_1297;L"+cir+";)V",null,null);
+        GenerateAddon.inject(observer,"isCollidingWithUnloadedShips(Lnet/minecraft/class_1297;)Z","RETURN",false);
+        observer.visitCode();observer.visitVarInsn(ALOAD,0);observer.visitVarInsn(ALOAD,1);
+        observer.visitMethodInsn(INVOKEVIRTUAL,cir,"getReturnValueZ","()Z",false);
+        observer.visitMethodInsn(INVOKESTATIC,helper,"guard","(Ljava/lang/Object;Z)V",false);
+        LogCompatibilityGenerator.end(observer);GenerateAddon.save(guard,guardWriter);
         String name=root+"mixin/immersiveportals/common/ShipAcknowledgementRecoveryMixin";ClassWriter w=GenerateAddon.writer(name,"org/valkyrienskies/mod/common/networking/VSGamePackets");
         String args="Lorg/valkyrienskies/mod/common/networking/PacketChangeKnownShips;Lorg/valkyrienskies/core/internal/world/VsiPlayer;";
         MethodVisitor m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$recoverAcknowledgement","("+args+"L"+cir+";)V",null,null);

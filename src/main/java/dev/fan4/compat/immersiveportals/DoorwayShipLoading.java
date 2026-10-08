@@ -4,7 +4,10 @@ import java.util.function.Consumer;
 import java.lang.reflect.Proxy;
 import static dev.fan4.compat.shared.CompatCalls.*;
 
-/** Bootstrap ship metadata from stable doorway anchors, independently of world bounds. */
+/** Keep ship chunks available for TARDIS exits and nearby native movement guards.
+ * Portal anchors cover ships before the player arrives; this is transit loading,
+ * not a separate portal-preview renderer or an alternate ship packet protocol.
+ */
 public final class DoorwayShipLoading {
     public static void loaders(Object player,Consumer<Object> consumer) {
         Object world=call(player,"method_37908"),position=call(player,"method_19538");

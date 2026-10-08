@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.5.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.6.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -16,12 +16,19 @@ textures during portal views; shader packs can otherwise sample stale terrain
 even when the DH frame flag is disabled. Main-view DH rendering stays enabled. Portal destinations use normal
 Minecraft terrain distance; this does not implement distant LODs through portals
 or stop background world generation. Requires supported DH/IP (and Iris for the
-shader guard), without requiring VS. Visual checks with shaders on/off are pending.
+shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fix working; the initial LOD load can take longer, with subsequent loads behaving normally.
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 5 release notes](docs/releases/0.1.0-beta.5.md) ·
+[Beta 6 release notes](docs/releases/0.1.0-beta.6.md) ·
 [Release validation and wishlist](docs/release-readiness.md)
+
+## Beta 6 cleanup
+
+Removed temporary movement diagnostics and unused collision-query code. Native
+ship loading recovery and chunk preparation needed for TARDIS exits remain.
+No separate ship-preview renderer is retained.
+[Code and feature map](docs/code-feature-map.md) explains the retained paths.
 
 ## Alpha 35: remove the WWOO border experiment
 
@@ -91,17 +98,9 @@ acknowledgements and selectively requeues valid delivered IP watches near the pl
 Collision, teleport validation and IP's normal chunk batching remain in place.
 These changes require in-game verification against the reported boundary freeze.
 
-Movement diagnostics are available with JVM argument
-`-Dfan4compat.movementDebug=true`; normal builds keep them disabled. Reproduce the
-freeze moving toward and away from the ship, then try spectator and send `latest.log`.
-Search for `[Fan4Compat movement]`. Logging identifies the native guard, ship known/
-loaded state, missing active chunks, stalled movement and terrain availability.
-It is capped at 12 samples per player per dimension visit, one every three seconds.
-Restart the world for another full test.
-
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.5.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.6.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.

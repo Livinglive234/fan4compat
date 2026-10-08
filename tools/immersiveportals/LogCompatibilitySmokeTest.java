@@ -153,7 +153,7 @@ public class LogCompatibilitySmokeTest {
     public static class Input implements Like {
         final Map<String,Object> values=new HashMap<>();public Object get(Object key){return values.get(key);}public Object get(String key){return values.get(key);}public Stream<?> entries(){return values.entrySet().stream();}
     }
-    static final Set<String> HELPERS=Set.of("dev.fan4.compat.immersiveportals.MovementDiagnostics","dev.fan4.compat.doctorwho.ModelBakeCompat","dev.fan4.compat.immersiveportals.PositionPacketCompat","dev.fan4.compat.accessories.PortalEntitySyncCompat","dev.fan4.compat.iris.ShaderCompileCompat","dev.fan4.compat.immersiveportals.PortalMotionCompat","dev.fan4.compat.immersiveportals.DoorwayShipLoading","dev.fan4.compat.soundphysics.ShipSoundRaycast","dev.fan4.compat.immersiveportals.ShipChunkPackets","dev.fan4.compat.bclib.StackCodecCompat","dev.fan4.compat.bclib.AliasedStackCodec");
+    static final Set<String> HELPERS=Set.of("dev.fan4.compat.doctorwho.ModelBakeCompat","dev.fan4.compat.immersiveportals.PositionPacketCompat","dev.fan4.compat.accessories.PortalEntitySyncCompat","dev.fan4.compat.iris.ShaderCompileCompat","dev.fan4.compat.immersiveportals.PortalMotionCompat","dev.fan4.compat.immersiveportals.DoorwayShipLoading","dev.fan4.compat.soundphysics.ShipSoundRaycast","dev.fan4.compat.immersiveportals.ShipChunkPackets","dev.fan4.compat.bclib.StackCodecCompat","dev.fan4.compat.bclib.AliasedStackCodec");
     static final Map<String,String> TYPES=new HashMap<>();
     static {
         Object[][] mappings={
@@ -285,44 +285,12 @@ public class LogCompatibilitySmokeTest {
         for(int i=0;i<count;i++)VerifyAddon.readJar(jars[i]);
         for(Path p:Files.walk(Path.of("build/generated/classes/dev/fan4/compat/mixin")).filter(p->p.toString().endsWith(".class")).toList()) {
             ClassNode n=new ClassNode();new ClassReader(Files.readAllBytes(p)).accept(n,0);
-            if(n.name.contains("ShipAcknowledgementRecoveryMixin")||n.name.contains("ShipAcknowledgementFlushMixin")||n.name.contains("ShipGuardDiagnosticMixin")||n.name.contains("StackCodecAliasMixin")||n.name.contains("TardisShipModelCache")||n.name.contains("PortalSync")||n.name.contains("PortalInvalidate")||n.name.contains("ShipAcoustic")||n.name.contains("DoorwayShipLoading")||n.name.contains("ShipChunkPacketMixin")||n.name.contains("PositionPacketAwaiting")||n.name.contains("MixinShipPortalTargetDistance"))VerifyAddon.injectionTargets(n);
-            if(VerifyAddon.classes.containsKey("net/minecraft/class_281")&&(n.name.contains("MovementTerrainDiagnosticMixin")||n.name.contains("MovementDiagnosticMixin")||n.name.contains("ShaderCompileScope")||n.name.contains("PositionPacketDimension")||n.name.contains("OptionalRecipeDependencies")||n.name.contains("RecipeStackFormat")||n.name.contains("PortalEntityRetry")))VerifyAddon.injectionTargets(n);
+            if(n.name.contains("ShipAcknowledgementRecoveryMixin")||n.name.contains("ShipAcknowledgementFlushMixin")||n.name.contains("ShipGuardRecoveryMixin")||n.name.contains("StackCodecAliasMixin")||n.name.contains("TardisShipModelCache")||n.name.contains("PortalSync")||n.name.contains("PortalInvalidate")||n.name.contains("ShipAcoustic")||n.name.contains("DoorwayShipLoading")||n.name.contains("ShipChunkPacketMixin")||n.name.contains("PositionPacketAwaiting")||n.name.contains("MixinShipPortalTargetDistance"))VerifyAddon.injectionTargets(n);
+            if(VerifyAddon.classes.containsKey("net/minecraft/class_281")&&(n.name.contains("ShaderCompileScope")||n.name.contains("PositionPacketDimension")||n.name.contains("OptionalRecipeDependencies")||n.name.contains("RecipeStackFormat")||n.name.contains("PortalEntityRetry")))VerifyAddon.injectionTargets(n);
         }
     }
-    static void movementForwarding(Loader loader)throws Exception {
-        var helper=loader.loadClass("dev.fan4.compat.immersiveportals.MovementDiagnostics");
-        var move=helper.getMethod("move",Object.class,Object.class,Object.class,Object.class);
-        var guard=helper.getMethod("guard",Object.class,boolean.class);
-        var currentField=helper.getDeclaredField("CURRENT");currentField.setAccessible(true);ThreadLocal<?> current=(ThreadLocal<?>)currentField.get(null);
-        Player player=new Player(new World());Object kind=new Object();Vec movement=new Vec(0,0,0);int[] calls={0};
-        OperationAPI operation=args->{check(args.length==2&&args[0]==kind&&args[1]==movement,"movement arguments forwarded exactly");calls[0]++;try{guard.invoke(null,player,true);var flag=current.get().getClass().getDeclaredField("guarded");flag.setAccessible(true);check(flag.getBoolean(current.get()),"original guard recorded without bypass");}catch(Exception e){throw new RuntimeException(e);}return null;};
-        move.invoke(null,player,kind,movement,operation);check(calls[0]==1&&current.get()==null,"original movement runs once and scope clears");
-        RuntimeException failure=new RuntimeException("native failure");OperationAPI failing=args->{throw failure;};
-        try{move.invoke(null,player,kind,movement,failing);throw new AssertionError("native exception swallowed");}catch(java.lang.reflect.InvocationTargetException e){check(e.getCause()==failure,"original movement exception retained");}
-        check(current.get()==null,"failed movement clears diagnostic scope");
-        OperationAPI nested=args->{Object before=current.get();try{move.invoke(null,player,kind,movement,operation);}catch(Exception e){throw new RuntimeException(e);}check(current.get()==before,"nested movement restores parent scope");return null;};
-        move.invoke(null,player,kind,movement,nested);check(current.get()==null,"nested movement clears scope");
-        guard.invoke(null,player,true);check(current.get()==null,"unscoped guard does not mutate movement");
-    }
-    static void movementDisabled()throws Exception {
-        String old=System.getProperty("fan4compat.movementDebug");System.setProperty("fan4compat.movementDebug","false");
-        try {
-            var helper=new Loader().loadClass("dev.fan4.compat.immersiveportals.MovementDiagnostics");var move=helper.getMethod("move",Object.class,Object.class,Object.class,Object.class);
-            Object entity=new Object(),kind=new Object(),vector=new Object();int[] calls={0};OperationAPI original=args->{check(args[0]==kind&&args[1]==vector,"disabled diagnostics preserve arguments");calls[0]++;return null;};
-            move.invoke(null,entity,kind,vector,original);check(calls[0]==1,"disabled diagnostics run native movement exactly once without Minecraft lookup");
-            helper.getMethod("terrain",Object.class).invoke(null,new Object());
-        }finally{if(old==null)System.clearProperty("fan4compat.movementDebug");else System.setProperty("fan4compat.movementDebug",old);}
-    }
-    static void movementBudget()throws Exception {
-        var budget=new dev.fan4.compat.immersiveportals.MovementDiagnostics.Budget();Object world=new Object();
-        check(budget.take(world,-100),"first diagnostic works with negative nanoTime");
-        check(!budget.take(world,100),"repeated frames are throttled");
-        for(int i=1;i<12;i++)check(budget.take(world,i*3_000_000_000L),"bounded next sample");
-        check(!budget.take(world,99_000_000_000L),"session cap prevents console spam");
-        check(budget.take(new Object(),100_000_000_000L),"new dimension gets a fresh budget");
-    }
     public static void main(String[] args)throws Exception {
-        movementDisabled();movementBudget();Loader loader=new Loader();movementForwarding(loader);shader(loader);compileScope(loader);recipes();position(loader);models(loader);accessories(loader);doorway(loader);sound(loader);chunkPackets(loader);stackCodec(loader);if(args.length>0)nativeContracts(args);
+        Loader loader=new Loader();shader(loader);compileScope(loader);recipes();position(loader);models(loader);accessories(loader);doorway(loader);sound(loader);chunkPackets(loader);stackCodec(loader);if(args.length>0)nativeContracts(args);
         System.out.println("PASS: shader declarations/context, component-preserving recipes, packet metadata/corrections, model reuse/reload ordered remote entity sync, doorway bootstrap, dimension-aware chunk packets, unload ownership, bounded acoustic rays and native stack codec aliases");
     }
 }

@@ -24,7 +24,7 @@ public class TardisShipSmokeTest implements Opcodes {
     public static class ExteriorBlock {public static final Object OPEN=new Object(),FACING=new Object();public final ExteriorType exteriorType=new ExteriorType();}
     public static class ExteriorType {public double entranceWidth=1;}
     public static class BlockState {public boolean solid,open;public Dir facing=Dir.SOUTH;public final ExteriorBlock block=new ExteriorBlock();BlockState(boolean s){solid=s;}public Comparable<?> method_11654(Object property){return property==ExteriorBlock.OPEN?open:facing;}public ExteriorBlock method_26204(){return block;}}
-    public static class World { public boolean field_9236;public Iterable<?> source;public List<Object> collisions=new ArrayList<>();public Iterable<?> method_20812(Player p,Box b){return source==null?collisions:source;}public BlockState method_8320(Pos p){return new BlockState(p.x==-2866585&&p.y==130&&p.z==9999999);}final Key key=new Key(); public Key method_27983(){return key;}public int method_31607(){return -64;}public int method_31600(){return 320;}public Server method_8503(){return new Server(this);} }
+    public static class World { public boolean field_9236;public BlockState method_8320(Pos p){return new BlockState(p.x==-2866585&&p.y==130&&p.z==9999999);}final Key key=new Key(); public Key method_27983(){return key;}public int method_31607(){return -64;}public int method_31600(){return 320;}public Server method_8503(){return new Server(this);} }
     public static class Server {final World world;Server(World w){world=w;}public World method_3847(Key k){return world;} }
     public static class Player {public Vec position=new Vec(10,71,20);public Box method_5829(){return new Box(position.field_1352-.3,position.field_1351,position.field_1350-.3,position.field_1352+.3,position.field_1351+1.8,position.field_1350+.3);}Text message;public void method_7353(Text t,boolean overlay){message=t;}public Vec method_19538(){return position;} }
     public static class Hit {final Pos support;Hit(Pos p){support=p;}public Kind method_17783(){return support==null?Kind.MISS:Kind.BLOCK;}public Pos method_17777(){return support;}public Dir method_17780(){return Dir.UP;} }
@@ -134,14 +134,7 @@ public class TardisShipSmokeTest implements Opcodes {
         int updates=ps.portalToTardis.updates;portals.invoke(null,ps);check(ps.portalToTardis.updates==updates,"stationary portals don't spam updates");
         Utils.ship.matrix.tx+=4;portals.invoke(null,ps);at(ps.portalToTardis.origin,115,71,-60.5);check(ps.portalToTardis.updates==updates+1,"portal follows ship each tick");
         check(!ps.portalFromTardis.animation&&!ps.portalToTardis.animation,"ship portals disable trailing default animation");
-        CollisionShape lower=new CollisionShape(new Box(-2866585,130,9999999,-2866584,131,10000000));
-        CollisionShape upper=new CollisionShape(new Box(-2866585,131,9999999,-2866584,132,10000000));
-        CollisionShape deck=new CollisionShape(new Box(-2866585,129,9999999,-2866584,130,10000000));
-        CollisionShape neighbor=new CollisionShape(new Box(-2866584,130,9999999,-2866583,131,10000000));
-        state.world.collisions.addAll(List.of(lower,upper,deck,neighbor));
-        var collisions=helper.getMethod("shipCollisions",Object.class,Object.class,Object.class);
-        Object query=new Box(-2866586,129,9999998,-2866583,133,10000001);Player player=new Player();
-        check(collisions.invoke(null,state.world,player,query)==state.world.collisions,"source-clipped walls are not discarded by the VS query bridge");
+        Player player=new Player();
         var sourceShape=helper.getMethod("openExteriorShape",Object.class,Object.class,Object.class);
         BlockState openState=new BlockState(true);openState.open=true;
         check((Boolean)sourceShape.invoke(null,openState,state.world,state.curr),"open attached shell lower shape is eligible for doorway clipping");
@@ -168,10 +161,6 @@ public class TardisShipSmokeTest implements Opcodes {
             check(clipped.contains(.5+fz*.49,.5,.5+fx*.49)&&clipped.contains(.5-fz*.49,.5,.5-fx*.49),"both side faces stay hard");
         }
         openState.open=false;check(sourceClip.invoke(null,openState,state.world,state.curr,solid)==solid,"closed shell is unchanged");openState.open=true;
-        state.world.source=null;
-        ps.portalToTardis.removed=true;check(collisions.invoke(null,state.world,player,query)==state.world.collisions,"closed/discarded portal keeps collisions");ps.portalToTardis.removed=false;
-        World other=new World();other.collisions.addAll(state.world.collisions);check(collisions.invoke(null,other,player,query)==other.collisions,"other worlds keep collisions");
-        check(collisions.invoke(null,state.world,null,query)==state.world.collisions,"non-entity collision queries remain intact");
         Tag portalTag=new Tag();helper.getMethod("writeExteriorPortal",Object.class,Object.class).invoke(null,ps.portalToTardis,portalTag);
         World clientWorld=new World();Portal clientPortal=new Portal();clientPortal.entityId=ps.portalToTardis.entityId;clientPortal.world=clientWorld;
         helper.getMethod("readExteriorPortal",Object.class,Object.class).invoke(null,clientPortal,portalTag);
@@ -180,8 +169,8 @@ public class TardisShipSmokeTest implements Opcodes {
         helper.getMethod("readExteriorPortal",Object.class,Object.class).invoke(null,clientPortal,new Tag());
         check((Boolean)sourceShape.invoke(null,openState,state.world,state.curr),"removing client metadata preserves server doorway");
         ps.portalToTardis.removed=true;Portal synced=new Portal();synced.world=state.world;helper.getMethod("readExteriorPortal",Object.class,Object.class).invoke(null,synced,portalTag);
-        check(collisions.invoke(null,state.world,player,query)==state.world.collisions,"synced client metadata preserves source-clipped walls");
-        helper.getMethod("readExteriorPortal",Object.class,Object.class).invoke(null,synced,new Tag());check(collisions.invoke(null,state.world,player,query)==state.world.collisions,"ordinary portals do not erase ship collisions");
+        check((Boolean)sourceShape.invoke(null,openState,state.world,state.curr),"synced metadata opens the doorway");
+        helper.getMethod("readExteriorPortal",Object.class,Object.class).invoke(null,synced,new Tag());check(!(Boolean)sourceShape.invoke(null,openState,state.world,state.curr),"ordinary portals keep the shell solid");
         var sonic=helper.getMethod("sonicMessage",Object.class,Object.class,boolean.class,Object.class,Object.class);
         Text original=new Text("raw coordinates");sonic.invoke(null,player,original,true,state.world,new Hit(state.curr));
         check(player.message.value.equals("Destination: 114, 71, -61 (On ship)"),"sonic displays transformed destination with ship marker");

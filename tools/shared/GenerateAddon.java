@@ -40,7 +40,6 @@ public class GenerateAddon implements Opcodes {
         TardisBridgeGenerator.generate();
         ShipTransitGenerator.transit();
         ShipLoadRecoveryGenerator.generate();
-        MovementDiagnosticsGenerator.generate();
         PortalShipWatchGenerator.generate();
         PortalMotionGenerator.generate();
         TardisQolGenerator.generate();
@@ -49,6 +48,6 @@ public class GenerateAddon implements Opcodes {
         ShipChunkPacketGenerator.generate();
         StackCodecGenerator.generate();
         WingTrailGenerator.generate();
-        System.out.println("Generated standalone dimension, ship lifecycle, Sable and optional debug mixins.");
+        System.out.println("Generated standalone dimension, ship lifecycle, Sable and compatibility mixins.");
     }
 }

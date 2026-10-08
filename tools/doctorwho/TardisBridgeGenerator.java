@@ -125,8 +125,7 @@ public final class TardisBridgeGenerator implements Opcodes {
             GenerateAddon.inject(m,target+"("+args+")Lnet/minecraft/class_265;","RETURN",true);
             m.visitCode();m.visitVarInsn(ALOAD,5);m.visitVarInsn(ALOAD,1);m.visitVarInsn(ALOAD,2);m.visitVarInsn(ALOAD,3);m.visitVarInsn(ALOAD,5);
             m.visitMethodInsn(INVOKEVIRTUAL,CIR,"getReturnValue","()Ljava/lang/Object;",false);
-            m.visitLdcInsn(target.equals("method_9549")?"collision":"outline");
-            m.visitMethodInsn(INVOKESTATIC,HELPER,"doorwayShape","(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/Object;",false);
+            m.visitMethodInsn(INVOKESTATIC,HELPER,"doorwayShape","(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",false);
             m.visitMethodInsn(INVOKEVIRTUAL,CIR,"setReturnValue","(Ljava/lang/Object;)V",false);end(m);
         }
         GenerateAddon.save(name,w);

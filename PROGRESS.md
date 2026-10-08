@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.5**.
+Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.6**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
@@ -1322,3 +1322,13 @@ after travel and restart, and save/reload/inventory preservation/repeated crossi
 without freezes or crashes. These are singleplayer results. Update current
 README/checklist status; dedicated-server and explicit shader on/off comparison
 remain outstanding. No runtime change or release-version bump is made.
+
+## Beta 6: feature-linked cleanup
+
+Removed temporary movement observers, diagnostic generators and JVM logging switch,
+plus an unused collision-query passthrough and obsolete test assertions. Retained
+native unloaded-ship guard recovery, portal watch authorization, chunk delivery
+and doorway loading needed for landing and player exits. Door-face clipping still
+preserves the side and back walls. Added a packaged-class reachability audit to
+check that classes connect to active configured hooks or entrypoints. Historical
+entries above describe older builds; retired debug switches no longer apply.

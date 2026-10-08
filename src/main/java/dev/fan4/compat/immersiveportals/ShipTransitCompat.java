@@ -58,7 +58,7 @@ public final class ShipTransitCompat {
         if(ships.isEmpty())return;
         Object tracking=type("qouteall.imm_ptl.core.chunk_loading.ImmPtlChunkTracking");
         call(tracking,"immediatelyUpdateForPlayer",player);
-        Object loading=call(tracking,"getPlayerInfo",player),dimension=call(world,"method_27983");int refreshed=0;
+        Object loading=call(tracking,"getPlayerInfo",player),dimension=call(world,"method_27983");
         for(Object ship:ships) {
             Point local=localPose(ship).position(point);
             int cx=(int)Math.floor(local.x()/16),cz=(int)Math.floor(local.z()/16);
@@ -72,7 +72,7 @@ public final class ShipTransitCompat {
                 try {
                     record.getClass().getField("isLoadedToPlayer").setBoolean(record,false);
                 }catch(ReflectiveOperationException e){throw new IllegalStateException("Cannot refresh IP ship chunk watch",e);}
-                call(loading,"markPendingLoading",record);refreshed++;
+                call(loading,"markPendingLoading",record);
             }
         }
     }

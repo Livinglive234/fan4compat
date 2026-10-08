@@ -1,8 +1,9 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.5**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
-notice filtering and DH/Iris portal-render guards. Check portal backgrounds with
-shaders enabled and disabled, and confirm ordinary main-view LODs still draw.
+Current build: **0.1.0-beta.6**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
+loading can take longer; subsequent loads behave normally. Beta 6 removes
+temporary movement diagnostics and unused collision-query code.
 Both client and server should run this build for Eureka server notices.
 
 A beta 1 dedicated-server log exposed a client-only classloading crash during
@@ -32,7 +33,7 @@ changes. Log warning count alone is not a release criterion.
 
 Beta 1 freezes the current supported feature set. Exact supported versions,
 installation instructions and known limitations remain in the README and
-[release notes](releases/0.1.0-beta.5.md).
+[release notes](releases/0.1.0-beta.6.md).
 
 ## Move from beta to stable
 

@@ -177,10 +177,6 @@ public final class TardisShipCompat {
             EXTERIORS.put(portal,new Exterior(((Number)call(tag,"method_10537","fan4compatExteriorBlock")).longValue(),((Number)call(tag,"method_10537","fan4compatExteriorShip")).longValue()));
         else EXTERIORS.remove(portal);
     }
-    /** Source shapes already preserve walls before VS polygon conversion. */
-    public static Iterable<?> shipCollisions(Object world,Object entity,Object bounds) {
-        return (Iterable<?>)call(world,"method_20812",entity,bounds);
-    }
     private static Object stateProperty(Object state,Object property) {
         return callTyped(MC+"class_2688","method_11654","java.lang.Comparable",state,new String[]{MC+"class_2769"},property);
     }
@@ -201,8 +197,7 @@ public final class TardisShipCompat {
         }
         return false;
     }
-    public static Object doorwayShape(Object state,Object view,Object pos,Object original) {return doorwayShape(state,view,pos,original,"unspecified");}
-    public static Object doorwayShape(Object state,Object view,Object pos,Object original,String source) {
+    public static Object doorwayShape(Object state,Object view,Object pos,Object original) {
         boolean eligible=openExteriorShape(state,view,pos);Object result=original;
         if(eligible) {
             Object base=type("net.drgmes.dwm.blocks.tardis.exteriors.BaseTardisExteriorBlock");

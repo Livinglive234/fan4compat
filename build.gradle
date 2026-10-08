@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'dev.fan4'
-version = '0.1.0-beta.5'
+version = '0.1.0-beta.6'
 
 repositories {
     mavenCentral()
@@ -284,3 +284,11 @@ tasks.named('check') { dependsOn tasks.named('portalSoundTest') }
     }
  }
  tasks.named('check') { dependsOn tasks.named('dhPortalRenderTest') }
+
+tasks.register('featureLinkAudit', JavaExec) {
+    dependsOn tasks.named('jar'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'FeatureLinkAudit'
+    args tasks.named('jar').get().archiveFile.get().asFile.absolutePath
+}
+tasks.named('check') { dependsOn tasks.named('featureLinkAudit') }
