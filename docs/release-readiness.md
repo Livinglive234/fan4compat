@@ -1,6 +1,11 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.1**. Promoted from alpha 41 without runtime changes.
+Current build: **0.1.0-beta.2**. Fixes dedicated-server VS helper resolution.
+
+A beta 1 dedicated-server log exposed a client-only classloading crash during
+TARDIS startup and shutdown saves. Beta 2 has a reproducing classloader regression
+and passes the clean build. Repeat dedicated-server startup, portal/waypoint use,
+world save and restart in the full pack before treating this patch as verified.
 
 ## Confirmed release checks
 
@@ -11,7 +16,7 @@ On 2026-10-08 the pack owner confirmed all remaining checks proposed for beta:
 | --- | --- |
 | Moving-ship TARDIS entry/exit, landing, placement and repeat crossings | Confirmed by pack owner |
 | Ship waypoints after travel/world restart; save/reload and inventory preservation | Confirmed by pack owner |
-| Dedicated-server checks | Confirmed by pack owner |
+| Dedicated-server checks | Earlier checks confirmed; beta 2 startup/save/restart retest pending |
 | Shaders enabled/disabled comparison | Confirmed by pack owner |
 | Alpha 41 portal audio with and without VS | Confirmed by pack owner |
 | Offhand Point Blank gun with main-hand TARDIS key | Confirmed by pack owner |
@@ -24,7 +29,7 @@ changes. Log warning count alone is not a release criterion.
 
 Beta 1 freezes the current supported feature set. Exact supported versions,
 installation instructions and known limitations remain in the README and
-[release notes](releases/0.1.0-beta.1.md).
+[release notes](releases/0.1.0-beta.2.md).
 
 ## Move from beta to stable
 

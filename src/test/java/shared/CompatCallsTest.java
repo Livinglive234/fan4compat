@@ -30,7 +30,38 @@ public class CompatCallsTest implements Opcodes {
         w.visitEnd();byte[] bytes=w.toByteArray();
         Class<?> c=new ClassLoader(CompatCallsTest.class.getClassLoader()){Class<?> define(){return defineClass(name,bytes,0,bytes.length);}}.define();return c.getConstructor().newInstance();
     }
+    static void dedicatedServerStatics() throws Exception {
+        ClassLoader isolated = new ClassLoader(CompatCallsTest.class.getClassLoader()) {
+            @Override protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                if (name.equals("fixtures.MissingClientWorld")) throw new ClassNotFoundException(name);
+                if (name.startsWith("fixtures.") || name.startsWith("dev.fan4.compat.shared.CompatCalls")) {
+                    Class<?> loaded = findLoadedClass(name);
+                    if (loaded == null) {
+                        try (var input = getResourceAsStream(name.replace('.', '/') + ".class")) {
+                            if (input == null) throw new ClassNotFoundException(name);
+                            byte[] bytes = input.readAllBytes();
+                            loaded = defineClass(name, bytes, 0, bytes.length);
+                        } catch (java.io.IOException e) { throw new ClassNotFoundException(name, e); }
+                    }
+                    if (resolve) resolveClass(loaded);
+                    return loaded;
+                }
+                return super.loadClass(name, resolve);
+            }
+        };
+        Class<?> helpers = isolated.loadClass("fixtures.ServerStaticFixture");
+        try { helpers.getMethod("ship", String.class); throw new AssertionError("Client overload did not reproduce server failure"); }
+        catch (NoClassDefFoundError expected) {}
+        var exact = isolated.loadClass(CompatCalls.class.getName()).getMethod("exact", String.class, String.class, String[].class, Object[].class);
+        for (int i=0;i<2;i++) {
+            check(exact.invoke(null, helpers.getName(), "ship", new String[]{"java.lang.String"}, new Object[]{"world"}).equals("server:world"));
+            check(Boolean.TRUE.equals(exact.invoke(null, helpers.getName(), "shipyard", new String[]{"int","int"}, new Object[]{3,3})));
+        }
+        try { exact.invoke(null, helpers.getName(), "fail", new String[]{}, new Object[]{}); throw new AssertionError(); }
+        catch (java.lang.reflect.InvocationTargetException expected) { check(expected.getCause() instanceof IllegalArgumentException && expected.getCause().getMessage().equals("original static failure")); }
+    }
     public static void main(String[] args)throws Exception {
+        dedicatedServerStatics();
         Object poisoned=poisonedState();
         try{poisoned.getClass().getMethods();throw new AssertionError("missing optional signature did not reproduce");}catch(NoClassDefFoundError expected){}
         check(Boolean.FALSE.equals(CompatCalls.callTyped(TypedBase.class.getName(),"property","java.lang.Comparable",poisoned,new String[]{"java.lang.Object"},new Object())));

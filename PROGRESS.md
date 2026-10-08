@@ -1,10 +1,26 @@
 # Fan4Compat progress
 
-Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.1**.
+Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.2**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 2: dedicated-server VS static lookup fix
+
+A dedicated-server beta 1 log exposed `NoClassDefFoundError: net/minecraft/class_638`
+(ClientWorld) during TARDIS entrance portal creation and waypoint status saving.
+`Class.getMethod` resolves all declared signatures on VSGameUtilsKt, including
+client overloads. Static exact calls now read classfile descriptors without
+linking unrelated types, then cache a method handle for the requested public
+static signature. Applies to existing VS lookups across TARDIS and portal helpers;
+no client-class stubs or disabled ship functionality. Classfile parsing uses ASM
+already supplied by Fabric/Mixin.
+Regression deliberately removes a client-only overload type from the loader,
+reproduces the old reflection failure, and checks successful cached server calls,
+primitive parameters/results and original exception propagation. Clean build,
+bytecode validation, packaging and existing regressions pass. Full-pack dedicated-
+server startup, TARDIS portal/waypoint use, save and restart remain pending.
 
 ## Beta 1: validated feature freeze
 

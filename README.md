@@ -5,14 +5,14 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.1.** On 2026-10-08 the pack owner confirmed the
-remaining alpha 41 checks: portal audio with/without VS, offhand gun with a
-main-hand TARDIS key, dedicated-server workflows and shaders enabled/disabled.
-Earlier TARDIS ship entry/exit, landing, placement, waypoints, reloads, contrails
-and biome-label checks are also confirmed. Beta 1 keeps alpha 41 runtime behavior.
+**Status: beta, 0.1.0-beta.2.** Fixes a dedicated-server startup crash in
+VS compatibility lookups when TARDIS entrance portals are created or ship
+waypoint status is saved. Static helper resolution no longer enumerates unrelated
+client-only overloads. Earlier gameplay confirmations remain recorded, but this
+patch needs a full-pack dedicated-server startup/save/restart check.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 1 release notes](docs/releases/0.1.0-beta.1.md) ·
+[Beta 2 release notes](docs/releases/0.1.0-beta.2.md) ·
 [Release validation and wishlist](docs/release-readiness.md)
 
 ## Alpha 35: remove the WWOO border experiment
@@ -93,7 +93,7 @@ Restart the world for another full test.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.1.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.2.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.

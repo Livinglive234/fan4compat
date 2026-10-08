@@ -44,13 +44,40 @@ public final class CompatCalls {
         Class<?> c = type(owner);
         Class<?>[] parameters = Arrays.stream(parameterNames).map(CompatCalls::parameterType).toArray(Class<?>[]::new);
         Key key = new Key(name, List.of(parameters));
-        Method m = METHODS.get(c).computeIfAbsent(key, unused -> {
-            try { return c.getMethod(name, parameters); } catch (ReflectiveOperationException e) { throw failure(e); }
+        MethodHandle handle = STATICS.get(c).computeIfAbsent(key, unused -> {
+            // Class.getMethod resolves every signature on the Kotlin utility class,
+            // including ClientWorld overloads unavailable on a dedicated server.
+            // Read descriptors without linking their types, then link only our target.
+            String arguments = MethodType.methodType(void.class, parameters).toMethodDescriptorString();
+            arguments = arguments.substring(0, arguments.length() - 1);
+            for (Class<?> declaring = c; declaring != null; declaring = declaring.getSuperclass()) {
+                List<String> descriptors = new ArrayList<>();
+                final String prefix = arguments;
+                String resource = "/" + declaring.getName().replace('.', '/') + ".class";
+                try (java.io.InputStream input = declaring.getResourceAsStream(resource)) {
+                    if (input == null) throw new IllegalStateException("Missing compatibility bytecode " + declaring.getName());
+                    new org.objectweb.asm.ClassReader(input).accept(new org.objectweb.asm.ClassVisitor(org.objectweb.asm.Opcodes.ASM9) {
+                        @Override public org.objectweb.asm.MethodVisitor visitMethod(int access, String methodName, String descriptor, String signature, String[] exceptions) {
+                            int required = org.objectweb.asm.Opcodes.ACC_PUBLIC | org.objectweb.asm.Opcodes.ACC_STATIC;
+                            if ((access & required) == required && methodName.equals(name) && descriptor.startsWith(prefix)) descriptors.add(descriptor);
+                            return null;
+                        }
+                    }, org.objectweb.asm.ClassReader.SKIP_CODE | org.objectweb.asm.ClassReader.SKIP_DEBUG | org.objectweb.asm.ClassReader.SKIP_FRAMES);
+                } catch (java.io.IOException e) { throw failure(e); }
+                if (descriptors.isEmpty()) continue;
+                if (descriptors.size() != 1) throw new IllegalStateException("Ambiguous compatibility static call " + owner + "." + name);
+                MethodType signature = MethodType.fromMethodDescriptorString(descriptors.get(0), c.getClassLoader());
+                try { return MethodHandles.publicLookup().findStatic(c, name, signature); }
+                catch (ReflectiveOperationException e) { throw failure(e); }
+            }
+            throw new IllegalStateException("Missing compatibility static call " + owner + "." + name);
         });
-        try { return m.invoke(null, args); }
-        catch (InvocationTargetException e) { throw failure(e.getCause()); }
-        catch (ReflectiveOperationException e) { throw failure(e); }
+        try { return handle.invokeWithArguments(args); }
+        catch (Throwable e) { throw failure(e); }
     }
+    private static final ClassValue<Map<Key, MethodHandle>> STATICS = new ClassValue<>() {
+        protected Map<Key, MethodHandle> computeValue(Class<?> owner) { return new ConcurrentHashMap<>(); }
+    };
     private static Class<?> parameterType(String n) { return switch(n) { case "boolean" -> boolean.class; case "int" -> int.class; case "double" -> double.class; case "long" -> long.class; default -> type(n); }; }
     private record TypedKey(String name,Class<?> result,List<Class<?>> parameters) {}
     private static final ClassValue<Map<TypedKey,MethodHandle>> TYPED=new ClassValue<>() {
