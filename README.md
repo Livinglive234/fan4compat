@@ -21,7 +21,8 @@ Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
 [Beta 7 release notes](docs/releases/0.1.0-beta.7.md) ·
-[Release validation and wishlist](docs/release-readiness.md)
+[Release validation and wishlist](docs/release-readiness.md) ·
+[Destination portal LOD prototype](docs/portal-destination-lods.md)
 
 ## Beta 7 Freecam / Distant Horizons
 

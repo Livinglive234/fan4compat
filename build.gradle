@@ -292,3 +292,11 @@ tasks.register('featureLinkAudit', JavaExec) {
     args tasks.named('jar').get().archiveFile.get().asFile.absolutePath
 }
 tasks.named('check') { dependsOn tasks.named('featureLinkAudit') }
+
+// Isolated destination-LOD prototype; no runtime hooks or gameplay changes.
+tasks.register('portalLodPrototypeTest', JavaExec) {
+    dependsOn tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'PortalLodPrototypeTest'
+}
+tasks.named('check') { dependsOn tasks.named('portalLodPrototypeTest') }

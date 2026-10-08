@@ -52,6 +52,8 @@ IronChest and BetterEnd cosmetic warning candidates as low priority.
 
 ## Wishlist / forward thinking
 
+- Destination DH LODs beyond five chunks through portals: [isolated prototype](portal-destination-lods.md). Runtime integration and GPU validation remain pending.
+
 - **Load and render the exterior ship through the TARDIS entrance before
   stepping out**, including opening from inside after the doors were closed or
   after a new entrance portal was created. Support stationary and moving ships

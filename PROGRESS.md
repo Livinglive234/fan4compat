@@ -1343,3 +1343,12 @@ instance. Exact Freecam 1.3.0+mc1.21 and DH 3.3.3 gates require neither VS nor I
 Native Minecraft/Freecam selectors and APIs verified; camera/player/disabled-camera
 regressions and clean build pass. This is a candidate fix pending in-game testing;
 it does not establish which DH behavior exposed the vanilla condition.
+
+## Destination portal LOD investigation (2026-10-08)
+
+Prepared an isolated CPU prototype and native-contract investigation for five-chunk
+portal terrain with destination LODs. It is not a runtime feature. Automatic
+approval review rejected the broad untested integration; that wiring was not
+applied. Shader suppression and beta 7 gameplay code remain intact. See
+[the proposal](docs/portal-destination-lods.md) for limitations, verified constraints
+and the tests that establish state-restoration and clipping policy.
