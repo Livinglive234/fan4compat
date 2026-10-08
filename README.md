@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: experimental, 0.1.0-alpha.40.** The original v4 ship fixes were confirmed
+**Status: experimental, 0.1.0-alpha.41.** The original v4 ship fixes were confirmed
 working in game by the pack owner. The pack owner confirmed TARDIS entry, exit, placement and landing in alpha 21.
 The pack owner also confirmed moving-ship exits, waypoint UI, contrails and the TARDIS biome label in the latest build. Ship visibility through reopened doors before exiting remains a known limitation.
 
@@ -87,7 +87,7 @@ Restart the world for another full test.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-alpha.40.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-alpha.41.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -102,6 +102,10 @@ portal-specific ship hooks also require supported Immersive Portals. Accessories
 and Iris portal fixes require IP but do not require VS. DH dynamic dimensions,
 BCLib recipe fixes and Elytra Contrails fallback can activate independently.
 Sound Physics ship acoustics and Jade helm hiding require VS (Jade also Eureka).
+Sound Physics/IP snapshot protection works without VS; without VS installed,
+acoustic rays are restricted to cloned chunks and split below IP’s ray limit.
+A missing snapshot uses Sound Physics’s default audio environment for that
+evaluation. Unsafe level access retains its native ray handling.
 No target mods installed means no compatibility mixins apply.
 
 ## Supported builds

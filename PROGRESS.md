@@ -1,10 +1,28 @@
 # Fan4Compat progress
 
-Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.40**.
+Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-alpha.41**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is experimental; a successful build does not
 establish that portal traversal works correctly in the full modpack.
+
+## Alpha 41: Sound Physics/IP without VS
+
+Reviewed alpha 40 log: null cloned world proxy during sound evaluation and 20
+oversized SPR occlusion rays caught by IP. Creation of an Aether client world
+can be portal loading; it does not establish player entry into that dimension.
+Hold one sound-world proxy for each complete environment evaluation; nested
+scopes and exceptions restore it. Missing snapshots use native default audio
+without attempting environment work. Separate no-VS ray hook clips cloned rays
+to cached chunk bounds and subdivides them into <=256-block segments; preserves
+first native block hit, ignore block, and original miss endpoint. Does not load
+chunks or change audio settings. Unsafe/native proxies retain original rays.
+Snapshot protection requires supported IP/SPR; generic ray hook additionally
+requires VS absent, preserving existing VS ship coordinate handling.
+Regression covers fallback, nested/thread scopes, exceptions, forwarding,
+clipping/subdivision/hits and no-VS gates. Native selectors/cache contract checked;
+clean build passes. Full-pack audio verification remains pending. DH double-close
+and Macaw model issues left alone per user instruction.
 
 ## Alpha 40: Point Blank offhand draw routing
 

@@ -15,7 +15,7 @@ public final class OptionalCompatibilityTest {
         Map<String,String> all=new HashMap<>(CompatibilityRules.VERSIONS);all.put("aether","1.5.11");
         for(String name:mixins){
             check(!applies(Map.of(),name),"empty setup applies "+name);
-            check(applies(all,name),"full supported setup skips "+name);
+            check(applies(all,name)!=name.endsWith("PortalSoundRayMixin"),"full supported setup skips "+name);
         }
         Map<String,String> pair=Map.of("pointblank","2.2.0","dwm","1.0.38.4");
         Set<String> expected=new HashSet<>();expected.add("pointblank.client.StaleGunAnimationMixin");expected.add("pointblank.client.StaleGunDrawMixin");expected.add("pointblank.client.OffhandGunDrawMixin");
@@ -31,11 +31,15 @@ public final class OptionalCompatibilityTest {
             }
         }
         Map<String,String> ship=new HashMap<>(all);ship.remove("valkyrienskies");
-        for(String name:mixins)if(name.startsWith("immersiveportals.")||name.startsWith("soundphysics.")||name.startsWith("sable.")||name.startsWith("jade.")||name.contains("ShipNetherPortal")||name.contains("ShipAetherPortal")||(name.startsWith("doctorwho.")&&!name.contains("ModelCache")))check(!applies(ship,name),"ship hook without VS: "+name);
+        for(String name:mixins)if(name.startsWith("immersiveportals.")||name.contains("ShipAcoustic")||name.startsWith("sable.")||name.startsWith("jade.")||name.contains("ShipNetherPortal")||name.contains("ShipAetherPortal")||(name.startsWith("doctorwho.")&&!name.contains("ModelCache")))check(!applies(ship,name),"ship hook without VS: "+name);
         ship=new HashMap<>(all);ship.remove("immersive_portals");
         for(String name:mixins)if(name.startsWith("immersiveportals.")||name.startsWith("accessories.")||name.startsWith("iris.")||name.contains("EurekaPortalWarning")||name.contains("TardisShipPortal")||name.contains("ExteriorShape"))check(!applies(ship,name),"portal hook without IP: "+name);
         Map<String,String> wrongIp=new HashMap<>(all);wrongIp.put("immersive_portals","unsupported-test-version");
         for(String name:mixins)if(name.startsWith("doctorwho.")&&!name.contains("ModelCache"))check(!applies(wrongIp,name),"indirect ship portal update with unsupported IP: "+name);
+        Map<String,String> audio=Map.of("immersive_portals","6.0.6","sound_physics_remastered","1.21.1-1.5.1");
+        check(applies(audio,"soundphysics.client.PortalSoundSnapshotMixin")&&applies(audio,"soundphysics.client.PortalSoundRayMixin"),"standalone IP/Sound Physics hooks");
+        check(!applies(audio,"soundphysics.client.ShipAcousticRaycastMixin"),"ship ray enabled without VS");
+        check(!applies(Map.of("sound_physics_remastered","1.21.1-1.5.1"),"soundphysics.client.PortalSoundSnapshotMixin"),"portal scope without IP");
         check(!CompatibilityRules.applies(all,false,PREFIX+"sable.common.SableCompatMixin"),"missing Sable class");
         check(!CompatibilityRules.applies(all,true,PREFIX+"unknown.common.FutureMixin"),"unknown integration enabled");
         String metadata=Files.readString(Path.of("src/main/resources/fabric.mod.json"));

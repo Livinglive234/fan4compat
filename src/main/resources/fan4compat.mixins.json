@@ -71,6 +71,8 @@
     "accessories.client.PortalSyncEntireContainerMixin",
     "accessories.client.PortalInvalidateEntityCacheMixin",
     "accessories.client.PortalEntityRetryMixin",
+    "soundphysics.client.PortalSoundSnapshotMixin",
+    "soundphysics.client.PortalSoundRayMixin",
     "soundphysics.client.ShipAcousticRaycastMixin",
     "soundphysics.client.ShipAcousticSnapshotMixin",
     "doctorwho.client.TardisShipModelCache0Mixin",

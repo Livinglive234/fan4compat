@@ -35,6 +35,8 @@ public final class CompatibilityRules {
         }
         if(path.startsWith("accessories."))return ip&&supported(mods,"accessories");
         if(path.startsWith("iris."))return ip&&supported(mods,"iris");
+        if(simple.equals("PortalSoundSnapshotMixin"))return ip&&supported(mods,"sound_physics_remastered");
+        if(simple.equals("PortalSoundRayMixin"))return ip&&supported(mods,"sound_physics_remastered")&&!mods.containsKey("valkyrienskies");
         if(path.startsWith("soundphysics."))return vs&&supported(mods,"sound_physics_remastered");
         if(path.startsWith("bclib."))return supported(mods,"bclib");
         if(path.startsWith("distanthorizons."))return supported(mods,"distanthorizons");
