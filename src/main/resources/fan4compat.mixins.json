@@ -41,7 +41,8 @@
     "bclib.common.RecipeStackFormatMixin",
     "minecraft.common.OptionalRecipeDependenciesMixin",
     "immersiveportals.common.ShipChunkPacketMixin",
-    "bclib.common.StackCodecAliasMixin"
+    "bclib.common.StackCodecAliasMixin",
+    "eureka.common.EurekaPortalWarningInfoMixin"
   ],
   "client": [
     "pointblank.client.StaleGunAnimationMixin",
@@ -80,7 +81,9 @@
     "doctorwho.client.TardisShipModelCache2Mixin",
     "doctorwho.client.TardisShipModelCache3Mixin",
     "doctorwho.client.TardisShipModelCache4Mixin",
-    "elytratrails.client.WingTrailFallbackMixin"
+    "elytratrails.client.WingTrailFallbackMixin",
+    "distanthorizons.client.DhPortalRenderMixin",
+    "iris.client.DhPortalShaderMixin"
   ],
   "injectors": {
     "defaultRequire": 1

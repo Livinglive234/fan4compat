@@ -13,4 +13,25 @@ public final class DistantHorizonsGenerator implements Opcodes {
         m.visitMethodInsn(INVOKEINTERFACE,dh+"world/IDhWorld","getOrLoadLevel","(L"+level+";)L"+dh+"level/IDhLevel;",true);
         m.visitTypeInsn(CHECKCAST,result);m.visitInsn(ARETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
     }
+    static void portalRenderMixins()throws Exception {
+        String name=ROOT+"mixin/distanthorizons/client/DhPortalRenderMixin";
+        ClassWriter w=GenerateAddon.writer(name,"com/seibel/distanthorizons/core/api/internal/ClientApi");
+        for(String method:new String[]{"renderLodLayer","renderFadeOpaque","renderFadeTransparent"}) {
+            boolean layer=method.equals("renderLodLayer");
+            MethodVisitor m=w.visitMethod(ACC_PRIVATE,"fan4$guard"+method,"("+(layer?"Z":"")+"Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;)V",null,null);
+            GenerateAddon.inject(m,method+"("+(layer?"Z":"")+")V","HEAD",true);
+            m.visitCode();m.visitMethodInsn(INVOKESTATIC,"qouteall/imm_ptl/core/render/context_management/PortalRendering","isRendering","()Z",false);
+            Label done=new Label();m.visitJumpInsn(IFEQ,done);m.visitVarInsn(ALOAD,layer?2:1);
+            m.visitMethodInsn(INVOKEVIRTUAL,"org/spongepowered/asm/mixin/injection/callback/CallbackInfo","cancel","()V",false);
+            m.visitLabel(done);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();
+        }
+        GenerateAddon.save(name,w);
+        name=ROOT+"mixin/iris/client/DhPortalShaderMixin";w=GenerateAddon.writer(name,"net/irisshaders/iris/compat/dh/DHCompat");
+        MethodVisitor m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$portalDhFrame","(Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V",null,null);
+        GenerateAddon.inject(m,"checkFrame()Z","HEAD",true);m.visitCode();
+        m.visitMethodInsn(INVOKESTATIC,"qouteall/imm_ptl/core/render/context_management/PortalRendering","isRendering","()Z",false);
+        Label done=new Label();m.visitJumpInsn(IFEQ,done);m.visitVarInsn(ALOAD,0);m.visitFieldInsn(GETSTATIC,"java/lang/Boolean","FALSE","Ljava/lang/Boolean;");
+        m.visitMethodInsn(INVOKEVIRTUAL,"org/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable","setReturnValue","(Ljava/lang/Object;)V",false);
+        m.visitLabel(done);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+    }
 }

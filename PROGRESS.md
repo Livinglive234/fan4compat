@@ -1,10 +1,30 @@
 # Fan4Compat progress
 
-Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.3**.
+Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.4**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 4: Eureka severe notices and DH portal rendering
+
+IP's severe incompatibility paths bypass IPConfig.shouldDisplayWarning, so the
+existing Eureka filter did not cover them. Filter only the vs_eureka warning
+record's isModLoadedWithinVersion predicate, retaining other records and native
+version decisions. Covers both server and client severe notices.
+
+DH 3.3.3's existing IP integration cancels ordinary opaque rendering but misses
+deferred LOD and fade paths. Guard ClientApi renderLodLayer, renderFadeOpaque and
+renderFadeTransparent while PortalRendering.isRendering is true; guard Iris
+DHCompat.checkFrame for the same nested portal scope. No global settings changed,
+main-view DH rendering remains native, no VS dependency. Portal LOD support is
+still unavailable; this prevents wrong-view drawing rather than generating the
+destination's distant terrain. Background generation stays native.
+
+Regression verifies normal/nested/main-restored contexts, opaque and deferred
+passes, fades and Iris frame guards. Eureka tests cover both warning paths and
+other IDs/null. Native DH/Iris/IP selectors checked against supplied jars; clean
+build and optional gates pass. Full-pack visual shader-on/off checks pending.
 
 ## Beta 3: detached TARDIS waypoint saves
 

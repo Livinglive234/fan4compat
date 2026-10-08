@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'dev.fan4'
-version = '0.1.0-beta.3'
+version = '0.1.0-beta.4'
 
 repositories {
     mavenCentral()
@@ -273,3 +273,14 @@ tasks.register('portalSoundTest', JavaExec) {
     if (project.hasProperty('soundPhysicsJar')) args project.property('soundPhysicsJar')
 }
 tasks.named('check') { dependsOn tasks.named('portalSoundTest') }
+
+ tasks.register('dhPortalRenderTest', JavaExec) {
+    dependsOn generateAddon, tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'DhPortalRenderSmokeTest'
+    args generatedClasses.get().asFile.absolutePath
+    if (project.hasProperty('dhJar') && project.hasProperty('irisJar')) {
+        args project.property('dhJar'), project.property('irisJar')
+    }
+ }
+ tasks.named('check') { dependsOn tasks.named('dhPortalRenderTest') }

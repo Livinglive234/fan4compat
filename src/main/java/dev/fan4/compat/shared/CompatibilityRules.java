@@ -34,16 +34,17 @@ public final class CompatibilityRules {
             return vs&&(!mods.containsKey("immersive_portals")||ip)&&(!PORTAL_TARDIS.contains(simple)||ip);
         }
         if(path.startsWith("accessories."))return ip&&supported(mods,"accessories");
+        if(simple.equals("DhPortalShaderMixin"))return ip&&supported(mods,"iris")&&supported(mods,"distanthorizons");
         if(path.startsWith("iris."))return ip&&supported(mods,"iris");
         if(simple.equals("PortalSoundSnapshotMixin"))return ip&&supported(mods,"sound_physics_remastered");
         if(simple.equals("PortalSoundRayMixin"))return ip&&supported(mods,"sound_physics_remastered")&&!mods.containsKey("valkyrienskies");
         if(path.startsWith("soundphysics."))return vs&&supported(mods,"sound_physics_remastered");
         if(path.startsWith("bclib."))return supported(mods,"bclib");
-        if(path.startsWith("distanthorizons."))return supported(mods,"distanthorizons");
+        if(path.startsWith("distanthorizons."))return supported(mods,"distanthorizons")&&(!path.startsWith("distanthorizons.client.")||ip);
         if(path.startsWith("pointblank."))return supported(mods,"pointblank");
         if(path.startsWith("elytratrails."))return supported(mods,"elytratrails");
         if(path.startsWith("jade."))return vs&&supported(mods,"jade")&&supported(mods,"vs_eureka");
-        if(simple.equals("EurekaPortalWarningMixin"))return ip&&supported(mods,"vs_eureka");
+        if(simple.equals("EurekaPortalWarningMixin")||simple.equals("EurekaPortalWarningInfoMixin"))return ip&&supported(mods,"vs_eureka");
         if(simple.equals("EurekaDebugMixin"))return supported(mods,"vs_eureka");
         if(simple.equals("ShipNetherPortalCreationMixin"))return vs;
         if(simple.equals("ShipAetherPortalCreationMixin"))return vs&&mods.containsKey("aether");

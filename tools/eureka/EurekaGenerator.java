@@ -14,6 +14,20 @@ public final class EurekaGenerator implements Opcodes {
         m.visitMethodInsn(INVOKEVIRTUAL,"org/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable","setReturnValue","(Ljava/lang/Object;)V",false);
         m.visitLabel(done);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
     }
+    static void severeWarningMixin() throws Exception {
+        String name=ROOT+"mixin/eureka/common/EurekaPortalWarningInfoMixin";
+        ClassWriter w=GenerateAddon.writer(name,"qouteall/imm_ptl/core/compat/IPModInfoChecking$ModIncompatInfo");
+        FieldVisitor f=w.visitField(ACC_PRIVATE,"modId","Ljava/lang/String;",null,null);
+        f.visitAnnotation("Lorg/spongepowered/asm/mixin/Shadow;",true).visitEnd();
+        f.visitAnnotation("Lorg/spongepowered/asm/mixin/Final;",true).visitEnd();f.visitEnd();
+        MethodVisitor m=w.visitMethod(ACC_PRIVATE,"fan4$hideSevereEurekaWarning","(Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V",null,null);
+        GenerateAddon.inject(m,"isModLoadedWithinVersion()Z","HEAD",true);
+        m.visitCode();m.visitLdcInsn("vs_eureka");m.visitVarInsn(ALOAD,0);m.visitFieldInsn(GETFIELD,name,"modId","Ljava/lang/String;");
+        m.visitMethodInsn(INVOKEVIRTUAL,"java/lang/String","equals","(Ljava/lang/Object;)Z",false);
+        Label done=new Label();m.visitJumpInsn(IFEQ,done);m.visitVarInsn(ALOAD,1);m.visitFieldInsn(GETSTATIC,"java/lang/Boolean","FALSE","Ljava/lang/Boolean;");
+        m.visitMethodInsn(INVOKEVIRTUAL,"org/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable","setReturnValue","(Ljava/lang/Object;)V",false);
+        m.visitLabel(done);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+    }
     static void debugMixin()throws Exception {
         String name=ROOT+"mixin/eureka/client/EurekaDebugMixin";ClassWriter w=GenerateAddon.writer(name,"org/valkyrienskies/eureka/fabric/EurekaModFabric$Client");
         MethodVisitor m=w.visitMethod(ACC_PRIVATE | ACC_STATIC,"fan4$optionalShipDebug","(Lorg/slf4j/Logger;Ljava/lang/String;[Ljava/lang/Object;)V",null,null);

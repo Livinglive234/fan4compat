@@ -24,6 +24,17 @@ public final class EurekaWarningSmokeTest implements Opcodes {
             Callback callback=new Callback();method.invoke(instance,id,callback);
             if(callback.cancelled!="vs_eureka".equals(id)||callback.cancelled&&!Boolean.FALSE.equals(callback.value))throw new AssertionError("Unexpected warning decision: "+id);
         }
+        ClassNode info=new ClassNode();new ClassReader(Files.readAllBytes(Path.of(args[0],"dev/fan4/compat/mixin/eureka/common/EurekaPortalWarningInfoMixin.class"))).accept(info,0);
+        if(args.length>1)VerifyAddon.injectionTargets(info);
+        for(MethodNode m:info.methods)m.access=ACC_PUBLIC;
+        for(FieldNode f:info.fields)f.access=ACC_PUBLIC;
+        MethodVisitor ctor=info.visitMethod(ACC_PUBLIC,"<init>","()V",null,null);ctor.visitCode();ctor.visitVarInsn(ALOAD,0);ctor.visitMethodInsn(INVOKESPECIAL,"java/lang/Object","<init>","()V",false);ctor.visitInsn(RETURN);ctor.visitMaxs(1,1);ctor.visitEnd();
+        ClassWriter iw=new ClassWriter(0);info.accept(new ClassRemapper(iw,new Remapper(){public String map(String name){return name.equals("org/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable")?"EurekaWarningSmokeTest$Callback":name;}}));
+        byte[] ib=iw.toByteArray();Class<?> ic=new ClassLoader(EurekaWarningSmokeTest.class.getClassLoader()){Class<?> define(){return defineClass(null,ib,0,ib.length);}}.define();Object record=ic.getConstructor().newInstance();
+        for(String id:new String[]{"vs_eureka","create","distanthorizons","other",null}) {
+            ic.getField("modId").set(record,id);Callback callback=new Callback();ic.getMethod("fan4$hideSevereEurekaWarning",Callback.class).invoke(record,callback);
+            if(callback.cancelled!="vs_eureka".equals(id)||callback.cancelled&&!Boolean.FALSE.equals(callback.value))throw new AssertionError("Severe warning filter: "+id);
+        }
         System.out.println("PASS: Eureka notice suppressed; Create, other IDs and null preserve native checks; exact IP selector verified");
     }
 }
