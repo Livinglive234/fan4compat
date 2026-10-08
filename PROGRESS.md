@@ -1,10 +1,25 @@
 # Fan4Compat progress
 
-Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.39**.
+Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.40**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is experimental; a successful build does not
 establish that portal traversal works correctly in the full modpack.
+
+## Alpha 40: Point Blank offhand draw routing
+
+Pack owner confirmed offhand gun + main-hand TARDIS key triggered the crashes,
+and client/server mod versions and Point Blank packs match. Exact 2.2.0 bytecode
+selects state via `resolveOperableGunContext` (main hand, then offhand fallback)
+but later calls `tryDraw` with the main-hand stack. Redirect only that client-tick
+call to the native operable context's stack, requiring both gun type and saved
+weapon UUID to match its state. Do not move items, assign IDs or alter hand rules.
+Keep alpha 39 draw guard for unresolved/stale state. Main-hand and unrelated draw
+calls remain unchanged. Regression executes forwarding for key + offhand gun,
+main-hand gun, same-type/different-UUID weapons, absent context and nonplayers.
+Exact native redirect/call contracts verified; clean build passes. In-game check
+remains pending. Matching mod versions do not explain the later unknown block-
+state packet; its server registry/payload still needs separate evidence.
 
 ## Alpha 39: reject stale Point Blank draw transitions
 

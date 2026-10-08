@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: 0.1.0-alpha.39. Validation status below separates singleplayer
+Current build: 0.1.0-alpha.40. Validation status below separates singleplayer
 confirmation from checks still outstanding.
 
 ## Confirmed singleplayer checks

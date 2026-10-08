@@ -18,7 +18,7 @@ public final class OptionalCompatibilityTest {
             check(applies(all,name),"full supported setup skips "+name);
         }
         Map<String,String> pair=Map.of("pointblank","2.2.0","dwm","1.0.38.4");
-        Set<String> expected=new HashSet<>();expected.add("pointblank.client.StaleGunAnimationMixin");expected.add("pointblank.client.StaleGunDrawMixin");
+        Set<String> expected=new HashSet<>();expected.add("pointblank.client.StaleGunAnimationMixin");expected.add("pointblank.client.StaleGunDrawMixin");expected.add("pointblank.client.OffhandGunDrawMixin");
         for(int i=0;i<5;i++)expected.add("doctorwho.client.TardisShipModelCache"+i+"Mixin");
         for(String name:mixins)check(applies(pair,name)==expected.contains(name),"Point Blank/TARDIS setup: "+name);
         for(String id:CompatibilityRules.VERSIONS.keySet()){

@@ -46,6 +46,7 @@
   "client": [
     "pointblank.client.StaleGunAnimationMixin",
     "pointblank.client.StaleGunDrawMixin",
+    "pointblank.client.OffhandGunDrawMixin",
     "immersiveportals.client.MovementTerrainDiagnosticMixin",
     "immersiveportals.client.MixinShipPickRange",
     "immersiveportals.client.MixinShipRemotePlacement",
