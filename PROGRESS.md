@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.6**.
+Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.7**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
@@ -1332,3 +1332,14 @@ and doorway loading needed for landing and player exits. Door-face clipping stil
 preserves the side and back walls. Added a packaged-class reachability audit to
 check that classes connect to active configured hooks or entrypoints. Historical
 entries above describe older builds; retired debug switches no longer apply.
+
+## Beta 7: Freecam loaded-chunk boundary
+
+The pack owner reports camera movement stopping at the vanilla render-distance
+boundary only with DH enabled, predating VS installation. Freecam's camera
+inherits LocalPlayer.tick, which returns before movement when its chunk is absent.
+A client-only expression hook permits that tick for the enabled, active FreeCamera
+instance. Exact Freecam 1.3.0+mc1.21 and DH 3.3.3 gates require neither VS nor IP.
+Native Minecraft/Freecam selectors and APIs verified; camera/player/disabled-camera
+regressions and clean build pass. This is a candidate fix pending in-game testing;
+it does not establish which DH behavior exposed the vanilla condition.

@@ -34,6 +34,7 @@ public class GenerateAddon implements Opcodes {
         EurekaGenerator.severeWarningMixin();
         PointBlankGenerator.generate();
         PortalSoundGenerator.generate();
+        FreecamGenerator.generate();
         DistantHorizonsGenerator.dhDimensionMixin();
         DistantHorizonsGenerator.portalRenderMixins();
         ImmersivePortalsGenerator.chunkCacheDuckMixin();

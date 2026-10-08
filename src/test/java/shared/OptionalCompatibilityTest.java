@@ -20,6 +20,9 @@ public final class OptionalCompatibilityTest {
         check(!applies(Map.of("distanthorizons","3.3.3"),"distanthorizons.client.DhPortalRenderMixin"),"DH portal guard requires IP");
         check(applies(Map.of("distanthorizons","3.3.3","immersive_portals","6.0.6"),"distanthorizons.client.DhPortalRenderMixin"),"DH portal guard needs no VS");
         check(!applies(Map.of("iris","1.8.1+mc1.21.1","immersive_portals","6.0.6"),"iris.client.DhPortalShaderMixin"),"Iris DH guard requires DH");
+        check(applies(Map.of("freecam","1.3.0+mc1.21","distanthorizons","3.3.3"),"freecam.client.FreecamUnloadedTickMixin"),"freecam fix needs no IP or VS");
+        check(!applies(Map.of("freecam","1.3.0+mc1.21"),"freecam.client.FreecamUnloadedTickMixin"),"freecam fix requires DH");
+        check(!applies(Map.of("distanthorizons","3.3.3"),"freecam.client.FreecamUnloadedTickMixin"),"freecam fix requires freecam");
         Map<String,String> pair=Map.of("pointblank","2.2.0","dwm","1.0.38.4");
         Set<String> expected=new HashSet<>();expected.add("pointblank.client.StaleGunAnimationMixin");expected.add("pointblank.client.StaleGunDrawMixin");expected.add("pointblank.client.OffhandGunDrawMixin");
         for(int i=0;i<5;i++)expected.add("doctorwho.client.TardisShipModelCache"+i+"Mixin");

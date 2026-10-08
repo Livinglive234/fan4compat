@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.6.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.7.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,8 +20,18 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 6 release notes](docs/releases/0.1.0-beta.6.md) ·
+[Beta 7 release notes](docs/releases/0.1.0-beta.7.md) ·
 [Release validation and wishlist](docs/release-readiness.md)
+
+## Beta 7 Freecam / Distant Horizons
+
+The active Freecam camera can tick beyond Minecraft's loaded terrain chunks when
+Freecam `1.3.0+mc1.21` (the 1.21.1 download's internal version) and DH `3.3.3` are
+installed. Minecraft's inherited player tick otherwise returns at that boundary,
+even when DH displays distant terrain. The hook changes that one tick condition
+for the active camera only; the real player retains the native terrain check.
+It does not request extra chunks, enable interactions with LODs, or alter ship
+collision guards. Camera movement beyond the boundary needs in-game verification.
 
 ## Beta 6 cleanup
 
@@ -100,7 +110,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.6.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.7.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -134,6 +144,7 @@ No target mods installed means no compatibility mixins apply.
 | Sable Companion crash observed | `1.6.0`, bundled in Windchimes `1.2.0+1.21.1` |
 | Elytra Contrails fallback | `1.4.7.5-1.21.1` only |
 | Jade helm overlay | `15.10.6+fabric` only |
+| Freecam / DH unloaded camera tick | Freecam `1.3.0+mc1.21`, DH `3.3.3`; client only |
 | Distant Horizons dynamic-world transfer | `3.3.3` for Fabric 1.21.1 |
 
 The ship hooks intentionally pin the VS implementation because their dimension
@@ -338,6 +349,7 @@ Compatibility code is grouped by the mod being integrated with Valkyrien Skies:
 | `immersiveportals` | Portal crossing, remote ship/chunk watching and client render alignment |
 | `valkyrienskies` | Physics-stage dimension mutation queue |
 | `eureka` | Optional ship debug logging and settings |
+| `freecam` | Active camera ticking beyond full terrain chunks with DH |
 | `distanthorizons` | Initialize destination DH levels during dimension changes |
 | `sable` | Handle Sable Companion's default VS fallback |
 | `iris`, `accessories`, `bclib`, `soundphysics` | Version-specific shader, portal entity, recipe and acoustic bridges |

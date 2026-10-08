@@ -44,6 +44,7 @@
     "eureka.common.EurekaPortalWarningInfoMixin"
   ],
   "client": [
+    "freecam.client.FreecamUnloadedTickMixin",
     "pointblank.client.StaleGunAnimationMixin",
     "pointblank.client.StaleGunDrawMixin",
     "pointblank.client.OffhandGunDrawMixin",

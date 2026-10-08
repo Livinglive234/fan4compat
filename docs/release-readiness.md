@@ -1,10 +1,12 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.6**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.7**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
 Both client and server should run this build for Eureka server notices.
+Beta 7 adds a client-only Freecam/DH tick-boundary candidate fix; test camera travel
+beyond loaded terrain, returning to the player, and normal player movement.
 
 A beta 1 dedicated-server log exposed a client-only classloading crash during
 TARDIS startup and shutdown saves. Beta 2 has a reproducing classloader regression
@@ -33,7 +35,7 @@ changes. Log warning count alone is not a release criterion.
 
 Beta 1 freezes the current supported feature set. Exact supported versions,
 installation instructions and known limitations remain in the README and
-[release notes](releases/0.1.0-beta.6.md).
+[release notes](releases/0.1.0-beta.7.md).
 
 ## Move from beta to stable
 
