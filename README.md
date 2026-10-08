@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: experimental, 0.1.0-alpha.38.** The original v4 ship fixes were confirmed
+**Status: experimental, 0.1.0-alpha.39.** The original v4 ship fixes were confirmed
 working in game by the pack owner. The pack owner confirmed TARDIS entry, exit, placement and landing in alpha 21.
 The pack owner also confirmed moving-ship exits, waypoint UI, contrails and the TARDIS biome label in the latest build. Ship visibility through reopened doors before exiting remains a known limitation.
 
@@ -87,7 +87,7 @@ Restart the world for another full test.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-alpha.38.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-alpha.39.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -198,7 +198,10 @@ and severe incompatibility checks remain active. This does not edit IP settings.
 
 Point Blank Fabric 2.2.0: stale gun animation callbacks with empty or non-gun
 item stacks return no controllers, preventing the `AirBlockItem` → `GunItem`
-cast crash. Valid gun animations retain their native handling.
+cast crash. Valid gun animations retain their native handling. Alpha 39 also rejects draw
+transitions when the passed item differs from the cached gun or its native fire
+mode is unresolved. This prevents the subsequent null fire-mode ammo crash
+without changing ammo data or fabricating a fire mode.
 
 ## Eureka debug option
 

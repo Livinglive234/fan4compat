@@ -1,10 +1,25 @@
 # Fan4Compat progress
 
-Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.38**.
+Updated: 2026-10-07 (America/Chicago). Current build: **0.1.0-alpha.39**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is experimental; a successful build does not
 establish that portal traversal works correctly in the full modpack.
+
+## Alpha 39: reject stale Point Blank draw transitions
+
+Latest alpha 38 log reaches `AmmoCount.get` with a null fire mode through
+`tryDraw` / draw-cooldown expressions. Guard `GunClientState.tryDraw` before
+any state transition: reject null/non-gun items, a different gun than the cached
+state, and unresolved native fire modes. Return false; no ammo writes, state
+mutation or invented fire mode. The native resolver can be retried normally once
+the stack is valid. Preserve the defensive animation listener guard from alpha 37.
+Version-gated Point Blank-only hook. Regression checks cover stale inputs,
+custom guns and fire-mode recovery; exact native selectors/contracts verified.
+Clean build passes; in-game validation remains pending.
+The later redirected block-update `No value with id 229380` is a separate packet
+failure during crash cleanup, not evidence of the draw guard. Its originating
+block/mod and server registry cannot be established from this client log alone.
 
 ## Alpha 38: optional integrations
 
