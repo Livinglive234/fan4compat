@@ -45,6 +45,8 @@
   ],
   "client": [
     "freecam.client.FreecamUnloadedTickMixin",
+    "freecam.client.FreecamLodNearClipMixin",
+    "freecam.client.FreecamLodClipUniformMixin",
     "pointblank.client.StaleGunAnimationMixin",
     "pointblank.client.StaleGunDrawMixin",
     "pointblank.client.OffhandGunDrawMixin",

@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.7**.
+Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.8**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
@@ -1352,3 +1352,22 @@ approval review rejected the broad untested integration; that wiring was not
 applied. Shader suppression and beta 7 gameplay code remain intact. See
 [the proposal](docs/portal-destination-lods.md) for limitations, verified constraints
 and the tests that establish state-restoration and clipping policy.
+
+## Beta 8: Freecam nearby LOD clipping (2026-10-08)
+
+The pack owner reports LOD terrain vanishing into empty space near Freecam and
+returning when the camera backs away. DH 3.3.3 clips LODs near the camera on the
+assumption that full terrain replaces them. The beta 7 tick fix permits the camera
+to reach chunks where that assumption fails.
+
+Added two small Freecam/DH client hooks: cap DH's near plane at 0.5 blocks and
+reset the native GL terrain clip uniform to zero only for the enabled, active
+FreeCamera in an unloaded full-terrain chunk. Loaded terrain, real-player views,
+foreign worlds and IP portal views keep existing behavior. No global settings,
+shader source, LOD generation or portal renderer was changed.
+
+Regression checks include the current camera identity, world and chunk coverage,
+loaded/unloaded transitions, reused shader restoration and portal/disabled gates.
+Native DH selectors, uniform field/setter and Minecraft camera getter were checked.
+Clean build passes; in-game confirmation is pending. Destination portal LOD work
+is paused at its documented isolated-prototype stage.

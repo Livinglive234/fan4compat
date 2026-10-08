@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.7.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.8.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,9 +20,19 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 7 release notes](docs/releases/0.1.0-beta.7.md) ·
+[Beta 8 release notes](docs/releases/0.1.0-beta.8.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
+
+## Beta 8 Freecam nearby LOD clipping
+
+While the active Freecam camera is in an unloaded full-terrain chunk, DH's near
+plane is capped at half a block and its native terrain near-clip uniform is zero.
+This avoids hiding LODs around a camera where full chunks cannot replace them.
+Native clipping returns in loaded terrain or when Freecam is disabled. Normal
+player views, other dimensions and portal views retain their native behavior.
+No terrain generation or permanent DH setting is changed. In-game verification
+of the reported disappearing/reappearing terrain remains pending.
 
 ## Beta 7 Freecam / Distant Horizons
 
@@ -111,7 +121,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.7.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.8.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.

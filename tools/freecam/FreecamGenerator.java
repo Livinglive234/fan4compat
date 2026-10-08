@@ -13,5 +13,21 @@ public final class FreecamGenerator implements Opcodes {
         m.visitCode();m.visitVarInsn(ILOAD,1);m.visitVarInsn(ALOAD,0);
         m.visitMethodInsn(INVOKESTATIC,GenerateAddon.ROOT+"freecam/FreecamTickCompat","allowTick","(ZLjava/lang/Object;)Z",false);
         m.visitInsn(IRETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+
+        String cir="org/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable";
+        name=GenerateAddon.ROOT+"mixin/freecam/client/FreecamLodNearClipMixin";
+        w=GenerateAddon.writer(name,"com/seibel/distanthorizons/core/util/RenderUtil");
+        m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$unloadedCameraNearClip","(L"+cir+";)V",null,null);
+        GenerateAddon.inject(m,"getNearClipPlaneInBlocks()F","RETURN",true);
+        m.visitCode();m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKEVIRTUAL,cir,"getReturnValueF","()F",false);
+        m.visitMethodInsn(INVOKESTATIC,GenerateAddon.ROOT+"freecam/FreecamTickCompat","nearClip","(F)F",false);
+        m.visitMethodInsn(INVOKESTATIC,"java/lang/Float","valueOf","(F)Ljava/lang/Float;",false);
+        m.visitMethodInsn(INVOKEVIRTUAL,cir,"setReturnValue","(Ljava/lang/Object;)V",false);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+        name=GenerateAddon.ROOT+"mixin/freecam/client/FreecamLodClipUniformMixin";
+        w=GenerateAddon.writer(name,"com/seibel/distanthorizons/common/render/openGl/terrain/GlDhTerrainShaderProgram");
+        m=w.visitMethod(ACC_PRIVATE,"fan4$unloadedCameraLodClip","(Lcom/seibel/distanthorizons/api/methods/events/sharedParameterObjects/DhApiRenderParam;L"+GenerateAddon.CI+";)V",null,null);
+        GenerateAddon.inject(m,"fillUniformData(Lcom/seibel/distanthorizons/api/methods/events/sharedParameterObjects/DhApiRenderParam;)V","RETURN",false);
+        m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,GenerateAddon.ROOT+"freecam/FreecamTickCompat","lodClip","(Ljava/lang/Object;)V",false);
+        m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
     }
 }

@@ -8,7 +8,7 @@ regression fixtures live under tools and are not shipped as gameplay classes.
 | --- | --- |
 | Doctor Who | Ship landing, tracking, console coordinates, keys, waypoints, model caching and door-face clipping |
 | Immersive Portals / VS | Moving portal poses, player entry/exit, authorized chunk delivery, native ship loading recovery and portal restrictions on ships |
-| Freecam | Active camera ticking outside full chunks when DH is installed |
+| Freecam | Active camera ticking outside full chunks and nearby LOD clipping correction with DH |
 | DH / Iris | Dynamic dimensions, portal render suppression and shader depth handling |
 | Eureka / Jade | Creative name, supported warning filtering, quiet logging and helm HUD behavior |
 | Point Blank | Offhand and held-item compatibility |
