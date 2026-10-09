@@ -1,10 +1,22 @@
 # Fan4Compat progress
 
-Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.18**.
+Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.19**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 19: grave GUI VerifyError
+
+Opening a grave with a plain right-click crashed the server thread with a VerifyError in
+GraveInventory.<init>: Graves calls super(45), so the screen-size ModifyConstant handler
+ran as an instance method on an uninitialized this. This affected every build since the
+six-row screen was added (beta 13) and was hidden because only crouch quick-retrieve was
+exercised in game before. All generated ModifyConstant handlers are now static. The
+gravesNativeCheck injector validator additionally rejects instance constant handlers
+whose constant occurs before the constructor's super()/this() call; it fails on the beta 18
+generator with this exact fault and passes on the fix. Mixin could still hide other
+load-time faults a static check cannot see, so a real in-game GUI test is the confirmation.
 
 ## Beta 18: Trinkets original-slot recovery
 

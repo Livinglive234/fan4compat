@@ -57,6 +57,17 @@ public final class GravesNativeCheck implements Opcodes {
                             for(MethodNode targetMethod:found) {
                                 boolean targetStatic=(targetMethod.access&ACC_STATIC)!=0,handlerStatic=(handler.access&ACC_STATIC)!=0;
                                 if(targetStatic&&!handlerStatic)throw new AssertionError(mixin.name+"."+handler.name+" is an instance handler for static "+node.name+"."+targetMethod.name);
+                                if(!handlerStatic&&targetMethod.name.equals("<init>")&&a.desc.contains("ModifyConstant")) {
+                                    Integer constantValue=null;
+                                    for(int i=0;i<a.values.size();i+=2)if(a.values.get(i).equals("constant"))
+                                        for(Object c:(List<?>)a.values.get(i+1))if(c instanceof AnnotationNode k)
+                                            for(int j=0;j<k.values.size();j+=2)if(k.values.get(j).equals("intValue"))constantValue=(Integer)k.values.get(j+1);
+                                    for(var insn:targetMethod.instructions) {
+                                        if(insn instanceof MethodInsnNode call&&call.getOpcode()==INVOKESPECIAL&&call.name.equals("<init>")&&(call.owner.equals(node.name)||call.owner.equals(node.superName)))break;
+                                        boolean same=constantValue!=null&&((insn instanceof IntInsnNode n&&n.operand==constantValue)||(insn instanceof LdcInsnNode l&&constantValue.equals(l.cst))||(insn.getOpcode()>=ICONST_M1&&insn.getOpcode()<=ICONST_5&&insn.getOpcode()-ICONST_0==constantValue));
+                                        if(same)throw new AssertionError(mixin.name+"."+handler.name+" is an instance handler for a "+node.name+".<init> constant used before super(): make it static");
+                                    }
+                                }
                                 if(inject) {
                                     boolean returns=!targetMethod.desc.endsWith(")V");
                                     String callback=Type.getArgumentTypes(handler.desc)[Type.getArgumentTypes(handler.desc).length-1].getInternalName();

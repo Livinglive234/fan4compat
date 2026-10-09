@@ -4,10 +4,12 @@ import dev.fan4.compat.graves.AccessoryGraveCompat;
 /** Native descriptors pinned to Player Graves 1.0.0 and Accessories beta 48. */
 public final class GravesGenerator implements Opcodes {
     static final String ROOT=GenerateAddon.ROOT,HELPER=ROOT+"graves/AccessoryGraveCompat",CIR="org/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable";
-    static void constant(ClassWriter w,String handler,String[] methods,int from,int to) {constant(w,handler,methods,from,to,false);}
-    /** Mixin rejects an instance handler that targets a static method (e.g. a non-capturing lambda). */
-    static void constant(ClassWriter w,String handler,String[] methods,int from,int to,boolean staticTarget) {
-        MethodVisitor m=w.visitMethod(ACC_PRIVATE|(staticTarget?ACC_STATIC:0),handler,"(I)I",null,null);
+    /**
+     * Always static: an instance handler cannot target a static method, and a constructor constant that is a
+     * super(...) argument would call the handler on an uninitialized this (VerifyError).
+     */
+    static void constant(ClassWriter w,String handler,String[] methods,int from,int to) {
+        MethodVisitor m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,handler,"(I)I",null,null);
         AnnotationVisitor a=m.visitAnnotation("Lorg/spongepowered/asm/mixin/injection/ModifyConstant;",true),arr=a.visitArray("method");
         for(String method:methods)arr.visit(null,method);arr.visitEnd();a.visit("require",1);a.visit("remap",false);
         arr=a.visitArray("constant");AnnotationVisitor c=arr.visitAnnotation(null,"Lorg/spongepowered/asm/mixin/injection/Constant;");c.visit("intValue",from);c.visitEnd();arr.visitEnd();a.visitEnd();
@@ -38,7 +40,7 @@ public final class GravesGenerator implements Opcodes {
             m.visitCode();m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,1);m.visitMethodInsn(INVOKESTATIC,HELPER,persistence[1],"(Ljava/lang/Object;Ljava/lang/Object;)V",false);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();
         }
         String lambda="lambda$openInventoryScreen$0";
-        constant(w,"fan4$sixRows",new String[]{lambda},5,6,true);
+        constant(w,"fan4$sixRows",new String[]{lambda},5,6);
         m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$sixRowType","(Lnet/minecraft/class_3917;)Lnet/minecraft/class_3917;",null,null);
         AnnotationVisitor a=m.visitAnnotation("Lcom/llamalad7/mixinextras/injector/ModifyExpressionValue;",true),arr=a.visitArray("method");arr.visit(null,lambda);arr.visitEnd();a.visit("require",1);a.visit("remap",false);
         AnnotationVisitor at=a.visitAnnotation("at","Lorg/spongepowered/asm/mixin/injection/At;");at.visit("value","FIELD");at.visit("target","Lnet/minecraft/class_3917;field_18667:Lnet/minecraft/class_3917;");at.visit("remap",false);at.visitEnd();a.visitEnd();
