@@ -8,7 +8,7 @@ import static dev.fan4.compat.shared.CompatCalls.*;
 /** Captures only Accessories' already-resolved death drops, never live equipment. */
 public final class AccessoryGraveCompat {
     public static final int STORAGE=128, VISIBLE=54, PLAYER_SLOTS=41;
-    private record Capture(Object player,List<Object> overflow) {}
+    private record Capture(Object player,List<Object> overflow,List<TrinketGraveCompat.Entry> trinkets) {}
     private record Slot(String name,int index,boolean cosmetic) {}
     private static final Map<Object,Capture> PENDING=Collections.synchronizedMap(new WeakIdentityMap<>());
     private static final Map<Object,IdentityHashMap<Object,Slot>> DEATH_SLOTS=Collections.synchronizedMap(new WeakIdentityMap<>());
@@ -38,7 +38,7 @@ public final class AccessoryGraveCompat {
         if(!original)return false;
         Object player=field(inventory,"field_7546");
         if(!type("io.wispforest.accessories.pond.DroppedStacksExtension").isInstance(player))return original;
-        return drops(player).stream().allMatch(AccessoryGraveCompat::empty);
+        return drops(player).stream().allMatch(AccessoryGraveCompat::empty)&&!TrinketGraveCompat.anyGraveable(player);
     }
     public static void capture(Object grave,Object player) {
         if(grave==null)return;
@@ -52,7 +52,14 @@ public final class AccessoryGraveCompat {
                 slots.set(next++,saved);
             } else overflow.add(saved);
         }
-        PENDING.put(grave,new Capture(player,overflow));
+        // Trinkets stacks follow the accessories; their slots are emptied only once the grave spawns.
+        List<TrinketGraveCompat.Entry> trinkets=TrinketGraveCompat.collect(player);
+        for(var entry:trinkets) {
+            if(entry.destroy())continue;
+            Object saved=copy(entry.stack());
+            if(next<slots.size())slots.set(next++,saved);else overflow.add(saved);
+        }
+        PENDING.put(grave,new Capture(player,overflow,trinkets));
     }
     /** The original drop queue remains intact until spawnEntity reports success. */
     public static void spawned(boolean success,Object entity) {
@@ -60,6 +67,7 @@ public final class AccessoryGraveCompat {
         if(!success||capture==null)return;
         call(capture.player,"addToBeDroppedStacks",List.of());
         for(Object stack:capture.overflow)call(capture.player,"method_5775",stack);
+        TrinketGraveCompat.clear(capture.trinkets);
     }
     /** The six-row vanilla screen is a window; reopen it to expose remaining stacks. */
     public static void prepareScreen(Object grave) {

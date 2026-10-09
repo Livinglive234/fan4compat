@@ -56,6 +56,9 @@ shutdown handoff. `ReleaseUpdates` selects and verifies public release assets.
 atomic replacement. `UpdateTest` exercises release policy and actual file/process
 behavior. `.github/workflows/build.yml` publishes immutable versioned release jars.
 
+Trinkets in graves: `graves/TrinketGraveCompat` mirrors Trinkets' drop rules because Graves
+cancels the native drop pass; it reuses the accessory grave hooks (no injectors of its own).
+
 Accessory graves: `graves/AccessoryGraveCompat`, generated `AccessoryGrave*Mixin`
 hooks and `GravesGenerator` consume only Accessories' resolved death queue after a
 successful grave spawn. Native grave serialization retains extra stacks; GUI sync

@@ -105,3 +105,12 @@ use ordinary recovery, retaining items in the grave if inventory is full and
 overflow drops are disabled. Disable exact-layout recovery and confirm ordinary
 inventory retrieval. Beta 13 graves remain inventory-only because their original
 slot identities were not saved. Automated checks pass; gameplay remains pending.
+
+## Beta 17 Trinkets grave checks
+
+With Trinkets and Player Graves installed: equip items in several Trinkets slots (cape elytra,
+ring, charm) and die with keepInventory off, then on. Confirm every trinket appears in the
+grave and the slots are empty after respawn; recover with quick retrieval and the GUI. Die
+carrying only trinkets (empty inventory) and confirm a grave is created. Equip a vanishing-curse
+trinket and confirm it is destroyed and not graved. Run gravesNativeCheck against the supplied
+jars (-PgravesJar, -PgravesAccessoriesJar, -PgravesMinecraftJar, -PtrinketsJar) before publishing.

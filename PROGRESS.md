@@ -1,10 +1,31 @@
 # Fan4Compat progress
 
-Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.16**.
+Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.17**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 17: Trinkets items in Player Graves
+
+Root cause: Graves cancels Player.dropInventory at HEAD after creating a grave, which
+also skips Trinkets' tail hook on LivingEntity.dropInventory, so equipped trinkets were
+never dropped or cleared and survived respawn on the body (elytra in the cape slot).
+TrinketGraveCompat now mirrors Trinkets 3.10.0's drop pass (item rule, TrinketDropCallback
+event, slot-type rule, then keepInventory/vanishing default) using only public Trinkets
+API, with no new injectors: it plugs into the existing capture, spawn-success and
+inventory-empty hooks. DROP and default-keepInventory KEEP stacks go into the grave
+(Graves already ignores keepInventory); explicit item/slot/event KEEP stays equipped;
+DESTROY (vanishing curse etc.) is cleared on success and never graved. Slots empty only
+after the grave spawns, so a failed spawn leaves Trinkets' normal drop intact. A
+trinket-only death now creates a grave. Recovered trinkets go to the normal inventory.
+Any Trinkets API failure logs once and falls back to previous behavior.
+
+Verification: new TrinketGraveTest fixtures; gravesNativeCheck (needs the supplied jars,
+not run in CI) now also pins the Trinkets API/drop pass and statically validates all 19
+generated Graves injector bindings (target exists, static-ness, CallbackInfo vs
+CallbackInfoReturnable). That check fails on the beta 14 and 15 generators with the
+exact startup-crash causes. In-game confirmation pending.
 
 ## Beta 16: second grave mixin startup crash
 
