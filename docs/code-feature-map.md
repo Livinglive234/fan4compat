@@ -11,6 +11,7 @@ regression fixtures live under tools and are not shipped as gameplay classes.
 | Freecam | Active camera ticking outside full chunks and nearby LOD clipping correction with DH |
 | DH / Iris | Dynamic dimensions, portal render suppression and shader depth handling |
 | Eureka / Jade | Creative name, supported warning filtering, quiet logging and helm HUD behavior |
+| Aether / Player Graves | Resolved accessory death drops, persistent grave storage, GUI and quick recovery |
 | Point Blank | Offhand and held-item compatibility |
 | Other integrations | Accessories packets, Sound Physics portal behavior, BCLib codecs/recipes, Sable dimensions and Elytra Contrails fallback |
 
@@ -54,3 +55,9 @@ shutdown handoff. `ReleaseUpdates` selects and verifies public release assets.
 `UpdateInstaller` is a standalone JDK-only post-exit installer with backup and
 atomic replacement. `UpdateTest` exercises release policy and actual file/process
 behavior. `.github/workflows/build.yml` publishes immutable versioned release jars.
+
+Accessory graves: `graves/AccessoryGraveCompat`, generated `AccessoryGrave*Mixin`
+hooks and `GravesGenerator` consume only Accessories' resolved death queue after a
+successful grave spawn. Native grave serialization retains extra stacks; GUI sync
+preserves the hidden backlog. `AccessoryGraveTest` covers item conservation and
+`gravesNativeCheck` verifies the supplied jar's hooks and persistence calls.

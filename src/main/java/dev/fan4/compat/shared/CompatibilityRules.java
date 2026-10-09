@@ -12,7 +12,7 @@ public final class CompatibilityRules {
         Map.entry("freecam","1.3.0+mc1.21"),Map.entry("distanthorizons","3.3.3"),Map.entry("pointblank","2.2.0"),
         Map.entry("iris","1.8.1+mc1.21.1"),Map.entry("accessories","1.1.0-beta.48+1.21.1"),
         Map.entry("sound_physics_remastered","1.21.1-1.5.1"),Map.entry("bclib","30.4.0"),
-        Map.entry("jade","15.10.6+fabric"),Map.entry("elytratrails","1.4.7.5-1.21.1"));
+        Map.entry("graves","1.0.0"),Map.entry("jade","15.10.6+fabric"),Map.entry("elytratrails","1.4.7.5-1.21.1"));
     private static final Set<String> PORTAL_TARDIS=Set.of("TardisShipPortalMixin","TardisShipPortalDataMixin","TardisShipExteriorShapeMixin");
     private CompatibilityRules() {}
     public static boolean supported(Map<String,String> mods,String id) {
@@ -23,6 +23,7 @@ public final class CompatibilityRules {
         if(!name.startsWith(prefix))return false;
         String path=name.substring(prefix.length()),simple=path.substring(path.lastIndexOf('.')+1);
         boolean vs=supported(mods,"valkyrienskies"),ip=supported(mods,"immersive_portals");
+        if(path.startsWith("graves."))return supported(mods,"graves")&&supported(mods,"accessories")&&mods.containsKey("aether");
         if(path.startsWith("freecam."))return supported(mods,"freecam")&&supported(mods,"distanthorizons")&&(!simple.startsWith("FreecamBsl")||supported(mods,"iris"));
         if(path.startsWith("valkyrienskies."))return vs;
         if(path.startsWith("sable."))return vs&&sable;

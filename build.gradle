@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'dev.fan4'
-version = '0.1.0-beta.12'
+version = '0.1.0-beta.13'
 
 repositories {
     mavenCentral()
@@ -70,7 +70,7 @@ tasks.named('processResources') {
     filesMatching('fabric.mod.json') { expand version: project.version }
 }
 
-['DimensionQueueTest', 'CompatCancellationTest', 'ShipPoseTest', 'CompatCallsTest', 'OptionalCompatibilityTest', 'PortalDepthTextureTest', 'FreecamTickTest', 'FreecamShaderTest', 'FramebufferCopyTest', 'JadeRaycastTest', 'DepthFormatTest', 'UpdateTest'].each { testMain ->
+['DimensionQueueTest', 'CompatCancellationTest', 'ShipPoseTest', 'CompatCallsTest', 'OptionalCompatibilityTest', 'PortalDepthTextureTest', 'FreecamTickTest', 'FreecamShaderTest', 'FramebufferCopyTest', 'JadeRaycastTest', 'DepthFormatTest', 'UpdateTest', 'AccessoryGraveTest'].each { testMain ->
     def regression = tasks.register(testMain.uncapitalize(), JavaExec) {
         dependsOn tasks.named('testClasses')
         classpath = sourceSets.test.runtimeClasspath
@@ -301,3 +301,15 @@ tasks.register('portalLodPrototypeTest', JavaExec) {
     mainClass = 'PortalLodPrototypeTest'
 }
 tasks.named('check') { dependsOn tasks.named('portalLodPrototypeTest') }
+
+// Exact supplied Graves jar plus Aether's bundled Accessories and Minecraft intermediary jar.
+tasks.register('gravesNativeCheck', JavaExec) {
+    dependsOn tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'GravesNativeCheck'
+    if (project.hasProperty('gravesJar') && project.hasProperty('accessoriesJar') && project.hasProperty('minecraftJar')) {
+        args project.property('gravesJar'), project.property('accessoriesJar'), project.property('minecraftJar')
+    } else {
+        onlyIf { false }
+    }
+}

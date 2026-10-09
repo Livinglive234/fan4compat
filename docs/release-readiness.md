@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.12**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.13**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
@@ -82,3 +82,14 @@ IronChest and BetterEnd cosmetic warning candidates as low priority.
   supported shader bridge can be implemented and tested.
 - Revisit WWOO / Distant Horizons grid seams only with a demonstrated fix whose
   generation cost is acceptable; the alpha 34 border experiment remains removed.
+
+## Beta 13 accessory grave checks
+
+With Aether and Player Graves installed on client/server: die with functional and
+cosmetic accessories, retrieve them via GUI and quick retrieval, and confirm no
+world drops or duplicate equipped items. Test accessories without normal inventory
+or XP, a full respawn inventory, keepInventory/keepAccessoryInventory, KEEP and
+DESTROY rules, protected graves, and save/restart before recovery. For a full grave
+screen, take items and reopen to recover remaining stacks. Native API and fixture
+checks pass; gameplay/save-restart confirmation is pending. Publish the draft
+release only after these checks.

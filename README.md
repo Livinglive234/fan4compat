@@ -20,9 +20,24 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 12 release notes](docs/releases/0.1.0-beta.12.md) ·
+[Beta 13 release notes](docs/releases/0.1.0-beta.13.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
+
+## Aether accessory graves
+
+With Aether, Accessories 1.1.0-beta.48+1.21.1 and Player Graves 1.0.0 installed,
+Aether-slot death drops enter the player's grave, including cosmetic accessories.
+Uses Accessories' resolved drop list, preserving its keep-inventory and item
+KEEP/DESTROY rules. Captures other Accessories slots too. Grave ownership and
+access rules stay in effect; no portals or ship mods are required for this fix.
+
+Quick retrieval returns accessories to the normal player inventory for re-equipping.
+The grave screen has six rows. If it fills, reopen it after taking items to expose
+remaining stacks; quick retrieval handles the whole grave. Items persist with the
+grave across world saves. Keep Fan4Compat installed until these graves are emptied.
+The grave stores up to 128 stacks; accessories beyond that capacity drop normally.
+Install the same build on client and server. Gameplay testing is pending.
 
 ## Automatic Fan4Compat updates
 

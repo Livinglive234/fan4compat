@@ -1,10 +1,31 @@
 # Fan4Compat progress
 
-Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.12**.
+Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.13**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 13: Aether accessories in Player Graves
+
+Capture Accessories' already-resolved death-drop queue into Player Graves 1.0.0,
+including functional/cosmetic Aether slots and accessory-only deaths. Consume the
+queue only after successful grave spawn; failed/null grave creation retains native
+drops. Preserve native keep/destroy rules, grave ownership and access restrictions.
+Expand persisted storage to 128 stacks with a six-row vanilla screen; preserve
+hidden stacks on GUI sync and expose them on reopening. Quick retrieval handles
+all stacks, including the native exact-layout path, without overwriting a full
+player inventory. Recovered accessories go to normal inventory for re-equipping.
+Beyond storage capacity, use ordinary drops. This optional integration needs
+Aether, the pinned Accessories build and Player Graves, without VS/IP/TARDIS.
+
+Validation: clean build and all regressions pass; fixture tests conserve items
+through failed/successful spawns, full/partial retrieval, GUI backlog and overflow.
+Native checks pass against the supplied Graves jar, Aether 1.5.11's bundled
+Accessories beta 48 and Minecraft 1.21.1 spawn/menu/inventory APIs; native grave
+persistence uses the complete ItemStack-list codec. In-game death, save/restart,
+owner restrictions and GUI/quick retrieval testing remain pending. Beta 13 is a
+test artifact/draft release until explicitly published after testing.
 
 ## Tested-build promotion gate
 
