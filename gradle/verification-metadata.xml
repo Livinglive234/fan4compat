@@ -40,5 +40,10 @@
         <sha256 value="62b786b37472cba6780b66c93f01e12dd029a594d89be18334048ff20c6393e6" origin="Checksums retained from the verified original build" />
       </artifact>
     </component>
+    <component group="com.google.code.gson" name="gson" version="2.10.1">
+      <artifact name="gson-2.10.1.jar">
+        <sha256 value="4241c14a7727c34feea6507ec801318a3d4a90f070e4525681079fb94ee4c593" origin="Maven Central artifact verified against upstream SHA1" />
+      </artifact>
+    </component>
   </components>
 </verification-metadata>

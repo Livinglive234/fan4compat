@@ -8,6 +8,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
@@ -21,3 +23,32 @@ jobs:
         with:
           name: Fan4Compat
           path: build/libs/*.jar
+      - name: Publish versioned release
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          jars=(build/libs/*.jar)
+          test "${#jars[@]}" -eq 1
+          jar="${jars[0]}"
+          version=$(python3 - "$jar" <<'PY'
+          import json,re,sys,zipfile
+          with zipfile.ZipFile(sys.argv[1]) as jar:
+              mod=json.loads(jar.read('fabric.mod.json'))
+          version=mod['version']
+          assert re.fullmatch(r'\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)\.\d+)?',version)
+          assert mod['id']=='fan4compat' and mod['depends']['minecraft']=='1.21.1'
+          print(version)
+          PY
+          )
+          tag="v$version"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists; leaving its assets unchanged."
+            exit 0
+          fi
+          sha256sum "$jar" > "$jar.sha256"
+          flags=()
+          if [[ "$version" == *-* ]]; then flags+=(--prerelease); fi
+          gh release create "$tag" "$jar" "$jar.sha256" --target "$GITHUB_SHA" --title "Fan4Compat $version" --notes-file "docs/releases/$version.md" "${flags[@]}"

@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.11.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.12.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,9 +20,33 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 11 release notes](docs/releases/0.1.0-beta.11.md) ·
+[Beta 12 release notes](docs/releases/0.1.0-beta.12.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
+
+## Automatic Fan4Compat updates
+
+Install beta 12 or newer once on each client and server. Fan4Compat then checks
+[this repository's releases](https://github.com/Livinglive234/fan4compat/releases)
+on startup and every 30 minutes, including prereleases by default. New jars are
+checksum-verified and staged in `.fan4compat-update` outside `mods`. After a normal
+exit, an independent installer waits for the game/server process to finish and
+atomically replaces the original jar for the next launch. The running game is
+unchanged; the server never restarts itself. Clients receive a chat notice when
+an update is ready. The original jar is backed up outside `mods`.
+
+Settings: `config/fan4compat-updater.properties`. Set `enabled=false` to stop all
+checks, `autoDownload=false` for notices only, or `allowPrereleases=false` for
+stable releases only. These settings take effect after restarting. Only Fan4Compat
+is updated; other mods, configs and content packs remain yours to manage.
+
+Successful versioned main-branch builds automatically publish release jars and
+checksums. Beta/alpha/RC versions are prereleases. Existing release assets are
+never overwritten; bump the version and add release notes for each new release.
+Pull requests do not publish. Actions artifacts remain available too.
+
+See [updater details and server hosting](docs/automatic-updates.md), including
+pre-start installation for hosts that kill child processes at shutdown.
 
 ## Beta 11 remaining Jade rays and Mac recursive depth
 
@@ -156,7 +180,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.11.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.12.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.

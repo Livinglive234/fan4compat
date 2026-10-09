@@ -14,7 +14,8 @@
   ],
   "entrypoints": {
     "main": [
-      "dev.fan4.compat.eureka.CompatSettings"
+      "dev.fan4.compat.eureka.CompatSettings",
+      "dev.fan4.compat.updater.UpdateInitializer"
     ]
   },
   "depends": {

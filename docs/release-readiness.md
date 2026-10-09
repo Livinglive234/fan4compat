@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.11**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.12**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
@@ -21,6 +21,11 @@ Apple recursive renderer's stencil representation to the actual main depth
 texture. Native checks and fixture regressions pass. Retest TARDIS crossings
 with Jade and BSL nested portals on Mac; the depth-mismatch cause is a candidate,
 not confirmed by the beta 10 log. The native error-triggered fallback is retained.
+
+Beta 12 adds automatic public-release downloads and post-exit installation.
+Checks/install/backup and standalone-helper regressions pass. Verify a staged
+update across restart on actual Windows/macOS clients and the server host;
+container hosts that kill helper processes must use the documented pre-start hook.
 
 A beta 1 dedicated-server log exposed a client-only classloading crash during
 TARDIS startup and shutdown saves. Beta 2 has a reproducing classloader regression
@@ -49,7 +54,7 @@ changes. Log warning count alone is not a release criterion.
 
 Beta 1 freezes the current supported feature set. Exact supported versions,
 installation instructions and known limitations remain in the README and
-[release notes](releases/0.1.0-beta.11.md).
+[release notes](releases/0.1.0-beta.12.md).
 
 ## Move from beta to stable
 

@@ -48,3 +48,9 @@ Beta 11 extends `jade/ShipRaycastCompat` with scoped cached-hit range validation
 `iris/DepthFormatCompat` and generated `IrisDepthFormatMixin` select matching
 Apple main/stencil depth formats; `DepthFormatTest` covers representation changes
 and resource/binding restoration. The native renderer error fallback is retained.
+
+Updater: `updater/UpdateInitializer` owns config, background checks, notices and
+shutdown handoff. `ReleaseUpdates` selects and verifies public release assets.
+`UpdateInstaller` is a standalone JDK-only post-exit installer with backup and
+atomic replacement. `UpdateTest` exercises release policy and actual file/process
+behavior. `.github/workflows/build.yml` publishes immutable versioned release jars.

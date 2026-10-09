@@ -1,10 +1,32 @@
 # Fan4Compat progress
 
-Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.11**.
+Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.12**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 12: public release updater
+
+User selected automatic downloads for next restart and automatic publication of
+successful versioned main builds. Add a mod-independent initializer with public
+GitHub release checks at startup/every 30 minutes, prerelease opt-out, checksums,
+metadata validation and bounded background downloads. No GitHub token required.
+Stage outside mods; an extracted JDK-only installer waits for parent exit and
+atomically replaces only the original regular jar, retaining a verified backup.
+Reject corruption, symlink targets, wrong mod/game/version and manually changed
+installed files. Chat notice on client; operational log notice on server. No
+automatic restart or hot reload. Managed/container hosts may need the documented
+pre-start helper command if they kill children with the game process.
+
+Actions publish a versioned release jar and SHA256 only after a successful main
+build, never from PRs and never overwriting an existing release. Gson is compile-
+only (Minecraft provides it); its artifact checksum is locked for build validation.
+Regression covers numeric version/channel selection, trusted asset URLs, jar
+metadata/checksum, install/backup/cleanup, unchanged running process, manual update
+and symlink refusal, and a standalone helper launched without Fabric or Gson.
+Public release/feed/download verification is performed after publication. Actual
+Windows/macOS hosting and chat notification gameplay confirmation remain pending.
 
 ## Beta 11: post-teleport Jade hits and Apple depth representation
 
