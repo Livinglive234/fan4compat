@@ -11,10 +11,11 @@ public final class AccessoryGraveTest {
         public void method_5431(){dirty++;}
     }
     public static class Player implements DroppedStacksExtension {
-        public Collection<Object> queue=new ArrayList<>();public Inventory inventory=new Inventory();public int dropped;
+        public Collection<Object> queue=new ArrayList<>();public Inventory inventory=new Inventory();public int dropped;public Object capability;
         public Player(){inventory.field_7546=this;}
         public Collection<Object> toBeDroppedStacks(){return queue;}
         public void addToBeDroppedStacks(Collection<Object> stacks){queue=stacks;}
+        public Object accessoriesCapability(){return capability;}
         public Inventory method_31548(){return inventory;}
         public Object method_5775(class_1799 stack){dropped+=stack.count;return new Object();}
         public Object method_7328(class_1799 stack,boolean random){return method_5775(stack);}

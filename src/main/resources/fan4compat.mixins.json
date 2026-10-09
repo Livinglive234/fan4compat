@@ -5,6 +5,7 @@
   "plugin": "dev.fan4.compat.CompatPlugin",
   "mixins": [
     "graves.common.AccessoryGraveStorageMixin",
+    "graves.common.AccessoryGraveDeathSlotsMixin",
     "graves.common.AccessoryGraveScreenMixin",
     "graves.common.AccessoryGraveSpawnMixin",
     "graves.common.AccessoryGraveEmptyMixin",

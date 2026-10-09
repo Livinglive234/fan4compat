@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.13**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.14**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
@@ -93,3 +93,15 @@ DESTROY rules, protected graves, and save/restart before recovery. For a full gr
 screen, take items and reopen to recover remaining stacks. Native API and fixture
 checks pass; gameplay/save-restart confirmation is pending. Publish the draft
 release only after these checks.
+
+## Beta 14 original accessory-slot checks
+
+Create a new grave with two rings and cosmetic accessories. Crouch-right-click
+with exact inventory-layout recovery enabled; verify each item returns to the
+same functional/cosmetic slot and native equipment effects/client rendering update.
+Repeat after server save/restart and after taking some items via the grave GUI.
+Equipped respawn items must remain intact; occupied or unavailable original slots
+use ordinary recovery, retaining items in the grave if inventory is full and
+overflow drops are disabled. Disable exact-layout recovery and confirm ordinary
+inventory retrieval. Beta 13 graves remain inventory-only because their original
+slot identities were not saved. Automated checks pass; gameplay remains pending.

@@ -1,10 +1,30 @@
 # Fan4Compat progress
 
-Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.13**.
+Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.14**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 14: original accessory-slot recovery
+
+Record each returned native accessory death drop's slot name, index and cosmetic
+flag after KEEP/DESTROY rules have resolved. Persist origins in grave NBT, track
+GUI paging moves, and invalidate origins for removed/replaced GUI stacks. On
+crouch-right-click with exact-layout recovery enabled, restore empty original slots
+through AccessoriesInternalSlot's native validation, stack limit and setter.
+Occupied, missing, resized or invalid slots use normal recovery; do not overwrite
+respawn equipment. Include restored accessories in the native retrieval count and
+complete XP/locator cleanup for accessory-only graves. Legacy beta 13 graves have
+no source-slot metadata and keep ordinary inventory recovery.
+
+Slot fixtures cover identical rings at distinct indices, functional/cosmetic
+separation, metadata save/load, occupied/removed/shrunk/invalid slots, GUI paging
+and deposits, exact-layout opt-out and repeated retrieval without duplication.
+Native API checks cover private dropStack capture, source references, capability
+containers, normal/cosmetic menu validation/setters and NBT string methods.
+Clean build/regressions and native checks pass; in-game slot synchronization and
+save/restart confirmation remain pending. Release remains a draft for testing.
 
 ## Beta 13: Aether accessories in Player Graves
 

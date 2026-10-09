@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 13 release notes](docs/releases/0.1.0-beta.13.md) ·
+[Beta 14 release notes](docs/releases/0.1.0-beta.14.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
 
@@ -32,7 +32,11 @@ Uses Accessories' resolved drop list, preserving its keep-inventory and item
 KEEP/DESTROY rules. Captures other Accessories slots too. Grave ownership and
 access rules stay in effect; no portals or ship mods are required for this fix.
 
-Quick retrieval returns accessories to the normal player inventory for re-equipping.
+With exact inventory-layout recovery enabled, crouch-right-click restores
+accessories to their original functional/cosmetic slots when those slots are empty
+and still accept the items. Occupied, removed or invalid slots use normal inventory
+recovery without replacing equipped items. Graves created before beta 14 lack this
+slot metadata and recover accessories into normal inventory.
 The grave screen has six rows. If it fills, reopen it after taking items to expose
 remaining stacks; quick retrieval handles the whole grave. Items persist with the
 grave across world saves. Keep Fan4Compat installed until these graves are emptied.

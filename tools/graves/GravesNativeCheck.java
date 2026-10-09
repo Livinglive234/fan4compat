@@ -39,6 +39,18 @@ public final class GravesNativeCheck implements Opcodes {
         method(read(args[1],"io/wispforest/accessories/pond/DroppedStacksExtension"),"toBeDroppedStacks","()Ljava/util/Collection;");
         method(read(args[1],"io/wispforest/accessories/pond/DroppedStacksExtension"),"addToBeDroppedStacks","(Ljava/util/Collection;)V");
         method(read(args[1],"io/wispforest/accessories/impl/AccessoriesEventHandler"),"onDeath","(Lnet/minecraft/class_1309;Lnet/minecraft/class_1282;)Ljava/util/Collection;");
+        method(read(args[1],"io/wispforest/accessories/impl/AccessoriesEventHandler"),"dropStack","(Lio/wispforest/accessories/api/DropRule;Lnet/minecraft/class_1309;Lio/wispforest/accessories/impl/ExpandedSimpleContainer;Lio/wispforest/accessories/api/slot/SlotReference;Lnet/minecraft/class_1282;Z)Lnet/minecraft/class_1799;");
+        ClassNode reference=read(args[1],"io/wispforest/accessories/api/slot/SlotReference");
+        method(reference,"slotName","()Ljava/lang/String;");method(reference,"slot","()I");method(reference,"slotContainer","()Lio/wispforest/accessories/api/AccessoriesContainer;");
+        ClassNode capability=read(args[1],"io/wispforest/accessories/api/AccessoriesCapability");
+        method(capability,"get","(Lnet/minecraft/class_1309;)Lio/wispforest/accessories/api/AccessoriesCapability;");method(capability,"getContainers","()Ljava/util/Map;");
+        ClassNode container=read(args[1],"io/wispforest/accessories/api/AccessoriesContainer");
+        method(container,"getSize","()I");method(container,"getAccessories","()Lio/wispforest/accessories/impl/ExpandedSimpleContainer;");method(container,"getCosmeticAccessories","()Lio/wispforest/accessories/impl/ExpandedSimpleContainer;");
+        ClassNode slot=read(args[1],"io/wispforest/accessories/menu/AccessoriesInternalSlot");
+        method(slot,"<init>","(Lio/wispforest/accessories/api/AccessoriesContainer;ZIII)V");method(slot,"method_7680","(Lnet/minecraft/class_1799;)Z");method(slot,"method_7673","(Lnet/minecraft/class_1799;)V");
+        method(read(args[1],"io/wispforest/accessories/api/menu/AccessoriesBasedSlot"),"method_7676","(Lnet/minecraft/class_1799;)I");
+        ClassNode nbt=read(args[2],"net/minecraft/class_2487");method(nbt,"method_10582","(Ljava/lang/String;Ljava/lang/String;)V");method(nbt,"method_10558","(Ljava/lang/String;)Ljava/lang/String;");
+        method(read(args[2],"net/minecraft/class_1799"),"method_31577","(Lnet/minecraft/class_1799;Lnet/minecraft/class_1799;)Z");
         method(read(args[2],"net/minecraft/class_3218"),"method_8649","(Lnet/minecraft/class_1297;)Z");
         method(read(args[2],"net/minecraft/class_1661"),"method_5442","()Z");
         ClassNode screen=read(args[2],"net/minecraft/class_3917");
@@ -50,6 +62,6 @@ public final class GravesNativeCheck implements Opcodes {
             for(var i:m.instructions)if(i instanceof MethodInsnNode invoke&&invoke.owner.equals("net/minecraft/class_1262"))codec=true;
             if(!codec)throw new AssertionError("Native persistence changed: "+selector);
         }
-        System.out.println("PASS: supplied Graves 1.0.0 storage/menu/persistence selectors, Accessories beta 48 queue API and Minecraft 1.21.1 spawn/inventory/menu APIs");
+        System.out.println("PASS: supplied Graves 1.0.0 storage/menu/persistence selectors, Accessories beta 48 queue/slot capture, validation/setter APIs and Minecraft 1.21.1 spawn/inventory/menu APIs");
     }
 }

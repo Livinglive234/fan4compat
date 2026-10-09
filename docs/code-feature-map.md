@@ -11,7 +11,7 @@ regression fixtures live under tools and are not shipped as gameplay classes.
 | Freecam | Active camera ticking outside full chunks and nearby LOD clipping correction with DH |
 | DH / Iris | Dynamic dimensions, portal render suppression and shader depth handling |
 | Eureka / Jade | Creative name, supported warning filtering, quiet logging and helm HUD behavior |
-| Aether / Player Graves | Resolved accessory death drops, persistent grave storage, GUI and quick recovery |
+| Aether / Player Graves | Resolved accessory death drops, persistent grave storage, GUI and original functional/cosmetic slot recovery |
 | Point Blank | Offhand and held-item compatibility |
 | Other integrations | Accessories packets, Sound Physics portal behavior, BCLib codecs/recipes, Sable dimensions and Elytra Contrails fallback |
 
@@ -61,3 +61,9 @@ hooks and `GravesGenerator` consume only Accessories' resolved death queue after
 successful grave spawn. Native grave serialization retains extra stacks; GUI sync
 preserves the hidden backlog. `AccessoryGraveTest` covers item conservation and
 `gravesNativeCheck` verifies the supplied jar's hooks and persistence calls.
+
+Beta 14 adds `AccessoryGraveDeathSlotsMixin` to record native resolved-drop origins.
+`AccessoryGraveCompat` persists source slot names/indices/cosmetic flags in NBT,
+keeps them attached through GUI paging and restores through native Accessories
+menu validation/setters before normal quick recovery. `AccessoryGraveSlotsTest`
+covers persisted destinations, slot conflicts and count/item conservation.
