@@ -1,10 +1,22 @@
 # Fan4Compat progress
 
-Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.17**.
+Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.18**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 18: Trinkets original-slot recovery
+
+Beta 17 (pack owner: graving worked) returned recovered trinkets to the inventory. Origins
+(Trinkets slot id group/name plus index) are now recorded per grave slot beside the accessory
+origins and persisted in the same grave NBT string with a trinket flag (older graves load
+unchanged). On crouch-right-click with exact-layout recovery on, empty original slots are
+filled through Trinkets' own TrinketSlot.canInsert check (validator predicates plus
+Trinket.canEquip), index/size and stack-limit checks; occupied, resized, invalid or opted-out
+slots use ordinary inventory recovery and respawn equipment is never overwritten. Restored
+trinkets count in the native retrieval total and complete XP/locator cleanup. Native check
+pins slot ids, the inventory map, canInsert (static) and canEquip. In-game confirmation pending.
 
 ## Beta 17: Trinkets items in Player Graves
 

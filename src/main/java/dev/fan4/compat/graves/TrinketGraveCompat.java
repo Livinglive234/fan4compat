@@ -18,7 +18,7 @@ final class TrinketGraveCompat {
     static final String SUPPORTED="3.10.0";
     private static boolean warned;
     /** destroy: Trinkets would delete the stack; it is cleared on success and never graved. */
-    record Entry(Object inventory,int index,Object stack,boolean destroy) {}
+    record Entry(Object inventory,int index,Object stack,boolean destroy,String slot) {}
     private TrinketGraveCompat() {}
     static boolean enabled() {
         if(!present(API))return false;
@@ -48,7 +48,8 @@ final class TrinketGraveCompat {
                 // Graves already ignored keepInventory to reach this point; honor only explicit item/slot/event KEEP.
                 if(rule.equals("KEEP")&&!(defaulted&&keepInventory))continue;
                 if(!rule.equals("KEEP")&&!rule.equals("DROP")&&!rule.equals("DESTROY"))continue;
-                entries.add(new Entry(call(reference,"inventory"),((Number)call(reference,"index")).intValue(),stack,rule.equals("DESTROY")));
+                Object inventory=call(reference,"inventory");
+                entries.add(new Entry(inventory,((Number)call(reference,"index")).intValue(),stack,rule.equals("DESTROY"),(String)call(call(inventory,"getSlotType"),"getId")));
             }
             return entries;
         } catch(RuntimeException|LinkageError failure) {
@@ -72,6 +73,30 @@ final class TrinketGraveCompat {
             } catch(RuntimeException|LinkageError failure) {
                 System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"Trinkets slot not cleared after grave capture: "+failure);
             }
+        }
+    }
+    /**
+     * Equip a recovered stack into its original trinket slot through Trinkets' own validity check
+     * (the same one the inventory screen applies); false leaves the stack for ordinary recovery.
+     */
+    static boolean restore(Object player,String slotId,int index,Object stack) {
+        if(!enabled())return false;
+        try {
+            Optional<?> component=(Optional<?>)call(type(API),"getTrinketComponent",player);
+            String[] id=slotId.split("/",2);
+            if(component.isEmpty()||id.length!=2)return false;
+            Map<?,?> group=(Map<?,?>)((Map<?,?>)call(component.get(),"getInventory")).get(id[0]);
+            Object inventory=group==null?null:group.get(id[1]);
+            if(inventory==null||index<0||index>=((Number)call(inventory,"method_5439")).intValue())return false;
+            if(!(boolean)call(call(inventory,"method_5438",index),"method_7960"))return false;
+            if(((Number)call(stack,"method_7947")).intValue()>((Number)call(stack,"method_7914")).intValue())return false;
+            Object reference=create(REFERENCE,inventory,index);
+            if(!(boolean)call(type("dev.emi.trinkets.TrinketSlot"),"canInsert",stack,reference,player))return false;
+            call(inventory,"method_5447",index,stack);
+            return true;
+        } catch(RuntimeException|LinkageError failure) {
+            System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"Trinkets slot recovery skipped: "+failure);
+            return false;
         }
     }
     /** Mirrors Trinkets 3.10.0: item rule, then the drop event, then the slot type's rule. */

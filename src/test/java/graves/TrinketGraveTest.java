@@ -1,3 +1,4 @@
+import dev.emi.trinkets.TrinketSlot;
 import dev.emi.trinkets.api.*;
 import dev.emi.trinkets.api.TrinketEnums.DropRule;
 import dev.emi.trinkets.api.event.TrinketDropCallback;
@@ -9,22 +10,41 @@ import java.util.*;
 
 /** Trinkets items must reach the grave even though Graves cancels Player.dropInventory. */
 public final class TrinketGraveTest {
-    public static class Inventory {public Wearer field_7546;}
+    public static class Inventory {
+        public Wearer field_7546;public int space,received,dirty;
+        public void method_7394(class_1799 stack){int moved=Math.min(space,stack.count);space-=moved;received+=moved;stack.count-=moved;}
+        public void method_5431(){dirty++;}
+    }
     public static class Wearer extends class_1309 implements DroppedStacksExtension, TrinketComponent {
         public final Inventory inventory=new Inventory();public final List<TrinketInventory> slots=new ArrayList<>();public int dropped;
         public Wearer(){inventory.field_7546=this;TrinketsApi.COMPONENTS.put(this,this);}
         public Collection<Object> toBeDroppedStacks(){return new ArrayList<>();}
         public void addToBeDroppedStacks(Collection<Object> stacks){}
         public Object method_5775(class_1799 stack){dropped+=stack.count;return new Object();}
+        public Object accessoriesCapability(){return null;}
+        public Inventory method_31548(){return inventory;}
+        public Object method_7328(class_1799 stack,boolean random){return method_5775(stack);}
         public List<TrinketInventory> inventories(){return slots;}
     }
     static class_1799 item(String name){class_1799 stack=new class_1799(1);stack.item=name;return stack;}
-    static TrinketInventory slot(Wearer wearer,DropRule rule,class_1799... stacks) {
-        TrinketInventory inventory=new TrinketInventory(new SlotType(rule),stacks.length);
+    static TrinketInventory slot(Wearer wearer,DropRule rule,class_1799... stacks) {return slot(wearer,"head/cape",rule,stacks);}
+    static TrinketInventory slot(Wearer wearer,String id,DropRule rule,class_1799... stacks) {
+        TrinketInventory inventory=new TrinketInventory(new SlotType(id,rule),stacks.length);
         for(int i=0;i<stacks.length;i++)inventory.stacks.set(i,stacks[i]);
         wearer.slots.add(inventory);return inventory;
     }
     static void check(boolean condition,String reason){if(!condition)throw new AssertionError(reason);}
+    static void copyStacks(AccessoryGraveTest.Grave from,AccessoryGraveTest.Grave to) {
+        try {
+            var f=AccessoryGraveTest.Grave.class.getDeclaredField("storedItems");f.setAccessible(true);
+            @SuppressWarnings("unchecked") var source=(List<Object>)f.get(from);@SuppressWarnings("unchecked") var target=(List<Object>)f.get(to);
+            for(int i=0;i<source.size();i++)target.set(i,((class_1799)source.get(i)).method_7972());
+        } catch(ReflectiveOperationException e){throw new AssertionError(e);}
+    }
+    static int retrieve(AccessoryGraveTest.Grave grave,Wearer player) {
+        AccessoryGraveCompat.beginQuickRetrieve(grave,player);
+        return AccessoryGraveCompat.endQuickRetrieve(AccessoryGraveCompat.retrieveExtra(0,grave,player),grave,player);
+    }
     static void reset() {
         TrinketsApi.TRINKETS.clear();
         TrinketDropCallback.EVENT.handler=(rule,stack,slot,entity)->rule;
@@ -83,10 +103,33 @@ public final class TrinketGraveTest {
         check(limit.count()+many.dropped==100,"bounded storage overflow drops once");
         check(all.stacks.stream().allMatch(class_1799::method_7960),"all captured slots emptied exactly once");
 
+        // Quick retrieval returns each trinket to its original slot through Trinkets' own validity check.
+        reset();Wearer owner=new Wearer();class_1799 cloak=item("crystallite_elytra"),ring=item("ring");
+        TrinketInventory capeSlot=slot(owner,"head/cape",DropRule.DEFAULT,cloak),rings=slot(owner,"hand/ring",DropRule.DEFAULT,ring,class_1799.field_8037);
+        var held=new AccessoryGraveTest.Grave();AccessoryGraveCompat.capture(held,owner);AccessoryGraveCompat.spawned(true,held);
+        var nbt=new AccessoryGraveSlotsTest.Nbt();AccessoryGraveCompat.saveSlots(held,nbt);
+        var reloaded=new AccessoryGraveTest.Grave();copyStacks(held,reloaded);AccessoryGraveCompat.loadSlots(reloaded,nbt);
+        check(retrieve(reloaded,owner)==2&&owner.inventory.received==0,"quick retrieve counts and equips trinkets without touching the inventory");
+        check(capeSlot.stacks.get(0).item.equals("crystallite_elytra")&&rings.stacks.get(0).item.equals("ring")&&reloaded.count()==0,"trinkets returned to original slots after save/reload");
+        check(retrieve(reloaded,owner)==0,"repeat retrieval cannot duplicate");
+
+        // Occupied, shrunk, invalid and opted-out destinations leave the item for ordinary inventory recovery.
+        for(String why:new String[]{"occupied","shrunk","invalid","layout off"}) {
+            reset();TrinketSlot.ALLOW[0]=!why.equals("invalid");com.kador.graves.GravesMod.CONFIG.retrieval.restoreExactInventoryLayout=!why.equals("layout off");
+            Wearer w=new Wearer();class_1799 worn=item("worn");TrinketInventory home=slot(w,"head/cape",DropRule.DEFAULT,worn);
+            var g=new AccessoryGraveTest.Grave();AccessoryGraveCompat.capture(g,w);AccessoryGraveCompat.spawned(true,g);
+            if(why.equals("occupied"))home.stacks.set(0,item("replacement"));
+            if(why.equals("shrunk"))home.stacks.clear();
+            w.inventory.space=64;
+            check(retrieve(g,w)==1&&w.inventory.received==1&&g.count()==0,"fallback to inventory when "+why);
+            if(why.equals("occupied"))check(home.stacks.get(0).item.equals("replacement"),"never overwrites respawn equipment");
+        }
+        TrinketSlot.ALLOW[0]=true;com.kador.graves.GravesMod.CONFIG.retrieval.restoreExactInventoryLayout=true;
+
         // No trinkets and non-living players behave exactly as before.
         Wearer bare=new Wearer();check(AccessoryGraveCompat.inventoryEmpty(true,bare.inventory),"no trinkets leaves empty-inventory logic unchanged");
         var plain=new AccessoryGraveTest.Player();
         check(AccessoryGraveCompat.inventoryEmpty(true,plain.inventory),"players without a trinket component are unaffected");
-        System.out.println("PASS: Trinkets items graved on empty inventory, staged copy and spawn failure, slot clearing, keepInventory/explicit KEEP/DESTROY/event rules and bounded overflow (fixtures)");
+        System.out.println("PASS: Trinkets items graved on empty inventory, staged copy and spawn failure, slot clearing, keepInventory/explicit KEEP/DESTROY/event rules, bounded overflow, and original-slot quick-retrieve with save/reload and fallbacks (fixtures)");
     }
 }

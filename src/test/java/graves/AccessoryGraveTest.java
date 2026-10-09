@@ -25,7 +25,7 @@ public final class AccessoryGraveTest {
         public Grave(){for(int i=0;i<128;i++)storedItems.add(new class_1799(0));}
         public boolean isInventoryEmpty(){return storedItems.stream().allMatch(s->((class_1799)s).method_7960());}
         private void trySmartDespawn(){despawns++;}
-        private void awardStoredExperience(Player player){awards++;}
+        private void awardStoredExperience(Object player){awards++;}
         public int count(){return storedItems.stream().mapToInt(s->((class_1799)s).count).sum();}
     }
     public static class Window {

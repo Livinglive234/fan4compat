@@ -9,7 +9,7 @@ import static dev.fan4.compat.shared.CompatCalls.*;
 public final class AccessoryGraveCompat {
     public static final int STORAGE=128, VISIBLE=54, PLAYER_SLOTS=41;
     private record Capture(Object player,List<Object> overflow,List<TrinketGraveCompat.Entry> trinkets) {}
-    private record Slot(String name,int index,boolean cosmetic) {}
+    private record Slot(String name,int index,boolean cosmetic,boolean trinket) {}
     private static final Map<Object,Capture> PENDING=Collections.synchronizedMap(new WeakIdentityMap<>());
     private static final Map<Object,IdentityHashMap<Object,Slot>> DEATH_SLOTS=Collections.synchronizedMap(new WeakIdentityMap<>());
     private static final Map<Object,Map<Integer,Slot>> GRAVE_SLOTS=Collections.synchronizedMap(new WeakIdentityMap<>());
@@ -32,7 +32,7 @@ public final class AccessoryGraveCompat {
         Object source=call(reference,"slotContainer");
         if(source==null)return;
         boolean cosmetic=container==call(source,"getCosmeticAccessories");
-        pending.put(stack,new Slot((String)call(reference,"slotName"),((Number)call(reference,"slot")).intValue(),cosmetic));
+        pending.put(stack,new Slot((String)call(reference,"slotName"),((Number)call(reference,"slot")).intValue(),cosmetic,false));
     }
     public static boolean inventoryEmpty(boolean original,Object inventory) {
         if(!original)return false;
@@ -57,7 +57,10 @@ public final class AccessoryGraveCompat {
         for(var entry:trinkets) {
             if(entry.destroy())continue;
             Object saved=copy(entry.stack());
-            if(next<slots.size())slots.set(next++,saved);else overflow.add(saved);
+            if(next<slots.size()) {
+                origins.put(next,new Slot(entry.slot(),entry.index(),false,true));
+                slots.set(next++,saved);
+            } else overflow.add(saved);
         }
         PENDING.put(grave,new Capture(player,overflow,trinkets));
     }
@@ -96,7 +99,7 @@ public final class AccessoryGraveCompat {
         for(var entry:new TreeMap<>(origins(grave)).entrySet()) {
             int index=entry.getKey();if(index<0||index>=slots.size()||empty(slots.get(index)))continue;
             Slot origin=entry.getValue();JsonObject item=new JsonObject();
-            item.addProperty("graveSlot",index);item.addProperty("name",origin.name);item.addProperty("index",origin.index);item.addProperty("cosmetic",origin.cosmetic);saved.add(item);
+            item.addProperty("graveSlot",index);item.addProperty("name",origin.name);item.addProperty("index",origin.index);item.addProperty("cosmetic",origin.cosmetic);if(origin.trinket)item.addProperty("trinket",true);saved.add(item);
         }
         call(nbt,"method_10582",SLOT_TAG,saved.toString());
     }
@@ -111,7 +114,7 @@ public final class AccessoryGraveCompat {
             for(JsonElement element:entries) {
                 JsonObject item=element.getAsJsonObject();int index=item.get("graveSlot").getAsInt(),slot=item.get("index").getAsInt();String name=item.get("name").getAsString();
                 if(index<0||index>=items(grave).size()||slot<0||slot>1024||name.isEmpty()||name.length()>512||empty(items(grave).get(index)))continue;
-                loaded.put(index,new Slot(name,slot,item.get("cosmetic").getAsBoolean()));
+                loaded.put(index,new Slot(name,slot,item.get("cosmetic").getAsBoolean(),item.has("trinket")&&item.get("trinket").getAsBoolean()));
             }
             origins.putAll(loaded);
         } catch(RuntimeException ignored) {
@@ -122,12 +125,18 @@ public final class AccessoryGraveCompat {
         int restored=0;
         Object config=call(type("com.kador.graves.GravesMod"),"getConfig");
         if((boolean)field(field(config,"retrieval"),"restoreExactInventoryLayout")) {
+            // Trinkets stacks return to their original trinket slot when it is free and still valid.
+            for(var entry:new TreeMap<>(origins(grave)).entrySet()) {
+                Slot origin=entry.getValue();Object stack=items(grave).get(entry.getKey());
+                if(!origin.trinket||empty(stack)||!TrinketGraveCompat.restore(player,origin.name,origin.index,copy(stack)))continue;
+                items(grave).set(entry.getKey(),emptyStack());origins(grave).remove(entry.getKey());restored++;
+            }
             Object capability=call(type("io.wispforest.accessories.api.AccessoriesCapability"),"get",player);
             if(capability!=null) {
                 Map<?,?> containers=(Map<?,?>)call(capability,"getContainers");
                 for(var entry:new TreeMap<>(origins(grave)).entrySet()) {
                     int index=entry.getKey();Object stack=items(grave).get(index);Slot origin=entry.getValue();
-                    if(empty(stack))continue;
+                    if(origin.trinket||empty(stack))continue;
                     Object container=containers.get(origin.name);
                     if(container==null||origin.index>=((Number)call(container,"getSize")).intValue())continue;
                     Object contents=call(container,origin.cosmetic?"getCosmeticAccessories":"getAccessories");
