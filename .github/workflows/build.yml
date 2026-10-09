@@ -23,7 +23,7 @@ jobs:
         with:
           name: Fan4Compat
           path: build/libs/*.jar
-      - name: Publish versioned release
+      - name: Prepare draft versioned release
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         env:
           GH_TOKEN: ${{ github.token }}
@@ -49,6 +49,6 @@ jobs:
             exit 0
           fi
           sha256sum "$jar" > "$jar.sha256"
-          flags=()
+          flags=(--draft)
           if [[ "$version" == *-* ]]; then flags+=(--prerelease); fi
           gh release create "$tag" "$jar" "$jar.sha256" --target "$GITHUB_SHA" --title "Fan4Compat $version" --notes-file "docs/releases/$version.md" "${flags[@]}"

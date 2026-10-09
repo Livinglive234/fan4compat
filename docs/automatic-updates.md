@@ -54,8 +54,14 @@ client/server restarts when rolling out runtime compatibility changes.
 
 ## Publishing
 
-Successful main push/workflow-dispatch builds publish a release named v<version>
-with the exact clean-built jar and SHA256. Prerelease versions stay prereleases.
+Successful main push/workflow-dispatch builds create a **draft** release named
+v<version> with the exact clean-built jar and SHA256. Testers download Actions
+artifacts; players receive no update until the draft is published. The updater
+ignores both drafts and Actions artifacts, including when allowPrereleases=true.
+After gameplay testing, open the draft on GitHub Releases and publish it, or run
+`gh release edit v<version> --draft=false`. Publication is a deliberate promotion
+step; the workflow never promotes drafts automatically. Prerelease versions stay
+prereleases. Already published releases remain eligible for updates.
 Bump build.gradle and add docs/releases/<version>.md for each published version.
 Existing releases are left untouched, including when Actions is rerun. PR builds
 only upload Actions artifacts. The updater accepts exact release jar names,

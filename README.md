@@ -40,10 +40,12 @@ checks, `autoDownload=false` for notices only, or `allowPrereleases=false` for
 stable releases only. These settings take effect after restarting. Only Fan4Compat
 is updated; other mods, configs and content packs remain yours to manage.
 
-Successful versioned main-branch builds automatically publish release jars and
-checksums. Beta/alpha/RC versions are prereleases. Existing release assets are
-never overwritten; bump the version and add release notes for each new release.
-Pull requests do not publish. Actions artifacts remain available too.
+Successful versioned main-branch builds automatically prepare **draft releases**
+with jars and checksums. Test builds remain available in Actions; the updater
+ignores drafts and Actions artifacts. After testing, publish the draft on GitHub
+to make it available to players. Beta/alpha/RC versions remain prereleases.
+Existing release assets are never overwritten; bump the version and add release
+notes for each new release. Pull requests only upload Actions artifacts.
 
 See [updater details and server hosting](docs/automatic-updates.md), including
 pre-start installation for hosts that kill child processes at shutdown.

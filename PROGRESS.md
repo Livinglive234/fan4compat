@@ -6,6 +6,14 @@ Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
 
+## Tested-build promotion gate
+
+Versioned main builds now prepare draft releases with jars and SHA256 checksums.
+Actions artifacts remain available for testing. Publishing the draft after testing
+is the explicit player-update gate; the existing updater skips drafts and never
+reads Actions artifacts. Existing published beta 12 remains eligible. No runtime
+change or version bump is required.
+
 ## Beta 12: public release updater
 
 User selected automatic downloads for next restart and automatic publication of
