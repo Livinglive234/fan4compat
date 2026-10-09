@@ -29,6 +29,8 @@ public final class GravesNativeCheck implements Opcodes {
         for(String name:new String[]{"<init>","captureInventory","getStoredStack","quickRetrieveAll"})constants(grave,name,45,1);
         method(grave,"createFromPlayer","(Lnet/minecraft/class_3222;)Lcom/kador/graves/entity/GraveEntity;");
         method(grave,"syncFromInventory","(Lnet/minecraft/class_1263;)V");
+        // A HEAD injector needs CallbackInfoReturnable only if the target returns a value.
+        if(!method(grave,"quickRetrieveAll",null).desc.endsWith(")I"))throw new AssertionError("Native quickRetrieveAll no longer returns int");
         method(grave,"quickRetrieveExact","(Lnet/minecraft/class_3222;)I");
         method(grave,"openInventoryScreen","(Lnet/minecraft/class_3222;)V");
         constants(grave,"lambda$openInventoryScreen$0",5,1);

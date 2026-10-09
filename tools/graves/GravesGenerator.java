@@ -27,7 +27,7 @@ public final class GravesGenerator implements Opcodes {
         m.visitCode();m.visitVarInsn(ILOAD,1);m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,2);m.visitMethodInsn(INVOKESTATIC,HELPER,"retrieveExtra","(ILjava/lang/Object;Ljava/lang/Object;)I",false);m.visitInsn(IRETURN);m.visitMaxs(0,0);m.visitEnd();
         m=w.visitMethod(ACC_PRIVATE,"fan4$prepareWindow","(Lnet/minecraft/class_3222;L"+GenerateAddon.CI+";)V",null,null);GenerateAddon.inject(m,"openInventoryScreen","HEAD",false);
         m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,HELPER,"prepareScreen","(Ljava/lang/Object;)V",false);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();
-        m=w.visitMethod(ACC_PRIVATE,"fan4$beginQuickRetrieve","(Lnet/minecraft/class_3222;L"+GenerateAddon.CI+";)V",null,null);GenerateAddon.inject(m,"quickRetrieveAll","HEAD",false);
+        m=w.visitMethod(ACC_PRIVATE,"fan4$beginQuickRetrieve","(Lnet/minecraft/class_3222;L"+CIR+";)V",null,null);GenerateAddon.inject(m,"quickRetrieveAll","HEAD",false);
         m.visitCode();m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,1);m.visitMethodInsn(INVOKESTATIC,HELPER,"beginQuickRetrieve","(Ljava/lang/Object;Ljava/lang/Object;)V",false);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();
         m=w.visitMethod(ACC_PRIVATE,"fan4$finishQuickRetrieve","(ILnet/minecraft/class_3222;)I",null,null);returnValue(m,"quickRetrieveAll","RETURN");
         m.visitCode();m.visitVarInsn(ILOAD,1);m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,2);m.visitMethodInsn(INVOKESTATIC,HELPER,"endQuickRetrieve","(ILjava/lang/Object;Ljava/lang/Object;)I",false);m.visitInsn(IRETURN);m.visitMaxs(0,0);m.visitEnd();

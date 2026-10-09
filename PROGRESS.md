@@ -1,10 +1,22 @@
 # Fan4Compat progress
 
-Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.14**.
+Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.15**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 15: fix beta 14 startup crash
+
+Beta 14 failed at launch: the generated quick-retrieve start hook on Player
+Graves' quickRetrieveAll (returns int) declared CallbackInfo, and Mixin requires
+CallbackInfoReturnable for value-returning targets, aborting GraveEntity loading
+during registry bootstrap. The hook now takes CallbackInfoReturnable; behavior is
+unchanged. Native check also asserts quickRetrieveAll still returns int. Fixture
+tests never applied the generated mixin to the real class, which is why it passed.
+Beta 14 should not be installed; in-game slot recovery testing remains pending.
+Also includes a simplification pass (cached mod map, named rule locals, hoisted
+shader regexes, identity-keyed grave/shader caches); no intended behavior change.
 
 ## Beta 14: original accessory-slot recovery
 
