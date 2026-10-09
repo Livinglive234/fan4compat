@@ -1,10 +1,19 @@
 # Fan4Compat progress
 
-Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.15**.
+Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.16**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 16: second grave mixin startup crash
+
+Beta 15 passed the first rejected injector but Mixin then refused the six-row
+ModifyConstant handler: it was an instance method targeting Graves' static
+lambda$openInventoryScreen$0. The handler is now static; native check asserts the
+lambda is still static. Mixin reports one failing injector per class at a time, so
+further grave-mixin descriptor/modifier faults are possible until a build loads
+cleanly in game. Beta 14 and 15 should not be installed.
 
 ## Beta 15: fix beta 14 startup crash
 

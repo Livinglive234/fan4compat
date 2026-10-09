@@ -34,6 +34,8 @@ public final class GravesNativeCheck implements Opcodes {
         method(grave,"quickRetrieveExact","(Lnet/minecraft/class_3222;)I");
         method(grave,"openInventoryScreen","(Lnet/minecraft/class_3222;)V");
         constants(grave,"lambda$openInventoryScreen$0",5,1);
+        // The generated six-row handler is static because Mixin rejects instance handlers on static targets.
+        if((method(grave,"lambda$openInventoryScreen$0",null).access&ACC_STATIC)==0)throw new AssertionError("Native menu lambda is no longer static");
         boolean menuType=false;
         for(var i:method(grave,"lambda$openInventoryScreen$0",null).instructions)if(i instanceof FieldInsnNode f&&f.owner.equals("net/minecraft/class_3917")&&f.name.equals("field_18667"))menuType=true;
         if(!menuType)throw new AssertionError("Native five-row menu type changed");
