@@ -18,6 +18,10 @@ public final class CompatCalls {
         try { return Class.forName(name, false, CompatCalls.class.getClassLoader()); }
         catch (ClassNotFoundException e) { throw new IllegalStateException("Missing compatibility class " + name, e); }
     }
+    /** Classpath presence check that neither loads nor initializes the class. */
+    public static boolean present(String name) {
+        return CompatCalls.class.getClassLoader().getResource(name.replace('.', '/') + ".class") != null;
+    }
     public static Object call(Object receiver, String name, Object... args) {
         Class<?> owner = receiver instanceof Class<?> c ? c : receiver.getClass();
         Key key = new Key(name, Arrays.stream(args).map(a -> a == null ? Void.class : a.getClass()).toList());

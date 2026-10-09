@@ -2,6 +2,7 @@ package dev.fan4.compat.graves;
 
 import java.util.*;
 import com.google.gson.*;
+import dev.fan4.compat.shared.WeakIdentityMap;
 import static dev.fan4.compat.shared.CompatCalls.*;
 
 /** Captures only Accessories' already-resolved death drops, never live equipment. */
@@ -9,10 +10,10 @@ public final class AccessoryGraveCompat {
     public static final int STORAGE=128, VISIBLE=54, PLAYER_SLOTS=41;
     private record Capture(Object player,List<Object> overflow) {}
     private record Slot(String name,int index,boolean cosmetic) {}
-    private static final Map<Object,Capture> PENDING=Collections.synchronizedMap(new WeakHashMap<>());
-    private static final Map<Object,IdentityHashMap<Object,Slot>> DEATH_SLOTS=Collections.synchronizedMap(new WeakHashMap<>());
-    private static final Map<Object,Map<Integer,Slot>> GRAVE_SLOTS=Collections.synchronizedMap(new WeakHashMap<>());
-    private static final Map<Object,Integer> RESTORED=Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<Object,Capture> PENDING=Collections.synchronizedMap(new WeakIdentityMap<>());
+    private static final Map<Object,IdentityHashMap<Object,Slot>> DEATH_SLOTS=Collections.synchronizedMap(new WeakIdentityMap<>());
+    private static final Map<Object,Map<Integer,Slot>> GRAVE_SLOTS=Collections.synchronizedMap(new WeakIdentityMap<>());
+    private static final Map<Object,Integer> RESTORED=Collections.synchronizedMap(new WeakIdentityMap<>());
     private static final String SLOT_TAG="Fan4CompatAccessorySlots";
     private AccessoryGraveCompat() {}
     @SuppressWarnings("unchecked") private static List<Object> items(Object grave){return (List<Object>)field(grave,"storedItems");}

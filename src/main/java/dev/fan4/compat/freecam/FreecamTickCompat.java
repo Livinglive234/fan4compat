@@ -5,7 +5,7 @@ import static dev.fan4.compat.shared.CompatCalls.*;
 /** Let only the active client camera tick beyond full terrain chunks. */
 public final class FreecamTickCompat {
     private static final String PORTAL="qouteall.imm_ptl.core.render.context_management.PortalRendering";
-    private static final boolean HAS_PORTALS=FreecamTickCompat.class.getClassLoader().getResource(PORTAL.replace('.','/')+".class")!=null;
+    private static final boolean HAS_PORTALS=present(PORTAL);
     private FreecamTickCompat() {}
     private static boolean active(Object entity) {
         if(entity==null||!entity.getClass().getName().equals("net.xolt.freecam.util.FreeCamera"))return false;
@@ -13,8 +13,7 @@ public final class FreecamTickCompat {
         return (Boolean)call(freecam,"isEnabled")&&call(freecam,"getFreeCamera")==entity;
     }
     public static boolean allowTick(boolean loaded,Object entity) {
-        if(loaded)return true;
-        return active(entity);
+        return loaded||active(entity);
     }
     /** No full terrain exists here to cover DH's normal near-camera exclusion. */
     public static boolean unloadedCamera() {

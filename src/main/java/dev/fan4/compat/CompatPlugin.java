@@ -6,6 +6,7 @@ import com.bawnorton.mixinsquared.canceller.MixinCancellerRegistrar;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import dev.fan4.compat.shared.CompatCalls;
 import dev.fan4.compat.shared.CompatibilityRules;
 import java.util.Set;
 import net.fabricmc.loader.api.FabricLoader;
@@ -15,9 +16,8 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 public final class CompatPlugin implements IMixinConfigPlugin, MixinCanceller {
     private static boolean registered;
-    private static boolean hasSable() {
-        return CompatPlugin.class.getClassLoader().getResource("dev/ryanhcode/sable/companion/impl/DefaultSableCompanion.class") != null;
-    }
+    private static final boolean HAS_SABLE = CompatCalls.present("dev.ryanhcode.sable.companion.impl.DefaultSableCompanion");
+    private static Map<String,String> installed;
     public void onLoad(String mixinPackage) {
         Map<String,String> mods=installedMods();
         for (var entry : CompatibilityRules.VERSIONS.entrySet()) {
@@ -29,22 +29,24 @@ public final class CompatPlugin implements IMixinConfigPlugin, MixinCanceller {
         if (!registered) { MixinCancellerRegistrar.register(this); registered = true; }
     }
     public boolean shouldCancel(List<String> targets, String mixinClassName) {
-        Map<String,String> mods=installedMods();
-        return shouldCancelFor(CompatibilityRules.supported(mods,"valkyrienskies") && CompatibilityRules.supported(mods,"immersive_portals"), hasSable(), mixinClassName);
+        return shouldCancelFor(CompatibilityRules.portalsOnVs(installedMods()), HAS_SABLE, mixinClassName);
     }
     public static boolean shouldCancelFor(boolean portals, boolean sable, String name) {
         if (portals && (name.equals("org.valkyrienskies.mod.mixin.feature.fix_frustum_dead_loop.MixinFrustum")
             || name.equals("org.valkyrienskies.mod.mixin.server.world.MixinChunkMap$TrackedEntity"))) return true;
         return false;
     }
-    private static Map<String,String> installedMods() {
-        Map<String,String> mods=new HashMap<>();
-        for (var mod : FabricLoader.getInstance().getAllMods())
-            mods.put(mod.getMetadata().getId(),mod.getMetadata().getVersion().getFriendlyString());
-        return mods;
+    private static synchronized Map<String,String> installedMods() {
+        if (installed == null) {
+            Map<String,String> mods=new HashMap<>();
+            for (var mod : FabricLoader.getInstance().getAllMods())
+                mods.put(mod.getMetadata().getId(),mod.getMetadata().getVersion().getFriendlyString());
+            installed = Map.copyOf(mods);
+        }
+        return installed;
     }
     public boolean shouldApplyMixin(String target, String name) {
-        return CompatibilityRules.applies(installedMods(),hasSable(),name);
+        return CompatibilityRules.applies(installedMods(),HAS_SABLE,name);
     }
     public String getRefMapperConfig() { return null; }
     public void acceptTargets(Set<String> mine, Set<String> others) {}

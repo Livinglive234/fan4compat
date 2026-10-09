@@ -42,7 +42,7 @@ public final class PortalSoundCompat {
         AcousticBounds bounds=bounds(proxy);if(bounds==null)return miss(from,to);
         Point a=point(from),b=point(to);double[] interval=bounds.interval(a,b);if(interval==null)return miss(from,to);
         Point first=AcousticBounds.lerp(a,b,interval[0]),last=AcousticBounds.lerp(a,b,interval[1]);
-        double length=Math.hypot(Math.hypot(last.x()-first.x(),last.y()-first.y()),last.z()-first.z());
+        double length=new Point(last.x()-first.x(),last.y()-first.y(),last.z()-first.z()).length();
         int steps=Math.max(1,(int)Math.ceil(length/256));
         for(int i=0;i<steps;i++){
             Object hit=call(operation,"call",(Object)new Object[]{proxy,vec(AcousticBounds.lerp(first,last,(double)i/steps)),vec(AcousticBounds.lerp(first,last,(double)(i+1)/steps)),ignore});

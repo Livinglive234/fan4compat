@@ -11,16 +11,19 @@ public final class ShaderCompileCompat {
         ((ThreadLocal<?>)field(shader,"ip_programType")).remove();
         ((ThreadLocal<?>)field(shader,"ip_programName")).remove();
     }
+    private static final Pattern COMMENTS=Pattern.compile("(?s)/\\*.*?\\*/|//[^\\r\\n]*");
+    private static final Pattern DIRECTIVES=Pattern.compile("(?m)^\\s*#(?:version|extension)[^\\r\\n]*(?:\\r?\\n|$)");
     private static final Pattern FAR=Pattern.compile("\\bdhFarPlane\\b");
     private static final Pattern DECLARED=Pattern.compile("\\bfloat\\s+dhFarPlane\\b|(?m)^\\s*#define\\s+dhFarPlane\\b");
     /** Iris 1.8.1 already binds this live DH uniform; repair a missing declaration. */
     public static List<String> declarations(List<String> sources) {
         String joined=String.join("",sources);
-        String code=joined.replaceAll("(?s)/\\*.*?\\*/|//[^\\r\\n]*","");
+        if(!joined.contains("dhFarPlane"))return sources;
+        String code=COMMENTS.matcher(joined).replaceAll("");
         if(!FAR.matcher(code).find()||DECLARED.matcher(code).find())return sources;
         // Shader source is a sequence of fragments. Keep #version and every
         // extension directive ahead of the declaration, even across fragments.
-        Matcher directive=Pattern.compile("(?m)^\\s*#(?:version|extension)[^\\r\\n]*(?:\\r?\\n|$)").matcher(joined);
+        Matcher directive=DIRECTIVES.matcher(joined);
         int offset=0;while(directive.find())offset=directive.end();
         return List.of(joined.substring(0,offset)+"\nuniform float dhFarPlane;\n"+joined.substring(offset));
     }

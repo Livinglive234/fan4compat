@@ -1,5 +1,6 @@
 package dev.fan4.compat.freecam;
 
+import dev.fan4.compat.shared.WeakIdentityMap;
 import static dev.fan4.compat.shared.CompatCalls.*;
 import java.util.*;
 import java.util.regex.*;
@@ -7,16 +8,18 @@ import java.util.regex.*;
 /** BSL's independent DH overlap discard must follow the active camera's chunk coverage. */
 public final class FreecamShaderCompat {
     private static final String UNIFORM="fan4compatFreecamUnloaded";
-    private static final Map<Object,Integer> LOCATIONS=new WeakHashMap<>();
+    private static final Map<Object,Integer> LOCATIONS=Collections.synchronizedMap(new WeakIdentityMap<>());
     private static final Pattern CUTOFF=Pattern.compile("\\bfloat\\s+minDist\\s*=\\s*\\(\\s*dither\\s*-\\s*(?:DH_OVERDRAW|[0-9.]+)\\s*-\\s*0\\.75\\s*\\)\\s*\\*\\s*16\\.0\\s*\\+\\s*far\\s*;\\s*if\\s*\\(\\s*viewLength\\s*<=\\s*minDist\\b");
+    private static final Pattern COMMENTS=Pattern.compile("(?s)/\\*.*?\\*/|//[^\\r\\n]*");
+    private static final Pattern DIRECTIVES=Pattern.compile("(?m)^\\s*#(?:version|extension)[^\\r\\n]*(?:\\r?\\n|$)");
     private FreecamShaderCompat() {}
     public static String source(String source) {
-        if(source==null||source.contains(UNIFORM))return source;
-        String code=Pattern.compile("(?s)/\\*.*?\\*/|//[^\\r\\n]*").matcher(source).replaceAll(m->m.group().replaceAll("[^\\r\\n]"," "));
+        if(source==null||source.contains(UNIFORM)||!source.contains("minDist"))return source;
+        String code=COMMENTS.matcher(source).replaceAll(m->m.group().replaceAll("[^\\r\\n]"," "));
         Matcher match=CUTOFF.matcher(code);if(!match.find())return source;
         int end=match.end();if(match.find())return source;
         String patched=source.substring(0,end)+" && !"+UNIFORM+source.substring(end);
-        Matcher directives=Pattern.compile("(?m)^\\s*#(?:version|extension)[^\\r\\n]*(?:\\r?\\n|$)").matcher(patched);
+        Matcher directives=DIRECTIVES.matcher(patched);
         int offset=0;while(directives.find())offset=directives.end();
         return patched.substring(0,offset)+"\nuniform bool "+UNIFORM+";\n"+patched.substring(offset);
     }

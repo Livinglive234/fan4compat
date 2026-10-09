@@ -22,8 +22,7 @@ public final class DepthFormatCompat {
                 format=resolvedFormat(format,bits,componentType);
             }
         } finally {exact("org.lwjgl.opengl.GL11","glBindTexture",new String[]{"int","int"},3553,binding);}
-        boolean selected=nvidiaForFormat(original,format);
-        boolean separated=!selected;
+        boolean selected=nvidiaForFormat(original,format),separated=!selected;
         if((format==33190||format==35056||format==36012||format==36013)
             && (Boolean)field(type("qouteall.imm_ptl.core.IPCGlobal"),"useSeparatedStencilFormat")!=separated) {
             // Existing layer buffers otherwise retain their old format at the same resolution.
