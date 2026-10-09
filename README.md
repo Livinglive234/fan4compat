@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.10.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.11.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,9 +20,22 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 10 release notes](docs/releases/0.1.0-beta.10.md) ·
+[Beta 11 release notes](docs/releases/0.1.0-beta.11.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
+
+## Beta 11 remaining Jade rays and Mac recursive depth
+
+Jade ignores cached crosshair hits outside its current targeting range before
+building a ray, including hits retained across dimension changes. Its configured
+range and eye/camera perspective are respected; the global crosshair is unchanged.
+
+On Apple OpenGL, IP's recursive renderer chooses its stencil depth representation
+from the actual main depth texture format, including unsized textures' depth bits
+and component type. Layer buffers are recreated when that representation changes.
+Other GPU vendors retain IP's choice. This targets a possible format mismatch
+behind the compatibility-mode switch; the original error check and fallback stay
+active. Mac portal-in-portal gameplay confirmation remains pending.
 
 ## Beta 10 Jade rays and macOS portal copying
 
@@ -143,7 +156,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.10.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.11.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.

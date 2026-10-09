@@ -5,7 +5,10 @@ import java.nio.FloatBuffer;
 /** Test-only OpenGL substitute; never packaged in the addon. */
 public final class GL11 {
     public static int binding=77,allocations,deletions,images;
-    public static boolean fail;
+    public static boolean fail,queryFail;
+    public static String vendor="Apple";public static int depthFormat=33190,depthBits=24,depthType=35863,queries;
+    public static String glGetString(int key){if(key!=7936)throw new AssertionError();return vendor;}
+    public static int glGetTexLevelParameteri(int target,int level,int key){if(target!=3553||level!=0||(key!=4099&&key!=34890&&key!=35862))throw new AssertionError();queries++;if(queryFail)throw new IllegalStateException("query failed");return key==4099?depthFormat:key==34890?depthBits:depthType;}
     public static int glGetInteger(int parameter){if(parameter!=32873)throw new AssertionError();return binding;}
     public static int glGenTextures(){return 100+ ++allocations;}
     public static void glBindTexture(int target,int id){if(target!=3553)throw new AssertionError();binding=id;}

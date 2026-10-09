@@ -43,3 +43,8 @@ Jade targeting: `jade/ShipRaycastCompat` and generated `JadeShipRaycastMixin`
 normalize ray vectors without changing ship block addresses (`JadeRaycastTest`).
 Mac portal copying: `iris/FramebufferCopyCompat` and `IrisFramebufferCopyMixin`
 provide a capability-gated GL3 fallback (`FramebufferCopyTest`).
+
+Beta 11 extends `jade/ShipRaycastCompat` with scoped cached-hit range validation.
+`iris/DepthFormatCompat` and generated `IrisDepthFormatMixin` select matching
+Apple main/stencil depth formats; `DepthFormatTest` covers representation changes
+and resource/binding restoration. The native renderer error fallback is retained.

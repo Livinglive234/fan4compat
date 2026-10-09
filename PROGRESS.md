@@ -1,10 +1,34 @@
 # Fan4Compat progress
 
-Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.10**.
+Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.11**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 11: post-teleport Jade hits and Apple depth representation
+
+The beta 10 Mac log continues without the old native abort, but still switches
+from IrisPortalRenderer to compatibility mode. A remaining Jade ray error occurs
+immediately after entering the TARDIS dimension. Jade now treats cached crosshair
+hits beyond its current range as absent, preserving its eye/camera perspective,
+configured long reach and third-person offset. Only Jade's view of the hit changes;
+normal targeting, global crosshair state and ship block addresses are preserved.
+
+IP chooses float32 depth/stencil for non-Nvidia GPUs before blitting main depth.
+Apple may allocate a different main depth representation than an AMD Windows
+driver. Candidate correction queries Apple's actual texture format (and depth
+size/type when unsized), selects matching 24-bit or float32 stencil depth, and
+recreates owned layer buffers on representation changes. If native prepare will
+replace the layer array itself, retain its old buffers for native destruction.
+Non-Apple and unknown representations keep IP's choice. Retain the error check,
+compatibility fallback and beta 10's capability-gated copy fallback. This does not
+claim the driver-format mismatch is confirmed or nested portals are fixed in-game.
+
+Clean build, native selectors/field reads and regressions pass. Tests cover stale
+dimension hits, eye mode with a stale render camera, third-person/long reach,
+Apple sized/unsized depth formats, other GPU vendors, resource recreation and
+binding restoration. Actual Mac nested rendering and Jade gameplay retest pending.
 
 ## Beta 10: Jade ship ray vectors and Mac GL capability fallback
 
