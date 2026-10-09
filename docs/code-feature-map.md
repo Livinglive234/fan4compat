@@ -38,3 +38,8 @@ checks structural reachability; it does not replace in-game regression testing.
 Freecam BSL support: `freecam/FreecamShaderCompat`, generated `FreecamBslShaderMixin`
 and `FreecamBslUniformMixin` target the BSL DH overlap discard through Iris.
 `FreecamShaderTest` covers source selection and per-draw uniform restoration.
+
+Jade targeting: `jade/ShipRaycastCompat` and generated `JadeShipRaycastMixin`
+normalize ray vectors without changing ship block addresses (`JadeRaycastTest`).
+Mac portal copying: `iris/FramebufferCopyCompat` and `IrisFramebufferCopyMixin`
+provide a capability-gated GL3 fallback (`FramebufferCopyTest`).

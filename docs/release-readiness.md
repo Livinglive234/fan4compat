@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.9**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.10**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
@@ -10,6 +10,11 @@ for its active camera in unloaded terrain. The pack owner reports beta 8 failed
 with BSL only; beta 9 targets BSL 10.1.5 terrain/water distance discard. In-game
 confirmation remains pending. Test approaching distant LODs, backing
 away, returning to loaded terrain, disabling Freecam and normal player movement.
+
+Beta 10 adds Jade/VS ray-vector normalization and an IP/Iris framebuffer copy
+fallback for macOS OpenGL 4.1. Verify Jade targeting on moving/rotating ships,
+ordinary terrain and fluid targets; verify BSL portal crossings and visual depth/
+color on the Mac. Native/API and fixture tests pass; gameplay/GPU checks pending.
 
 A beta 1 dedicated-server log exposed a client-only classloading crash during
 TARDIS startup and shutdown saves. Beta 2 has a reproducing classloader regression
@@ -38,7 +43,7 @@ changes. Log warning count alone is not a release criterion.
 
 Beta 1 freezes the current supported feature set. Exact supported versions,
 installation instructions and known limitations remain in the README and
-[release notes](releases/0.1.0-beta.9.md).
+[release notes](releases/0.1.0-beta.10.md).
 
 ## Move from beta to stable
 

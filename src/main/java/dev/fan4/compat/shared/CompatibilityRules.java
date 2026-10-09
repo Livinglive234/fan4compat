@@ -44,7 +44,7 @@ public final class CompatibilityRules {
         if(path.startsWith("distanthorizons."))return supported(mods,"distanthorizons")&&(!path.startsWith("distanthorizons.client.")||ip);
         if(path.startsWith("pointblank."))return supported(mods,"pointblank");
         if(path.startsWith("elytratrails."))return supported(mods,"elytratrails");
-        if(path.startsWith("jade."))return vs&&supported(mods,"jade")&&supported(mods,"vs_eureka");
+        if(path.startsWith("jade."))return vs&&supported(mods,"jade")&&(simple.equals("JadeShipRaycastMixin")||supported(mods,"vs_eureka"));
         if(simple.equals("EurekaPortalWarningMixin")||simple.equals("EurekaPortalWarningInfoMixin"))return ip&&supported(mods,"vs_eureka");
         if(simple.equals("EurekaDebugMixin"))return supported(mods,"vs_eureka");
         if(simple.equals("ShipNetherPortalCreationMixin"))return vs;

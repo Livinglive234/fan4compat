@@ -35,6 +35,8 @@ public class GenerateAddon implements Opcodes {
         PointBlankGenerator.generate();
         PortalSoundGenerator.generate();
         FreecamGenerator.generate();
+        JadeGenerator.generate();
+        FramebufferCopyGenerator.generate();
         DistantHorizonsGenerator.dhDimensionMixin();
         DistantHorizonsGenerator.portalRenderMixins();
         ImmersivePortalsGenerator.chunkCacheDuckMixin();

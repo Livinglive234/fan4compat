@@ -1,10 +1,34 @@
 # Fan4Compat progress
 
-Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.9**.
+Updated: 2026-10-08 (America/Chicago). Current build: **0.1.0-beta.10**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 10: Jade ship ray vectors and Mac GL capability fallback
+
+The client's repeated IP “Raycast too far” stacks originate in Jade rayTrace
+via VS clipIncludeShipsImpl. Jade uses the raw hit vector to build a ray and
+compare entity/block distances; shipyard hits must be transformed to world
+space first. Normalize hit/eye/camera vectors inside rayTrace only. Preserve
+hit objects, block positions, VS ship tracing and Jade fluid/entity selection.
+Gate on supported Jade/VS, independently of Eureka or IP.
+
+Mac beta 9 log reports Apple M2 Pro OpenGL 4.1 and a JVM native abort in IP's
+GL43C.glCopyImageSubData call. Both newCopyDepthStencil and the following copyColor
+call that unsupported function. Use isolated temporary framebuffer blits only
+when the actual copy-image function pointer is unavailable. Match depth-only
+versus packed depth/stencil metadata, copy color attachment zero, preserve native
+texture IDs and extents, disable scissor for full copies, then restore separate
+read/draw bindings and scissor and delete temporary FBOs, including on failure.
+Supported copy-image contexts retain the original path.
+
+Clean build, native Jade/VS/IP/Minecraft selectors and state API checks pass.
+Regressions cover transformed ship vectors and original-address preservation,
+optional gates, native-path bypass, depth/color masks, attachments, bindings,
+scissor and resource cleanup. Tests use fixtures; actual Mac GPU and Jade gameplay
+confirmation remain pending. No unrelated warning suppression or chunk changes.
 
 ## Beta 9: BSL Freecam distance discard
 

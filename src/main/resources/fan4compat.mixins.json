@@ -69,6 +69,8 @@
     "doctorwho.client.TardisShipWaypointQolMixin",
     "doctorwho.client.TardisShipWaypointStatusMixin",
     "jade.client.JadeHelmMixin",
+    "jade.client.JadeShipRaycastMixin",
+    "iris.client.IrisFramebufferCopyMixin",
     "doctorwho.client.TardisShipWaypointCreationQolMixin",
     "iris.client.ShaderCompileScopeMixin",
     "accessories.client.PortalSyncContainerDataMixin",

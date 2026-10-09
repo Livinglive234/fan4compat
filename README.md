@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.9.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.10.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,9 +20,21 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 9 release notes](docs/releases/0.1.0-beta.9.md) ·
+[Beta 10 release notes](docs/releases/0.1.0-beta.10.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
+
+## Beta 10 Jade rays and macOS portal copying
+
+Jade normalizes ship hit, eye and camera vectors into world space before its
+ray calculations, preserving shipyard block addresses for overlay lookup.
+Requires supported Jade and VS; Eureka and IP are optional for this fix.
+
+With supported Iris/IP, contexts lacking `glCopyImageSubData` use OpenGL 3
+framebuffer blits for the portal renderer's depth and color copies. This targets
+the native abort on macOS OpenGL 4.1. The existing image-copy path stays active
+on GPUs supporting it. Temporary framebuffer objects and scissor/binding state
+are cleaned up after each fallback copy. Mac visual confirmation remains pending.
 
 ## Beta 9 Freecam with BSL
 
@@ -131,7 +143,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.9.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.10.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
