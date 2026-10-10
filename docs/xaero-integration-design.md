@@ -1,8 +1,9 @@
 # Xaero integration: design proposal
 
 **Status: proposal. Nothing here is implemented, gated or shipped.** Written
-2026-10-10 against the pack's Xaero versions. Two features are proposed for
-dedicated servers; each needs the pack owner's approval before any code.
+2026-10-10 against the pack's Xaero versions. Three features are proposed
+(A and B for dedicated servers, C for the TARDIS); each needs the pack owner's
+approval before any code.
 
 | Mod | Pinned version | Mod ID |
 | --- | --- | --- |
@@ -19,6 +20,7 @@ integrations, the hooks would be gated on these exact metadata versions in
 - [What was verified in Xaero](#what-was-verified-in-xaero)
 - [Feature A: server-stored waypoints](#feature-a-server-stored-waypoints)
 - [Feature B: shared explored map](#feature-b-shared-explored-map)
+- [Feature C: exterior dimension on the map inside a TARDIS](#feature-c-exterior-dimension-on-the-map-inside-a-tardis)
 - [Shared infrastructure](#shared-infrastructure)
 - [Configuration](#configuration)
 - [Risks and pack-specific concerns](#risks-and-pack-specific-concerns)
@@ -144,6 +146,61 @@ reach several MB, hence throttling.
 - A shared map reveals terrain players have not explored personally. Provide
   config switches (see below); consider defaulting to off.
 
+## Feature C: exterior dimension on the map inside a TARDIS
+
+Goal (as understood; confirm with the pack owner): while a player is inside the
+TARDIS, the map shows only the dimension (and position) the TARDIS exterior is
+currently in, not the interior dimension.
+
+### What Xaero already provides (World Map 1.46.0)
+
+- `MapWorld` tracks `currentDimensionId`, `futureDimensionId` and a
+  `customDimensionId`. `isUsingCustomDimension()` is true when the displayed
+  dimension differs from the player's actual level, so showing another dimension
+  is an existing concept (used for cave-mode logic and the dimension switcher).
+- `MapProcessor.ignoreWorld(level)` skips levels whose dimension path matches a
+  hard-coded list (currently one entry). A gated hook could add DWM TARDIS
+  dimensions. Whether Xaero currently creates a separate map for each TARDIS
+  dimension is not verified.
+
+### Mechanism
+
+1. **Server.** A small packet tells the client, while it is in a TARDIS dimension,
+   the exterior's current dimension and world position (and whether the TARDIS is
+   landed or in flight). Fan4Compat's `TardisShipCompat` already reads the current
+   exterior dimension/position and, for ships, the transformed world position.
+   The server must apply DWM's own access rules before revealing the location to
+   a player, and send nothing during flight.
+2. **Client, World Map.** Set the displayed dimension to the exterior's, center the
+   view and draw the player marker at the exterior position, then restore the
+   normal behavior on leaving. Inside the TARDIS dimension, never write
+   interior chunks into the exterior dimension's map.
+3. **Interior dimensions are not mapped** (via `ignoreWorld` or an equivalent hook).
+4. **Moving ships.** The exterior position follows the ship, so updates must be
+   sent as it moves, throttled.
+
+### Limits and risks
+
+- **Map pollution is the critical risk.** If the map writer records interior blocks
+  at interior coordinates into the overworld's map, the saved map is damaged.
+  Whether Xaero's writer already refuses to write in a custom dimension is not
+  verified and must be confirmed before anything else.
+- **Player position.** Xaero reads the player's real coordinates in many places
+  (centering, marker, region loading). Overriding all of them is the main hook
+  risk.
+- **Minimap.** It draws from chunks around the player and keys waypoints by the
+  player's actual dimension. The exterior's chunks are usually not loaded on the
+  client, so a faithful minimap is much harder. Start with the World Map and, at
+  most, exterior-dimension waypoints and coordinates on the minimap.
+- **Flight and no exterior.** While in flight there is no exterior dimension. Show
+  the last known exterior or nothing; do not invent a position.
+- **Which rooms.** The TARDIS interior dimension contains more than the console
+  room; this design triggers on being in the TARDIS dimension. Narrowing to the
+  console room needs DWM room data and has not been looked at.
+- **Interaction with Features A and B.** B already excludes TARDIS dimensions from
+  capture. C would let their maps show the exterior instead. Waypoints stay keyed by the
+  real dimension unless a later decision remaps them.
+
 ## Shared infrastructure
 
 - One Fan4Compat network channel registered on server and client, with a version
@@ -214,9 +271,13 @@ Follow the repository's existing pattern: executable regression mains in
    autosave timing, to choose the right upload trigger.
 5. **Merge policy.** Confirm last-writer-wins is acceptable to players who use two
    PCs concurrently.
-6. **Scope.** These are new features, not repairs of an incompatibility between
+6. **Feature C spikes.** Confirm the writer does not write in a custom dimension,
+   list every place Xaero reads the player's position, check how DWM exposes the
+   TARDIS dimension and exterior state on the client, and see whether Xaero
+   already makes per-TARDIS map folders.
+7. **Scope.** These are new features, not repairs of an incompatibility between
    two mods. The pack owner decides whether they belong in Fan4Compat or in a
    separate addon.
 
-Recommended order: spike items 1-4 (read-only), then Feature A (smaller, mostly
-file syncing), then Feature B.
+Recommended order: spike items 1-4 and 6 (read-only), then Feature A (smaller,
+mostly file syncing), then Feature C or B depending on priority.
