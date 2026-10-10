@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.12.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.20.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 19 release notes](docs/releases/0.1.0-beta.19.md) ·
+[Beta 20 release notes](docs/releases/0.1.0-beta.20.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
 
@@ -324,6 +324,19 @@ without changing ammo data or fabricating a fire mode. Alpha 40 corrects the
 client-tick draw call to use Point Blank’s operable gun context, including an
 offhand gun while a TARDIS key is in the main hand. Gun type and saved weapon UUID
 must match the selected state; other draws retain their original stack.
+
+Beta 20 temporarily enables read-only graphics diagnostics for Point Blank 2.2.0.
+Reports tagged `[Fan4Compat RenderDiag]` compare actual OpenGL state and Minecraft's
+cached state around gun preparation, gun drawing, scope-world rendering and world
+rendering. They include shader status, framebuffer attachments, stencil/depth
+settings and color masks. Differences are evidence to investigate, not automatic
+proof of a rendering fault. No graphics state is repaired or changed.
+
+To reproduce the missing-terrain issue, restart with shaders disabled (or Iris
+removed), draw the XM3, then switch away and share `latest.log`. Sampling is limited
+to once per second per stage; duplicate reports are suppressed and each launch is
+capped at 96 reports. Add JVM argument `-Dfan4compat.renderDiagnostics=false` to
+skip these temporary diagnostic hooks on the next launch while retaining gun fixes.
 
 ## Eureka debug option
 

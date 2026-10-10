@@ -33,6 +33,7 @@ public class GenerateAddon implements Opcodes {
         EurekaGenerator.warningMixin();
         EurekaGenerator.severeWarningMixin();
         PointBlankGenerator.generate();
+        RenderDiagnosticsGenerator.generate();
         PortalSoundGenerator.generate();
         FreecamGenerator.generate();
         JadeGenerator.generate();

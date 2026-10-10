@@ -1,10 +1,29 @@
 # Fan4Compat progress
 
-Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.19**.
+Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.20**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 20: Point Blank missing-terrain diagnostics
+
+Solid terrain can disappear with shaders disabled or Iris removed, sometimes when
+drawing the XM3, and remains missing after switching away. A quiet log does not
+rule out graphics-state corruption. Temporary, default-enabled observers capture
+gun preparation/drawing, scope-world rendering and world rendering, comparing
+actual GL depth/stencil/color state with Minecraft's cached values. Framebuffer,
+attachment, shader status and viewport snapshots are included. These observers
+do not change graphics state or consume the GL error queue; they preserve original
+render calls and exceptions. Reports are sampled once per second per stage,
+deduplicated and capped at 96 per launch. Snapshot failure disables diagnostics.
+JVM flag `-Dfan4compat.renderDiagnostics=false` skips their mixins entirely.
+
+Clean build, regression tests, packaging and bytecode verification pass. Native
+checks against Point Blank 2.2.0 and Minecraft 1.21.1 verify all four target methods,
+wrapper descriptors/modifiers and cached-state fields. Actual GPU reproduction and
+root-cause confirmation remain pending; this build observes rather than repairs
+the reported rendering issue. Actions artifacts and a draft release are for testing.
 
 ## Beta 19: grave GUI VerifyError
 

@@ -49,6 +49,10 @@
     "eureka.common.EurekaPortalWarningInfoMixin"
   ],
   "client": [
+    "pointblank.client.GunRenderDiagnosticMixin",
+    "pointblank.client.GunPrepareDiagnosticMixin",
+    "pointblank.client.GunAuxDiagnosticMixin",
+    "pointblank.client.GunWorldDiagnosticMixin",
     "freecam.client.FreecamUnloadedTickMixin",
     "freecam.client.FreecamLodNearClipMixin",
     "freecam.client.FreecamLodClipUniformMixin",

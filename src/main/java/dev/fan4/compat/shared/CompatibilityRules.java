@@ -50,7 +50,7 @@ public final class CompatibilityRules {
         if(path.startsWith("soundphysics."))return vs&&spr;
         if(path.startsWith("bclib."))return bclib;
         if(path.startsWith("distanthorizons."))return dh&&(!path.startsWith("distanthorizons.client.")||ip);
-        if(path.startsWith("pointblank."))return supported(mods,"pointblank");
+        if(path.startsWith("pointblank."))return supported(mods,"pointblank")&&(!simple.endsWith("DiagnosticMixin")||Boolean.parseBoolean(System.getProperty("fan4compat.renderDiagnostics","true")));
         if(path.startsWith("elytratrails."))return supported(mods,"elytratrails");
         if(path.startsWith("jade."))return vs&&supported(mods,"jade")&&(simple.equals("JadeShipRaycastMixin")||eureka);
         if(simple.equals("EurekaPortalWarningMixin")||simple.equals("EurekaPortalWarningInfoMixin"))return ip&&eureka;

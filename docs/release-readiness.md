@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.14**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.20**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
@@ -31,6 +31,13 @@ A beta 1 dedicated-server log exposed a client-only classloading crash during
 TARDIS startup and shutdown saves. Beta 2 has a reproducing classloader regression
 and passes the clean build. Repeat dedicated-server startup, portal/waypoint use,
 world save and restart in the full pack before treating this patch as verified.
+
+Beta 20 adds temporary read-only Point Blank render diagnostics for disappearing
+solid terrain with shaders off. Clean build, bytecode, fixture and native-binding
+checks pass. GPU reproduction is pending: restart, disable shaders (or remove
+Iris), draw the XM3, switch away and capture `latest.log`. This is an investigation
+build, not a confirmed fix. Reports use `[Fan4Compat RenderDiag]`, are sampled and
+capped, and can be disabled with `-Dfan4compat.renderDiagnostics=false`.
 
 ## Confirmed release checks
 

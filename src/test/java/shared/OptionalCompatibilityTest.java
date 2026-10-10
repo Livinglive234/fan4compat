@@ -29,6 +29,7 @@ public final class OptionalCompatibilityTest {
         check(applies(Map.of("immersive_portals","6.0.6","iris","1.8.1+mc1.21.1"),"iris.client.IrisFramebufferCopyMixin"),"GL fallback needs no DH or VS");
         Map<String,String> pair=Map.of("pointblank","2.2.0","dwm","1.0.38.4");
         Set<String> expected=new HashSet<>();expected.add("pointblank.client.StaleGunAnimationMixin");expected.add("pointblank.client.StaleGunDrawMixin");expected.add("pointblank.client.OffhandGunDrawMixin");
+        for(String diagnostic:List.of("GunRender","GunPrepare","GunAux","GunWorld"))expected.add("pointblank.client."+diagnostic+"DiagnosticMixin");
         for(int i=0;i<5;i++)expected.add("doctorwho.client.TardisShipModelCache"+i+"Mixin");
         for(String name:mixins)check(applies(pair,name)==expected.contains(name),"Point Blank/TARDIS setup: "+name);
         for(String id:CompatibilityRules.VERSIONS.keySet()){

@@ -12,7 +12,7 @@ regression fixtures live under tools and are not shipped as gameplay classes.
 | DH / Iris | Dynamic dimensions, portal render suppression and shader depth handling |
 | Eureka / Jade | Creative name, supported warning filtering, quiet logging and helm HUD behavior |
 | Aether / Player Graves | Resolved accessory death drops, persistent grave storage, GUI and original functional/cosmetic slot recovery |
-| Point Blank | Offhand and held-item compatibility |
+| Point Blank | Offhand and held-item compatibility; temporary graphics-state diagnostics |
 | Other integrations | Accessories packets, Sound Physics portal behavior, BCLib codecs/recipes, Sable dimensions and Elytra Contrails fallback |
 
 ## Why doorway loading remains
@@ -70,3 +70,10 @@ Beta 14 adds `AccessoryGraveDeathSlotsMixin` to record native resolved-drop orig
 keeps them attached through GUI paging and restores through native Accessories
 menu validation/setters before normal quick recovery. `AccessoryGraveSlotsTest`
 covers persisted destinations, slot conflicts and count/item conservation.
+
+Point Blank diagnostics: `pointblank/RenderDiagnostics` and four generated
+`*DiagnosticMixin` wrappers observe graphics state around native render calls.
+`RenderDiagnosticsTest` checks sampling, cache comparison and failure isolation;
+`pointBlankRenderNativeCheck` verifies exact target and cached-field bindings using
+the real jars. These temporary observers exist for the missing-solid-terrain
+investigation and can be disabled with `-Dfan4compat.renderDiagnostics=false`.
