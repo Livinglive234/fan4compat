@@ -51,6 +51,12 @@ public final class OptionalCompatibilityTest {
         check(applies(Map.of("freecam","1.3.0+mc1.21","distanthorizons","3.3.3","iris","1.8.1+mc1.21.1"),"freecam.client.FreecamBslShaderMixin"),"BSL source fix needs no IP/VS");
         check(applies(Map.of("valkyrienskies",CompatibilityRules.VERSIONS.get("valkyrienskies"),"jade","15.10.6+fabric"),"jade.client.JadeShipRaycastMixin"),"Jade ray fix needs no Eureka or IP");
         check(applies(Map.of("immersive_portals","6.0.6","iris","1.8.1+mc1.21.1"),"iris.client.IrisFramebufferCopyMixin"),"GL fallback needs no DH or VS");
+        Map<String,String> portalIris=Map.of("immersive_portals","6.0.6","iris","1.8.1+mc1.21.1");
+        check(applies(portalIris,"iris.client.IrisPortalDepthDiagnosticMixin"),"depth diagnostics enabled without VS/DH/Point Blank");
+        System.setProperty("fan4compat.portalDepthDiagnostics","false");
+        check(!applies(portalIris,"iris.client.IrisPortalDepthDiagnosticMixin"),"depth diagnostics can be disabled");
+        check(applies(portalIris,"iris.client.IrisDepthFormatMixin"),"disabling diagnostics preserves depth fix");
+        System.clearProperty("fan4compat.portalDepthDiagnostics");
         Map<String,String> pair=Map.of("pointblank","2.2.0","dwm","1.0.38.4");
         Set<String> expected=new HashSet<>();expected.add("pointblank.client.StaleGunAnimationMixin");expected.add("pointblank.client.StaleGunDrawMixin");expected.add("pointblank.client.OffhandGunDrawMixin");
         expected.add("pointblank.client.GunStencilMixin");expected.add("pointblank.client.GunStencilClearMixin");

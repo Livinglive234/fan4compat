@@ -84,3 +84,9 @@ scope/portal setters on Minecraft's cache and preserve stencil ownership during
 portal views. `StencilCompatTest` reproduces the cache bypass and executes the
 redirect handlers with a recording backend; the native check pins their actual
 invocation targets. The interface mixin targets Point Blank's static scope lambdas.
+
+Portal depth-copy investigation: `iris/PortalDepthDiagnostics` and generated
+`IrisPortalDepthDiagnosticMixin` observe IP's existing GL error result, preserving
+its compatibility fallback. `PortalDepthDiagnosticsTest` covers bounded reports
+and exception isolation; `portalDepthDiagnosticsNativeCheck` verifies the real IP
+copy/error/fallback path and generated selector.

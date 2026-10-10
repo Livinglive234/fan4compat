@@ -53,7 +53,7 @@ public final class CompatibilityRules {
         }
         if(path.startsWith("accessories."))return ip&&accessories;
         if(simple.equals("DhPortalShaderMixin"))return ip&&iris&&dh;
-        if(path.startsWith("iris."))return ip&&iris;
+        if(path.startsWith("iris."))return ip&&iris&&(!simple.equals("IrisPortalDepthDiagnosticMixin")||Boolean.parseBoolean(System.getProperty("fan4compat.portalDepthDiagnostics","true")));
         if(simple.equals("PortalSoundSnapshotMixin"))return ip&&spr;
         if(simple.equals("PortalSoundRayMixin"))return ip&&spr&&!mods.containsKey("valkyrienskies");
         if(path.startsWith("soundphysics."))return vs&&spr;

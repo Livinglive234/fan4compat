@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.23.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.24.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 22 release notes](docs/releases/0.1.0-beta.23.md) ·
+[Beta 24 release notes](docs/releases/0.1.0-beta.24.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
@@ -202,7 +202,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.23.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.24.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -498,3 +498,14 @@ Update this README and `PROGRESS.md` with each compatibility change, including
 supported versions, user-visible behavior and outstanding runtime validation.
 Keep completed implementations separate from open goals and preserve historical
 results as history. Produce release artifacts with `./gradlew clean build`.
+
+## Portal depth-copy diagnostics (beta 24)
+
+To investigate Mac shader-on nested portals falling back to compatibility mode,
+beta 24 logs `[Fan4Compat PortalDepthDiag]` once for a successful depth copy and
+up to eight failed copies per launch. It records the original GL error and both
+framebuffers' depth/stencil representations without changing the native fallback
+or consuming extra errors. Reproduce nested portal rendering with BSL enabled
+and share `latest.log`. Disable this observer with
+`-Dfan4compat.portalDepthDiagnostics=false`; existing fixes stay enabled.
+Point Blank render diagnostics remain off by default as of beta 23.

@@ -1,15 +1,14 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.23**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.24**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
 Both client and server should run this build for Eureka server notices.
 Beta 7 adds the Freecam tick-boundary fix; beta 8 adjusts nearby LOD clipping only
 for its active camera in unloaded terrain. The pack owner reports beta 8 failed
-with BSL only; beta 9 targets BSL 10.1.5 terrain/water distance discard. In-game
-confirmation remains pending. Test approaching distant LODs, backing
-away, returning to loaded terrain, disabling Freecam and normal player movement.
+with BSL only; beta 9 targets BSL 10.1.5 terrain/water distance discard. The pack owner confirmed Freecam with BSL working on 2026-10-10.
+The individual edge-case checklist below remains useful after future changes.
 
 Beta 10 adds Jade/VS ray-vector normalization and an IP/Iris framebuffer copy
 fallback for macOS OpenGL 4.1. Verify Jade targeting on moving/rotating ships,
@@ -44,9 +43,15 @@ callbacks and IP's normal stencil renderer now share Minecraft's cache; scope
 callbacks preserve portal-owned stencil state during nested views. Clean build,
 fixture execution and native binding checks pass. Test solid terrain after drawing
 and switching away from the XM3, ordinary/nested portals, scope rendering and
-shaders off/on. GPU confirmation is pending; diagnostics remain enabled for testing.
+shaders off/on. The pack owner confirmed Point Blank fixed on 2026-10-10;
+this does not separately confirm every nested-portal case. Diagnostics remain available.
 
 ## Confirmed release checks
+
+On 2026-10-10 the pack owner also confirmed Point Blank rendering, Freecam with
+BSL, and Graves working. Earlier pending notes below describe historical release
+checklists; this broad confirmation does not claim each unusual recovery case,
+save/restart permutation or Mac nested-portal path was individually exercised.
 
 On 2026-10-07 the pack owner confirmed the core workflows in singleplayer.
 On 2026-10-08 the pack owner confirmed all remaining checks proposed for beta:
@@ -128,3 +133,12 @@ grave and the slots are empty after respawn; recover with quick retrieval and th
 carrying only trinkets (empty inventory) and confirm a grave is created. Equip a vanishing-curse
 trinket and confirm it is destroyed and not graved. Run gravesNativeCheck against the supplied
 jars (-PgravesJar, -PgravesAccessoriesJar, -PgravesMinecraftJar, -PtrinketsJar) before publishing.
+
+## Beta 24 Mac diagnostic check
+
+With BSL enabled, reproduce a portal visible through another portal. Capture
+`[Fan4Compat PortalDepthDiag]` and IP's compatibility-mode chat message in
+`latest.log`. A successful initial copy proves the hook ran but does not prove
+every later nested layer works. A failure reports the original GL error and the
+source/destination depth representations. The observer preserves native fallback;
+it does not itself enable nested rendering or fix a failed copy.

@@ -84,6 +84,7 @@
     "jade.client.JadeShipRaycastMixin",
     "iris.client.IrisFramebufferCopyMixin",
     "iris.client.IrisDepthFormatMixin",
+    "iris.client.IrisPortalDepthDiagnosticMixin",
     "doctorwho.client.TardisShipWaypointCreationQolMixin",
     "iris.client.ShaderCompileScopeMixin",
     "accessories.client.PortalSyncContainerDataMixin",

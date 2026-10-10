@@ -931,3 +931,20 @@ not proof a new patch is required in the current build.
 When reporting a result, include exact versions, client/server arrangement,
 reproduction steps and whether shaders/portal views were involved. Keep confirmed
 observations distinct from hypotheses so the next contributor can act on evidence.
+
+### Beta 24 portal depth-copy observer
+
+`iris/PortalDepthDiagnostics` and generated `IrisPortalDepthDiagnosticMixin`
+observe the result of IP's existing `glGetError()` call after the depth blit in
+`IrisPortalRenderer.doMainRenderings`. The same result returns to IP, including
+errors that trigger compatibility mode. There are no additional error-queue reads
+or GL binding changes. Read-only attachment queries report object identities,
+depth/stencil bit sizes and component types for the still-bound source and
+destination framebuffers. One success and at most eight failures are logged per
+launch, using `[Fan4Compat PortalDepthDiag]`; snapshot/logging failures disable the
+observer and preserve rendering. The startup flag
+`-Dfan4compat.portalDepthDiagnostics=false` excludes this mixin while retaining
+other fixes. It needs supported IP and Iris, without VS, DH or Point Blank.
+The Mac's live failure remains to be reproduced; this build adds evidence, not a
+new nested-portal repair. Point Blank, Freecam/BSL and Graves have been confirmed
+working by the pack owner on 2026-10-10; earlier pending notes are historical.

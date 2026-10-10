@@ -1,16 +1,42 @@
 # Fan4Compat progress
 
-Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.23**.
+Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.24**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 24: portal depth-copy diagnostics
+
+Adds default-enabled `[Fan4Compat PortalDepthDiag]` observation of the existing
+IrisPortalRenderer depth-copy error result. Logs one successful copy and at most
+eight failures per launch: GL error name/value, Apple/GPU/OpenGL identity, current
+portal layer/max layers, render mode before fallback, separated-stencil choice,
+main dimensions, source/destination framebuffer completeness, depth/stencil
+attachment identities, component types and bit sizes. Attachment queries change
+no GL bindings and no extra glGetError calls are made. Original error values and
+native compatibility-mode fallback remain intact; snapshot failures disable the
+observer without interrupting rendering. Disable with
+`-Dfan4compat.portalDepthDiagnostics=false`. Requires supported IP/Iris only.
+Beta 23's opt-in Point Blank diagnostics and all existing rendering fixes remain.
+Bounded reporting/error preservation, optional gates and real IP selectors are
+checked; actual Mac reproduction remains pending.
 
 ## Beta 23: diagnostics off by default
 
 The beta 20 Point Blank render diagnostics are no longer installed unless
 `-Dfan4compat.renderDiagnostics=true` is set. The beta 21 stencil fix is unchanged.
 Removed the draft-release wording from release notes and status entries.
+
+## Latest pack-owner gameplay confirmation
+
+On 2026-10-10 the pack owner confirmed Point Blank rendering, Freecam with BSL,
+and Graves are working. This supersedes their earlier pending gameplay statuses;
+it does not imply every listed edge case or Mac nested-portal test was exercised.
+The supplied Mac log runs beta 21 with DWM 1.0.39, so it does not test beta 22's
+expanded DWM gate. Apple OpenGL extension and unused shader-attribute warnings
+appear during successful BSL pipeline creation; separate DWM model-cache,
+portal raycast and chunk-loading messages remain follow-up candidates.
 
 ## Beta 22: Doctor Who Mod minimum-version gate
 
