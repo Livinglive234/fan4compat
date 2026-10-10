@@ -1,10 +1,32 @@
 # Fan4Compat progress
 
-Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.20**.
+Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.21**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 21: shared stencil cache and portal ownership
+
+The beta 20 log captures actual/cached stencil function/reference differences and
+an actual write mask of 255 with cached mask 0. Not every mismatch is harmful:
+255 and -1 can represent the same effective mask on an eight-bit stencil buffer.
+Native inspection confirms both Point Blank scope callbacks and IP's normal
+stencil renderer mix raw GL calls with Minecraft's cached setters. Redirects now
+route their stencil function/mask/operation changes through the same cache. Point
+Blank's scope stencil setup/cleanup and pre-render clears skip stencil changes
+while IP renders a nested portal view, preserving IP's mask contents, comparison
+and test state. Non-stencil clear bits remain intact and ordinary scope stencil
+behavior remains enabled. The IP cache bridge requires supported Point Blank and
+IP, without requiring VS, DH or Iris. Unsupported/absent IP does not enter the guard.
+
+Clean build, regressions, packaging and bytecode checks pass. The fixture reproduces
+a skipped mask reset, executes all generated redirect handlers with a recording
+backend, and checks portal ownership and normal scope resumption. Native checks
+verify every redirect against actual Point Blank/IP calls, including static and
+interface types. Diagnostics remain available for gameplay confirmation. Test
+shaders off/on, drawing the XM3 then switching away, and ordinary/nested portal
+views. This is a candidate rendering fix; GPU confirmation remains pending.
 
 ## Beta 20: Point Blank missing-terrain diagnostics
 

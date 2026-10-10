@@ -49,6 +49,9 @@
     "eureka.common.EurekaPortalWarningInfoMixin"
   ],
   "client": [
+    "pointblank.client.PortalStencilCacheMixin",
+    "pointblank.client.GunStencilMixin",
+    "pointblank.client.GunStencilClearMixin",
     "pointblank.client.GunRenderDiagnosticMixin",
     "pointblank.client.GunPrepareDiagnosticMixin",
     "pointblank.client.GunAuxDiagnosticMixin",

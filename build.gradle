@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'dev.fan4'
-version = '0.1.0-beta.20'
+version = '0.1.0-beta.21'
 
 repositories {
     mavenCentral()
@@ -70,7 +70,7 @@ tasks.named('processResources') {
     filesMatching('fabric.mod.json') { expand version: project.version }
 }
 
-['DimensionQueueTest', 'CompatCancellationTest', 'ShipPoseTest', 'CompatCallsTest', 'OptionalCompatibilityTest', 'PortalDepthTextureTest', 'FreecamTickTest', 'FreecamShaderTest', 'FramebufferCopyTest', 'JadeRaycastTest', 'DepthFormatTest', 'UpdateTest', 'AccessoryGraveTest', 'AccessoryGraveSlotsTest', 'TrinketGraveTest', 'RenderDiagnosticsTest'].each { testMain ->
+['DimensionQueueTest', 'CompatCancellationTest', 'ShipPoseTest', 'CompatCallsTest', 'OptionalCompatibilityTest', 'PortalDepthTextureTest', 'FreecamTickTest', 'FreecamShaderTest', 'FramebufferCopyTest', 'JadeRaycastTest', 'DepthFormatTest', 'UpdateTest', 'AccessoryGraveTest', 'AccessoryGraveSlotsTest', 'TrinketGraveTest', 'RenderDiagnosticsTest', 'StencilCompatTest'].each { testMain ->
     def regression = tasks.register(testMain.uncapitalize(), JavaExec) {
         dependsOn tasks.named('testClasses')
         classpath = sourceSets.test.runtimeClasspath
@@ -322,5 +322,6 @@ tasks.register('pointBlankRenderNativeCheck', JavaExec) {
     mainClass = 'PointBlankRenderNativeCheck'
     if (project.hasProperty('pointBlankRenderJar') && project.hasProperty('pointBlankRenderMinecraftJar')) {
         args project.property('pointBlankRenderJar'), project.property('pointBlankRenderMinecraftJar')
+        if (project.hasProperty('pointBlankRenderPortalJar')) args project.property('pointBlankRenderPortalJar')
     } else { onlyIf { false } }
 }

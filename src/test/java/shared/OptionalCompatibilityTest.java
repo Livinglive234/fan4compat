@@ -17,11 +17,17 @@ public final class OptionalCompatibilityTest {
             check(!applies(Map.of(),name),"empty setup applies "+name);
             check(applies(all,name)!=name.endsWith("PortalSoundRayMixin"),"full supported setup skips "+name);
         }
+        check(!applies(Map.of("pointblank","2.2.0"),"pointblank.client.PortalStencilCacheMixin"),"portal stencil bridge requires IP");
+        check(!applies(Map.of("pointblank","2.2.0","immersive_portals","unsupported"),"pointblank.client.PortalStencilCacheMixin"),"portal stencil bridge rejects unsupported IP");
+        check(applies(Map.of("pointblank","2.2.0","immersive_portals","6.0.6"),"pointblank.client.PortalStencilCacheMixin"),"portal stencil bridge needs no VS/Iris");
         check(!applies(Map.of("distanthorizons","3.3.3"),"distanthorizons.client.DhPortalRenderMixin"),"DH portal guard requires IP");
         check(applies(Map.of("distanthorizons","3.3.3","immersive_portals","6.0.6"),"distanthorizons.client.DhPortalRenderMixin"),"DH portal guard needs no VS");
         check(!applies(Map.of("iris","1.8.1+mc1.21.1","immersive_portals","6.0.6"),"iris.client.DhPortalShaderMixin"),"Iris DH guard requires DH");
         check(applies(Map.of("freecam","1.3.0+mc1.21","distanthorizons","3.3.3"),"freecam.client.FreecamUnloadedTickMixin"),"freecam fix needs no IP or VS");
         check(!applies(Map.of("freecam","1.3.0+mc1.21"),"freecam.client.FreecamUnloadedTickMixin"),"freecam fix requires DH");
+        check(!applies(Map.of("pointblank","2.2.0"),"pointblank.client.PortalStencilCacheMixin"),"portal stencil bridge requires IP");
+        check(!applies(Map.of("pointblank","2.2.0","immersive_portals","unsupported"),"pointblank.client.PortalStencilCacheMixin"),"portal stencil bridge rejects unsupported IP");
+        check(applies(Map.of("pointblank","2.2.0","immersive_portals","6.0.6"),"pointblank.client.PortalStencilCacheMixin"),"portal stencil bridge needs no VS/Iris");
         check(!applies(Map.of("distanthorizons","3.3.3"),"freecam.client.FreecamUnloadedTickMixin"),"freecam fix requires freecam");
         check(!applies(Map.of("freecam","1.3.0+mc1.21","distanthorizons","3.3.3"),"freecam.client.FreecamBslShaderMixin"),"BSL source fix requires Iris");
         check(applies(Map.of("freecam","1.3.0+mc1.21","distanthorizons","3.3.3","iris","1.8.1+mc1.21.1"),"freecam.client.FreecamBslShaderMixin"),"BSL source fix needs no IP/VS");
@@ -29,6 +35,7 @@ public final class OptionalCompatibilityTest {
         check(applies(Map.of("immersive_portals","6.0.6","iris","1.8.1+mc1.21.1"),"iris.client.IrisFramebufferCopyMixin"),"GL fallback needs no DH or VS");
         Map<String,String> pair=Map.of("pointblank","2.2.0","dwm","1.0.38.4");
         Set<String> expected=new HashSet<>();expected.add("pointblank.client.StaleGunAnimationMixin");expected.add("pointblank.client.StaleGunDrawMixin");expected.add("pointblank.client.OffhandGunDrawMixin");
+        expected.add("pointblank.client.GunStencilMixin");expected.add("pointblank.client.GunStencilClearMixin");
         for(String diagnostic:List.of("GunRender","GunPrepare","GunAux","GunWorld"))expected.add("pointblank.client."+diagnostic+"DiagnosticMixin");
         for(int i=0;i<5;i++)expected.add("doctorwho.client.TardisShipModelCache"+i+"Mixin");
         for(String name:mixins)check(applies(pair,name)==expected.contains(name),"Point Blank/TARDIS setup: "+name);

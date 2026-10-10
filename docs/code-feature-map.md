@@ -12,7 +12,7 @@ regression fixtures live under tools and are not shipped as gameplay classes.
 | DH / Iris | Dynamic dimensions, portal render suppression and shader depth handling |
 | Eureka / Jade | Creative name, supported warning filtering, quiet logging and helm HUD behavior |
 | Aether / Player Graves | Resolved accessory death drops, persistent grave storage, GUI and original functional/cosmetic slot recovery |
-| Point Blank | Offhand and held-item compatibility; temporary graphics-state diagnostics |
+| Point Blank | Offhand and held-item compatibility, shared scope/portal stencil cache and temporary graphics diagnostics |
 | Other integrations | Accessories packets, Sound Physics portal behavior, BCLib codecs/recipes, Sable dimensions and Elytra Contrails fallback |
 
 ## Why doorway loading remains
@@ -77,3 +77,10 @@ Point Blank diagnostics: `pointblank/RenderDiagnostics` and four generated
 `pointBlankRenderNativeCheck` verifies exact target and cached-field bindings using
 the real jars. These temporary observers exist for the missing-solid-terrain
 investigation and can be disabled with `-Dfan4compat.renderDiagnostics=false`.
+
+Point Blank stencil handling: `pointblank/StencilCompat` and generated
+`GunStencilMixin`, `GunStencilClearMixin` and `PortalStencilCacheMixin` keep native
+scope/portal setters on Minecraft's cache and preserve stencil ownership during
+portal views. `StencilCompatTest` reproduces the cache bypass and executes the
+redirect handlers with a recording backend; the native check pins their actual
+invocation targets. The interface mixin targets Point Blank's static scope lambdas.

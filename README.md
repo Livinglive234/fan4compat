@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.20.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.21.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 20 release notes](docs/releases/0.1.0-beta.20.md) ·
+[Beta 21 release notes](docs/releases/0.1.0-beta.21.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
 
@@ -324,6 +324,14 @@ without changing ammo data or fabricating a fire mode. Alpha 40 corrects the
 client-tick draw call to use Point Blank’s operable gun context, including an
 offhand gun while a TARDIS key is in the main hand. Gun type and saved weapon UUID
 must match the selected state; other draws retain their original stack.
+
+Beta 21 routes Point Blank scope stencil setters through Minecraft's state cache.
+With supported Immersive Portals installed, its normal stencil renderer also uses
+that cache. Point Blank's scope setup/cleanup and preparatory clears leave portal
+stencil state and contents alone during nested portal views; ordinary scope draws
+retain their stencil behavior. This targets the missing-solid-terrain issue seen
+with shaders off and the XM3. GPU confirmation is pending: test drawing/switching
+away from the XM3, ordinary terrain and portal views, with shaders both off and on.
 
 Beta 20 temporarily enables read-only graphics diagnostics for Point Blank 2.2.0.
 Reports tagged `[Fan4Compat RenderDiag]` compare actual OpenGL state and Minecraft's

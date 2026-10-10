@@ -26,6 +26,7 @@ public final class PointBlankRenderNativeCheck implements Opcodes {
             AnnotationNode annotation=handler.visibleAnnotations.stream().filter(a->a.desc.endsWith("/WrapMethod;")).findFirst().orElseThrow();
             if(!annotation.values.toString().contains(target[2]+target[3]))throw new AssertionError("Wrong selector");
         }
+        validateStencil(args);
         String[][] fields={
             {"com/mojang/blaze3d/platform/GlStateManager","STENCIL","DEPTH","COLOR_MASK"},
             {"com/mojang/blaze3d/platform/GlStateManager$class_1035","field_5149","field_5153"},
@@ -39,4 +40,30 @@ public final class PointBlankRenderNativeCheck implements Opcodes {
         }
         System.out.println("PASS: all four Point Blank/Minecraft render wrappers match native modifiers/descriptors; finally handlers and cached-state fields verified");
     }
+    static void validateStencil(String[] args)throws Exception {
+        for(String simple:args.length>2?new String[]{"GunStencilMixin","GunStencilClearMixin","PortalStencilCacheMixin"}:new String[]{"GunStencilMixin","GunStencilClearMixin"}) {
+            boolean provider=simple.equals("GunStencilMixin"),portal=simple.equals("PortalStencilCacheMixin");
+            String owner=portal?"qouteall/imm_ptl/core/render/renderer/RendererUsingStencil":provider?StencilGenerator.PROVIDER:"com/vicmatskiv/pointblank/client/ClientSystem";
+            ClassNode nativeClass=read(portal?args[2]:args[0],owner),mixin=new ClassNode();
+            new ClassReader(java.nio.file.Files.readAllBytes(java.nio.file.Path.of("build/generated/classes/dev/fan4/compat/mixin/pointblank/client/"+simple+".class"))).accept(mixin,0);
+            if(((nativeClass.access^mixin.access)&ACC_INTERFACE)!=0)throw new AssertionError("Mixin interface/class mismatch");
+            for(MethodNode handler:mixin.methods) {
+                if((handler.access&ACC_STATIC)!=(provider||portal?ACC_STATIC:0))throw new AssertionError("Redirect static-ness mismatch");
+                AnnotationNode annotation=handler.visibleAnnotations.stream().filter(a->a.desc.endsWith("/Redirect;")).findFirst().orElseThrow();
+                java.util.Map<String,Object> properties=new java.util.HashMap<>();for(int i=0;i<annotation.values.size();i+=2)properties.put((String)annotation.values.get(i),annotation.values.get(i+1));
+                AnnotationNode at=(AnnotationNode)properties.get("at");String target=null;for(int i=0;i<at.values.size();i+=2)if(at.values.get(i).equals("target"))target=(String)at.values.get(i+1);
+                int split=target.indexOf(';'),paren=target.indexOf('(');String callOwner=target.substring(1,split),name=target.substring(split+1,paren),desc=target.substring(paren);
+                if(!handler.desc.equals(desc))throw new AssertionError("Redirect arguments differ from invocation");
+                int matches=0;
+                for(Object selector:(java.util.List<?>)properties.get("method")) {
+                    String selected=(String)selector;MethodNode method=nativeClass.methods.stream().filter(m->(m.name+m.desc).equals(selected)).findFirst().orElseThrow();
+                    if(!portal&&(method.access&ACC_STATIC)!=(provider?ACC_STATIC:0))throw new AssertionError("Native method static-ness mismatch");
+                    for(AbstractInsnNode instruction:method.instructions)if(instruction instanceof MethodInsnNode call&&call.owner.equals(callOwner)&&call.name.equals(name)&&call.desc.equals(desc))matches++;
+                }
+                if(matches<1||!Integer.valueOf(1).equals(properties.get("require")))throw new AssertionError("Missing required stencil invocation");
+            }
+        }
+        System.out.println("PASS: all stencil redirects bind native calls with correct static and interface types");
+    }
+
 }
