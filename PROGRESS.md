@@ -1,10 +1,20 @@
 # Fan4Compat progress
 
-Updated: 2026-10-09 (America/Chicago). Current build: **0.1.0-beta.21**.
+Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.22**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 22: Doctor Who Mod minimum-version gate
+
+DWM hooks now activate for semantic versions >=1.0.38.4, including the pack owner's
+1.0.39 development version. The baseline remains supported; older/malformed
+versions and below-minimum prereleases stay excluded. Other mod pins and required
+combinations remain unchanged. Startup warnings show the inclusive minimum.
+Regressions cover numeric ordering, build metadata, development prereleases,
+all DWM hooks, missing VS and unsupported IP. Native selectors are unchanged;
+accepting newer metadata is not confirmation of every future DWM API change.
 
 ## Contributor documentation
 

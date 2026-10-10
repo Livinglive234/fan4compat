@@ -1,7 +1,7 @@
 # Fan4Compat: architecture, features and contributor guide
 
-This document explains the active implementation at **0.1.0-beta.21**, reviewed
-2026-10-09 (America/Chicago). It is an onboarding guide for human contributors and
+This document explains the active implementation at **0.1.0-beta.22**, reviewed
+2026-10-10 (America/Chicago). It is an onboarding guide for human contributors and
 AI coding assistants. The source and version gates describe what actually runs;
 older release notes describe historical builds and can contain superseded behavior.
 
@@ -125,15 +125,20 @@ the particular helper rather than assuming every cache has identical ownership.
 
 ## Which integrations activate
 
-Exact metadata versions live in `CompatibilityRules.VERSIONS`. Filenames are not
+Reference metadata versions live in `CompatibilityRules.VERSIONS`. DWM's entry
+is now an inclusive minimum, compared using Fabric's semantic version parser:
+1.0.38.4 and newer (including 1.0.39) activate its hooks. Older, malformed and
+below-minimum prerelease versions do not. Build metadata does not affect ordering.
+Other entries remain exact pins. Acceptance enables the existing hooks; native
+API compatibility still requires validation when DWM changes its internals. Filenames are not
 reliable versions: the supplied IP file says 6.0.7 but its metadata is 6.0.6, and
 the supplied VS/Eureka files have different marketing and metadata versions.
 
-| Mod ID | Pinned metadata version |
+| Mod ID | Metadata requirement |
 | --- | --- |
 | `valkyrienskies` | `2.4.12-td.9+66a13242ed` |
 | `immersive_portals` | `6.0.6` |
-| `dwm` | `1.0.38.4` |
+| `dwm` | `>=1.0.38.4` (inclusive minimum) |
 | `vs_eureka` | `1.5.3-beta.4-td.4+b0d9511582` |
 | `distanthorizons` | `3.3.3` |
 | `iris` | `1.8.1+mc1.21.1` |

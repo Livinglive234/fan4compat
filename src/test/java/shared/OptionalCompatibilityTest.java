@@ -17,6 +17,22 @@ public final class OptionalCompatibilityTest {
             check(!applies(Map.of(),name),"empty setup applies "+name);
             check(applies(all,name)!=name.endsWith("PortalSoundRayMixin"),"full supported setup skips "+name);
         }
+        for(String version:List.of("1.0.38.4","1.0.38.4+build.2","1.0.38.5","1.0.39","1.0.39-dev.1","1.0.100","1.1.0","2.0.0")) {
+            Map<String,String> newer=new HashMap<>(all);newer.put("dwm",version);
+            check(CompatibilityRules.supported(newer,"dwm"),"accepted DWM minimum/newer version: "+version);
+            for(String name:mixins)if(name.startsWith("doctorwho."))check(applies(newer,name),"newer DWM hook excluded: "+version+" / "+name);
+            check(applies(Map.of("dwm",version),"doctorwho.client.TardisShipModelCache0Mixin"),"newer standalone model cache");
+            check(!applies(Map.of("dwm",version),"doctorwho.common.TardisShipStateMixin"),"newer DWM still requires VS");
+            newer.put("immersive_portals","unsupported");
+            check(!applies(newer,"doctorwho.common.TardisShipStateMixin"),"newer DWM still rejects unsupported IP");
+        }
+        for(String version:List.of("1.0.38.3","1.0.38","1.0.9","1.0.38.4-beta.1","0.9.100","invalid","","1..39")) {
+            Map<String,String> older=new HashMap<>(all);older.put("dwm",version);
+            check(!CompatibilityRules.supported(older,"dwm"),"older/malformed DWM accepted: "+version);
+            for(String name:mixins)if(name.startsWith("doctorwho."))check(!applies(older,name),"older DWM hook enabled: "+version+" / "+name);
+        }
+        check(CompatibilityRules.requirement("dwm").equals(">=1.0.38.4"),"startup warning states minimum");
+        check(CompatibilityRules.requirement("pointblank").equals("2.2.0"),"other version pins remain exact");
         check(!applies(Map.of("pointblank","2.2.0"),"pointblank.client.PortalStencilCacheMixin"),"portal stencil bridge requires IP");
         check(!applies(Map.of("pointblank","2.2.0","immersive_portals","unsupported"),"pointblank.client.PortalStencilCacheMixin"),"portal stencil bridge rejects unsupported IP");
         check(applies(Map.of("pointblank","2.2.0","immersive_portals","6.0.6"),"pointblank.client.PortalStencilCacheMixin"),"portal stencil bridge needs no VS/Iris");

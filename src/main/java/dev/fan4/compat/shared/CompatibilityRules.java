@@ -2,6 +2,8 @@ package dev.fan4.compat.shared;
 
 import java.util.Map;
 import java.util.Set;
+import net.fabricmc.loader.api.SemanticVersion;
+import net.fabricmc.loader.api.VersionParsingException;
 
 /** Dependency decisions use metadata only, never loading optional mod classes. */
 public final class CompatibilityRules {
@@ -17,8 +19,15 @@ public final class CompatibilityRules {
     private CompatibilityRules() {}
     public static boolean supported(Map<String,String> mods,String id) {
         String version=mods.get(id);
-        return version!=null && version.equals(VERSIONS.getOrDefault(id,version));
+        if(version==null)return false;
+        if(id.equals("dwm")) {
+            try{return SemanticVersion.parse(version).compareTo(SemanticVersion.parse(VERSIONS.get(id)))>=0;}
+            catch(VersionParsingException invalid){return false;}
+        }
+        return version.equals(VERSIONS.getOrDefault(id,version));
     }
+    /** VERSIONS contains exact pins except DWM, whose entry is its inclusive minimum. */
+    public static String requirement(String id){return id.equals("dwm")?">="+VERSIONS.get(id):VERSIONS.get(id);}
     /** VS and IP are both installed at their supported builds. */
     public static boolean portalsOnVs(Map<String,String> mods) {
         return supported(mods,"valkyrienskies")&&supported(mods,"immersive_portals");
