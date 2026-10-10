@@ -179,6 +179,41 @@ currently in, not the interior dimension.
 4. **Moving ships.** The exterior position follows the ship, so updates must be
    sent as it moves, throttled.
 
+### Extension: following the TARDIS during travel
+
+While a TARDIS is flying there is no real exterior; Doctor Who Mod dematerializes
+it and rematerializes it at the destination. A "following" map would therefore be a
+**synthetic path**, an animation between the departure and the destination, not
+tracking of a real moving object.
+
+What the code already exposes (from `TardisShipQol`): the flight object has a
+`step` (the travel phase is `PROCESSING`), a `tick` counter and a `duration`; the
+TARDIS state gives the current and destination exterior dimension and position.
+Duration is a fixed overhead (64 ticks, plus 300 when the dimensions differ) plus
+a part that scales with distance. Today Fan4Compat snapshots the departure point
+only for destinations on ships; this feature would need the snapshot for every
+flight.
+
+Proposed behavior:
+
+1. At flight start, the server sends departure, destination, tick and duration.
+   The client advances a progress value locally and re-syncs on corrections (for
+   example when Fan4Compat extends the duration for a moving ship destination).
+2. Same dimension: glide the map view and marker from departure to destination,
+   easing over the distance-dependent part of the flight.
+3. Different dimensions: do not invent a mid-route position. Hold the departure
+   view and switch to the destination dimension on arrival (a midpoint switch is a
+   possible option).
+4. On landing, snap to the actual exterior position, which can differ from the
+   requested destination because DWM's landing checks can adjust it. On an
+   aborted or crashed flight, snap back to the last real exterior.
+5. Moving ship destinations: follow the transformed world position of the ship.
+
+Additional risks: the glide can cross large unexplored or unloaded areas and
+force Xaero to load many saved map regions quickly, so travel speed or load rate
+may need limiting; the shown route is not the TARDIS's real path; and it reveals
+the destination during flight, so the same access rules as the console apply.
+
 ### Limits and risks
 
 - **Map pollution is the critical risk.** If the map writer records interior blocks
@@ -192,8 +227,9 @@ currently in, not the interior dimension.
   player's actual dimension. The exterior's chunks are usually not loaded on the
   client, so a faithful minimap is much harder. Start with the World Map and, at
   most, exterior-dimension waypoints and coordinates on the minimap.
-- **Flight and no exterior.** While in flight there is no exterior dimension. Show
-  the last known exterior or nothing; do not invent a position.
+- **Flight and no exterior.** While in flight there is no exterior dimension. Without
+  the travel extension, show the last known exterior or nothing; do not invent a
+  position.
 - **Which rooms.** The TARDIS interior dimension contains more than the console
   room; this design triggers on being in the TARDIS dimension. Narrowing to the
   console room needs DWM room data and has not been looked at.
