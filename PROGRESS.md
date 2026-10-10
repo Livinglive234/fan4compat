@@ -6,6 +6,15 @@ Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
 
+## Contributor documentation
+
+Added [architecture and feature guide](docs/architecture-and-features.md), covering
+runtime/build-time structure, activation gates, every active integration, data and
+configuration contracts, verification, safe maintenance and withdrawn/future work.
+The pack owner confirms beta 21 stopped solid terrain disappearing. Portal
+regression testing was unavailable and accepted as unverified. This documentation
+update changes no runtime code, version or release publication status.
+
 ## Beta 21: shared stencil cache and portal ownership
 
 The beta 20 log captures actual/cached stencil function/reference differences and

@@ -21,6 +21,7 @@ Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
 [Beta 21 release notes](docs/releases/0.1.0-beta.21.md) ·
+[Architecture and feature guide](docs/architecture-and-features.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
 
@@ -201,7 +202,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.12.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.21.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -330,8 +331,9 @@ With supported Immersive Portals installed, its normal stencil renderer also use
 that cache. Point Blank's scope setup/cleanup and preparatory clears leave portal
 stencil state and contents alone during nested portal views; ordinary scope draws
 retain their stencil behavior. This targets the missing-solid-terrain issue seen
-with shaders off and the XM3. GPU confirmation is pending: test drawing/switching
-away from the XM3, ordinary terrain and portal views, with shaders both off and on.
+with shaders off and the XM3. The pack owner confirmed solid terrain no longer disappears in beta 21. Portal
+regression testing was unavailable and accepted as unverified; shader/platform
+variants remain separate checks.
 
 Beta 20 temporarily enables read-only graphics diagnostics for Point Blank 2.2.0.
 Reports tagged `[Fan4Compat RenderDiag]` compare actual OpenGL state and Minecraft's
