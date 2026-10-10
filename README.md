@@ -22,6 +22,7 @@ Ship visibility through reopened doors before exiting remains a known limitation
 
 [Beta 25 release notes](docs/releases/0.1.0-beta.25.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
+[Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
 

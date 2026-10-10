@@ -6,6 +6,14 @@ Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
 
+## Maintained Mac portal investigation
+
+Added [Mac nested portals with Iris](docs/mac-nested-portals.md): captured beta 24
+evidence, renderer fallback mechanism, earlier fixes, beta 25 implementation and
+resource ownership, diagnostic interpretation, source/test map and gameplay
+checklist. This is the primary record for future results and revisions. Beta 25
+Mac gameplay remains pending. Documentation only; no version or runtime change.
+
 ## Beta 25: Apple depth-only portal targets with separate stencil
 
 Beta 24's Mac log shows GL_INVALID_OPERATION after copying DEPTH32F into a

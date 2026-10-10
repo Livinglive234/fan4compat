@@ -945,8 +945,9 @@ launch, using `[Fan4Compat PortalDepthDiag]`; snapshot/logging failures disable 
 observer and preserve rendering. The startup flag
 `-Dfan4compat.portalDepthDiagnostics=false` excludes this mixin while retaining
 other fixes. It needs supported IP and Iris, without VS, DH or Point Blank.
-The Mac's live failure remains to be reproduced; this build adds evidence, not a
-new nested-portal repair. Point Blank, Freecam/BSL and Graves have been confirmed
+The beta 24 Mac log reproduced the depth-copy failure and compatibility fallback.
+See the maintained [Mac investigation](mac-nested-portals.md) for evidence and
+beta 25 workaround status. Point Blank, Freecam/BSL and Graves have been confirmed
 working by the pack owner on 2026-10-10; earlier pending notes are historical.
 
 ### Beta 25 Apple separate depth/stencil targets
@@ -963,3 +964,6 @@ resize and shader reload. A rejected layout is restored to its native packed
 texture/attachment, then skipped until recreation; GL bindings restore even on
 allocation failure. IP's stencil clears and depth-copy error fallback are intact.
 Diagnostics remain enabled; Mac gameplay verification is still required.
+
+Detailed evidence, lifecycle contracts and ongoing test results are maintained in
+[Mac nested portals with Iris](mac-nested-portals.md).
