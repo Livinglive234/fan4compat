@@ -948,3 +948,18 @@ other fixes. It needs supported IP and Iris, without VS, DH or Point Blank.
 The Mac's live failure remains to be reproduced; this build adds evidence, not a
 new nested-portal repair. Point Blank, Freecam/BSL and Graves have been confirmed
 working by the pack owner on 2026-10-10; earlier pending notes are historical.
+
+### Beta 25 Apple separate depth/stencil targets
+
+`iris/SeparateStencilCompat` redirects IP's stencil enablement only inside
+`IrisPortalRenderer.prepareRendering` through `IrisSeparateStencilMixin`, first
+preserving the native call. For Apple and a DEPTH32F main texture, each portal
+layer's existing texture gets DEPTH32F storage plus a separate STENCIL_INDEX8
+renderbuffer. This avoids the depth-only to packed depth/stencil blit captured
+in beta 24. It does not reallocate or replace the main framebuffer. Storage is
+reused by framebuffer identity/texture/size. `IrisStencilCleanupMixin` observes
+Minecraft framebuffer deletion to free owned stencil resources, including native
+resize and shader reload. A rejected layout is restored to its native packed
+texture/attachment, then skipped until recreation; GL bindings restore even on
+allocation failure. IP's stencil clears and depth-copy error fallback are intact.
+Diagnostics remain enabled; Mac gameplay verification is still required.

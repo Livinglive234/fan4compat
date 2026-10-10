@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'dev.fan4'
-version = '0.1.0-beta.24'
+version = '0.1.0-beta.25'
 
 repositories {
     mavenCentral()
@@ -70,7 +70,7 @@ tasks.named('processResources') {
     filesMatching('fabric.mod.json') { expand version: project.version }
 }
 
-['DimensionQueueTest', 'CompatCancellationTest', 'ShipPoseTest', 'CompatCallsTest', 'OptionalCompatibilityTest', 'PortalDepthTextureTest', 'FreecamTickTest', 'FreecamShaderTest', 'FramebufferCopyTest', 'JadeRaycastTest', 'DepthFormatTest', 'PortalDepthDiagnosticsTest', 'UpdateTest', 'AccessoryGraveTest', 'AccessoryGraveSlotsTest', 'TrinketGraveTest', 'RenderDiagnosticsTest', 'StencilCompatTest'].each { testMain ->
+['DimensionQueueTest', 'CompatCancellationTest', 'ShipPoseTest', 'CompatCallsTest', 'OptionalCompatibilityTest', 'PortalDepthTextureTest', 'FreecamTickTest', 'FreecamShaderTest', 'FramebufferCopyTest', 'JadeRaycastTest', 'DepthFormatTest', 'PortalDepthDiagnosticsTest', 'SeparateStencilTest', 'UpdateTest', 'AccessoryGraveTest', 'AccessoryGraveSlotsTest', 'TrinketGraveTest', 'RenderDiagnosticsTest', 'StencilCompatTest'].each { testMain ->
     def regression = tasks.register(testMain.uncapitalize(), JavaExec) {
         dependsOn tasks.named('testClasses')
         classpath = sourceSets.test.runtimeClasspath
@@ -334,5 +334,6 @@ tasks.register('portalDepthDiagnosticsNativeCheck', JavaExec) {
     onlyIf { project.hasProperty('portalDepthDiagnosticsJar') }
     if (project.hasProperty('portalDepthDiagnosticsJar')) {
         args project.property('portalDepthDiagnosticsJar'), generatedClasses.get().asFile.absolutePath
+        if (project.hasProperty('portalDepthMinecraftJar')) args project.property('portalDepthMinecraftJar')
     }
 }

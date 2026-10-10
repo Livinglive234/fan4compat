@@ -21,6 +21,15 @@ public final class PortalDepthDiagnosticsNativeCheck {
         VerifyAddon.classes.put(owner,target);VerifyAddon.injectionTargets(mixin);
         MethodNode handler=mixin.methods.stream().filter(m->m.name.equals("fan4$observeDepthCopy")).findFirst().orElseThrow();
         if(!handler.desc.equals("(I)I")||(handler.access&Opcodes.ACC_STATIC)!=0)throw new AssertionError("Error observer must preserve instance expression signature");
-        System.out.println("PASS: native IP depth-copy/error/fallback path and diagnostic injection selector/signature");
+        ClassNode separate=new ClassNode();new ClassReader(Files.readAllBytes(Path.of(args[1],"dev/fan4/compat/mixin/iris/client/IrisSeparateStencilMixin.class"))).accept(separate,0);
+        VerifyAddon.injectionTargets(separate);
+        if(args.length>2) {
+            ClassNode framebuffer=new ClassNode();
+            try(ZipFile jar=new ZipFile(args[2])){new ClassReader(jar.getInputStream(jar.getEntry("net/minecraft/class_276.class"))).accept(framebuffer,0);}
+            VerifyAddon.classes.put(framebuffer.name,framebuffer);
+            ClassNode cleanup=new ClassNode();new ClassReader(Files.readAllBytes(Path.of(args[1],"dev/fan4/compat/mixin/iris/client/IrisStencilCleanupMixin.class"))).accept(cleanup,0);
+            VerifyAddon.injectionTargets(cleanup);
+        }
+        System.out.println("PASS: native IP depth-copy/error/fallback path and diagnostic/separate-stencil selectors and framebuffer cleanup");
     }
 }

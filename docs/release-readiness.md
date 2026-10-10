@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.24**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.25**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
@@ -142,3 +142,12 @@ With BSL enabled, reproduce a portal visible through another portal. Capture
 every later nested layer works. A failure reports the original GL error and the
 source/destination depth representations. The observer preserves native fallback;
 it does not itself enable nested rendering or fix a failed copy.
+
+## Beta 25 Apple nested portal validation
+
+Retest the beta 24 reproduction with BSL enabled. Check for the separate-stencil
+setup report, a successful portal-depth diagnostic and no compatibility fallback.
+Verify a portal visible through another portal, portal crossings, resize, shader
+toggle/reload and world rejoin. If separate attachments are rejected, native
+layout/fallback must remain functional. Windows/non-Apple rendering should retain
+native allocation. Automated/native checks do not establish Mac GPU success.

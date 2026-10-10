@@ -28,5 +28,18 @@ public final class FramebufferCopyGenerator implements Opcodes {
         m.visitCode();m.visitVarInsn(ILOAD,1);m.visitMethodInsn(INVOKESTATIC,GenerateAddon.ROOT+"iris/PortalDepthDiagnostics","observe","(I)I",false);m.visitInsn(IRETURN);m.visitMaxs(0,0);m.visitEnd();
         GenerateAddon.save(name,w);
 
+
+        name=GenerateAddon.ROOT+"mixin/iris/client/IrisSeparateStencilMixin";
+        w=GenerateAddon.writer(name,"qouteall/imm_ptl/core/compat/iris_compatibility/IrisPortalRenderer");
+        m=w.visitMethod(ACC_PRIVATE,"fan4$separateStencil","(Lnet/minecraft/class_276;Z)V",null,null);
+        a=m.visitAnnotation("Lorg/spongepowered/asm/mixin/injection/Redirect;",true);
+        arr=a.visitArray("method");arr.visit(null,"prepareRendering()V");arr.visitEnd();a.visit("require",2);a.visit("remap",false);
+        at=a.visitAnnotation("at","Lorg/spongepowered/asm/mixin/injection/At;");at.visit("value","INVOKE");at.visit("target","Lqouteall/imm_ptl/core/compat/IPPortingLibCompat;setIsStencilEnabled(Lnet/minecraft/class_276;Z)V");at.visit("remap",false);at.visitEnd();a.visitEnd();
+        m.visitCode();m.visitVarInsn(ALOAD,1);m.visitVarInsn(ILOAD,2);m.visitMethodInsn(INVOKESTATIC,GenerateAddon.ROOT+"iris/SeparateStencilCompat","enable","(Ljava/lang/Object;Z)V",false);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+        name=GenerateAddon.ROOT+"mixin/iris/client/IrisStencilCleanupMixin";
+        w=GenerateAddon.writer(name,"net/minecraft/class_276");
+        m=w.visitMethod(ACC_PRIVATE,"fan4$releaseStencil","(L"+GenerateAddon.CI+";)V",null,null);
+        GenerateAddon.inject(m,"method_1238()V","HEAD",false);
+        m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESTATIC,GenerateAddon.ROOT+"iris/SeparateStencilCompat","release","(Ljava/lang/Object;)V",false);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
     }
 }

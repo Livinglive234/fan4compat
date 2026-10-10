@@ -1,10 +1,28 @@
 # Fan4Compat progress
 
-Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.24**.
+Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.25**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 25: Apple depth-only portal targets with separate stencil
+
+Beta 24's Mac log shows GL_INVALID_OPERATION after copying DEPTH32F into a
+DEPTH32F_STENCIL8 target, followed immediately by native compatibility fallback.
+Both framebuffers are complete; shader-extension warnings are separate. Apple's
+recursive Iris portal targets now retain their depth texture identity but use
+DEPTH32F storage and a separate STENCIL_INDEX8 renderbuffer when the main depth
+texture is DEPTH32F. Original IP stencil enablement, layer clears and native
+error fallback are retained. Other vendors, main framebuffers and other source
+formats retain native allocation. Per-layer storage is reused; native framebuffer
+delete/resize releases owned renderbuffers. Rejected separate layouts restore the
+original packed attachment and avoid per-frame retry until native recreation.
+Texture, renderbuffer and read/draw framebuffer bindings restore in finally.
+Beta 24 diagnostics remain enabled to verify the actual copy on Mac. Regression
+checks cover allocation/reuse, cleanup, rejection rollback and binding restoration;
+native selector checks cover IP setup and Minecraft framebuffer deletion. Actual
+Mac nested rendering remains pending; this is a candidate driver workaround.
 
 ## Beta 24: portal depth-copy diagnostics
 

@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.24.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.25.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 24 release notes](docs/releases/0.1.0-beta.24.md) ·
+[Beta 25 release notes](docs/releases/0.1.0-beta.25.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
@@ -202,7 +202,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.24.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.25.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -509,3 +509,13 @@ or consuming extra errors. Reproduce nested portal rendering with BSL enabled
 and share `latest.log`. Disable this observer with
 `-Dfan4compat.portalDepthDiagnostics=false`; existing fixes stay enabled.
 Point Blank render diagnostics remain off by default as of beta 23.
+
+## Mac nested portal depth workaround (beta 25)
+
+On Apple OpenGL, recursive Iris portal targets use a depth-only floating-point
+texture and separate stencil renderbuffer when copying the main view's DEPTH32F
+texture. This targets the depth-copy failure captured in beta 24. Other GPUs and
+main framebuffers retain their native layout. If the driver rejects the separate
+attachments, the original layout and compatibility fallback remain available.
+Test nested portals with BSL enabled; actual Mac rendering is not yet confirmed.
+The `[Fan4Compat PortalDepthDiag]` reports remain enabled for verification.

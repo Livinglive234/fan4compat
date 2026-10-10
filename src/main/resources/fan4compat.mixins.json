@@ -85,6 +85,8 @@
     "iris.client.IrisFramebufferCopyMixin",
     "iris.client.IrisDepthFormatMixin",
     "iris.client.IrisPortalDepthDiagnosticMixin",
+    "iris.client.IrisSeparateStencilMixin",
+    "iris.client.IrisStencilCleanupMixin",
     "doctorwho.client.TardisShipWaypointCreationQolMixin",
     "iris.client.ShaderCompileScopeMixin",
     "accessories.client.PortalSyncContainerDataMixin",

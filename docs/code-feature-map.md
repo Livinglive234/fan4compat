@@ -90,3 +90,9 @@ Portal depth-copy investigation: `iris/PortalDepthDiagnostics` and generated
 its compatibility fallback. `PortalDepthDiagnosticsTest` covers bounded reports
 and exception isolation; `portalDepthDiagnosticsNativeCheck` verifies the real IP
 copy/error/fallback path and generated selector.
+
+Apple separate stencil: `iris/SeparateStencilCompat`, `IrisSeparateStencilMixin`
+and `IrisStencilCleanupMixin` supply depth-only float portal targets with owned
+stencil renderbuffers. `SeparateStencilTest` covers resource reuse, cleanup,
+rejected-layout rollback and GL binding restoration. Native checks verify IP
+setup and Minecraft deletion selectors.
