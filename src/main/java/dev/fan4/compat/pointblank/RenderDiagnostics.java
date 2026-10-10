@@ -7,7 +7,7 @@ import static dev.fan4.compat.shared.CompatCalls.*;
 
 /** Temporary read-only snapshots; never repairs state or consumes the GL error queue. */
 public final class RenderDiagnostics {
-    private static final boolean ENABLED=Boolean.parseBoolean(System.getProperty("fan4compat.renderDiagnostics","true"));
+    private static final boolean ENABLED=Boolean.parseBoolean(System.getProperty("fan4compat.renderDiagnostics","false"));
     public record Sample(String stage,String context,Map<String,String> before) {}
     public static final class Probe {
         private final LongSupplier clock;private final Supplier<Map<String,String>> reader;private final Consumer<String> log;

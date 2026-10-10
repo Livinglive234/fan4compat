@@ -1,6 +1,6 @@
 # Fan4Compat: architecture, features and contributor guide
 
-This document explains the active implementation at **0.1.0-beta.22**, reviewed
+This document explains the active implementation at **0.1.0-beta.23**, reviewed
 2026-10-10 (America/Chicago). It is an onboarding guide for human contributors and
 AI coding assistants. The source and version gates describe what actually runs;
 older release notes describe historical builds and can contain superseded behavior.
@@ -557,8 +557,8 @@ probe instead of replacing the native render failure. Reports are tagged
 `[Fan4Compat RenderDiag]`. Differences are clues, not automatic proof of a bug:
 `-1` and `255` masks can be effectively equivalent on an eight-bit stencil buffer.
 
-JVM argument `-Dfan4compat.renderDiagnostics=false` skips these observation mixins
-on startup while leaving the animation/draw/stencil fixes enabled. These diagnostics
+Diagnostics are off by default; JVM argument `-Dfan4compat.renderDiagnostics=true` installs these observation mixins
+on startup. The animation/draw/stencil fixes are always enabled. These diagnostics
 are temporary investigation code and may be removed after adequate confirmation.
 
 ## Accessory and Trinkets graves
@@ -778,7 +778,7 @@ not treat unavailable world context as a deleted ship.
 | `config/fan4compat-updater.properties`: `enabled` | `true` | Enable background release checks. |
 | Same file: `autoDownload` | `true` | Stage verified updates; false gives availability notices only. |
 | Same file: `allowPrereleases` | `true` | Allow published alpha/beta/rc releases; never drafts/artifacts. |
-| JVM `fan4compat.renderDiagnostics` | `true` | Enable temporary Point Blank observation hooks; false skips them at launch. |
+| JVM `fan4compat.renderDiagnostics` | `false` | Set true to install temporary Point Blank observation hooks at launch. |
 | Graves' `restoreExactInventoryLayout` | Owned by Graves | Determines original equipment-slot recovery. |
 | Graves' `dropOverflowOnQuickRetrieve` | Owned by Graves | Determines retrieval overflow drop behavior. |
 

@@ -26,8 +26,12 @@ public final class RenderDiagnosticsTest {
         check(RenderDiagnostics.mismatches(Map.of("depthWrite","true","cached.depthWrite","true")).isEmpty(),"matching state not labelled a leak");
         String previous=System.getProperty("fan4compat.renderDiagnostics");
         try {
-            System.setProperty("fan4compat.renderDiagnostics","false");
             var installed=Map.of("pointblank","2.2.0");
+            System.clearProperty("fan4compat.renderDiagnostics");
+            check(!dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client.GunWorldDiagnosticMixin"),"diagnostic hooks are off by default");
+            System.setProperty("fan4compat.renderDiagnostics","true");
+            for(String hook:new String[]{"GunRender","GunPrepare","GunAux","GunWorld"})check(dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client."+hook+"DiagnosticMixin"),hook+" diagnostic installed when opted in");
+            System.setProperty("fan4compat.renderDiagnostics","false");
             check(!dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client.GunWorldDiagnosticMixin"),"disabled diagnostic hooks not installed");
             check(dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client.StaleGunDrawMixin"),"existing gun fix unaffected by diagnostic opt-out");
         } finally {if(previous==null)System.clearProperty("fan4compat.renderDiagnostics");else System.setProperty("fan4compat.renderDiagnostics",previous);}

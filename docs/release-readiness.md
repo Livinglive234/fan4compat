@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.22**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.23**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
@@ -37,7 +37,7 @@ solid terrain with shaders off. Clean build, bytecode, fixture and native-bindin
 checks pass. GPU reproduction is pending: restart, disable shaders (or remove
 Iris), draw the XM3, switch away and capture `latest.log`. This is an investigation
 build, not a confirmed fix. Reports use `[Fan4Compat RenderDiag]`, are sampled and
-capped, and can be disabled with `-Dfan4compat.renderDiagnostics=false`.
+capped, and are off by default; enable with `-Dfan4compat.renderDiagnostics=true`.
 
 Beta 21 adds a candidate stencil-state fix for that report. Point Blank scope
 callbacks and IP's normal stencil renderer now share Minecraft's cache; scope
@@ -105,8 +105,8 @@ world drops or duplicate equipped items. Test accessories without normal invento
 or XP, a full respawn inventory, keepInventory/keepAccessoryInventory, KEEP and
 DESTROY rules, protected graves, and save/restart before recovery. For a full grave
 screen, take items and reopen to recover remaining stacks. Native API and fixture
-checks pass; gameplay/save-restart confirmation is pending. Publish the draft
-release only after these checks.
+checks pass; gameplay/save-restart confirmation is pending. Publish a release
+only after these checks.
 
 ## Beta 14 original accessory-slot checks
 

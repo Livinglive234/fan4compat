@@ -13,10 +13,12 @@ public final class OptionalCompatibilityTest {
         List<String> mixins=new ArrayList<>();while(matcher.find())mixins.add(matcher.group(1));
         check(mixins.size()>60,"manifest coverage");
         Map<String,String> all=new HashMap<>(CompatibilityRules.VERSIONS);all.put("aether","1.5.11");
+        System.setProperty("fan4compat.renderDiagnostics","true");
         for(String name:mixins){
             check(!applies(Map.of(),name),"empty setup applies "+name);
             check(applies(all,name)!=name.endsWith("PortalSoundRayMixin"),"full supported setup skips "+name);
         }
+        System.clearProperty("fan4compat.renderDiagnostics");
         for(String version:List.of("1.0.38.4","1.0.38.4+build.2","1.0.38.5","1.0.39","1.0.39-dev.1","1.0.100","1.1.0","2.0.0")) {
             Map<String,String> newer=new HashMap<>(all);newer.put("dwm",version);
             check(CompatibilityRules.supported(newer,"dwm"),"accepted DWM minimum/newer version: "+version);
@@ -52,7 +54,6 @@ public final class OptionalCompatibilityTest {
         Map<String,String> pair=Map.of("pointblank","2.2.0","dwm","1.0.38.4");
         Set<String> expected=new HashSet<>();expected.add("pointblank.client.StaleGunAnimationMixin");expected.add("pointblank.client.StaleGunDrawMixin");expected.add("pointblank.client.OffhandGunDrawMixin");
         expected.add("pointblank.client.GunStencilMixin");expected.add("pointblank.client.GunStencilClearMixin");
-        for(String diagnostic:List.of("GunRender","GunPrepare","GunAux","GunWorld"))expected.add("pointblank.client."+diagnostic+"DiagnosticMixin");
         for(int i=0;i<5;i++)expected.add("doctorwho.client.TardisShipModelCache"+i+"Mixin");
         for(String name:mixins)check(applies(pair,name)==expected.contains(name),"Point Blank/TARDIS setup: "+name);
         for(String id:CompatibilityRules.VERSIONS.keySet()){

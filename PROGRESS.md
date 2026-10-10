@@ -1,10 +1,16 @@
 # Fan4Compat progress
 
-Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.22**.
+Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.23**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 23: diagnostics off by default
+
+The beta 20 Point Blank render diagnostics are no longer installed unless
+`-Dfan4compat.renderDiagnostics=true` is set. The beta 21 stencil fix is unchanged.
+Removed the draft-release wording from release notes and status entries.
 
 ## Beta 22: Doctor Who Mod minimum-version gate
 
@@ -64,7 +70,7 @@ Clean build, regression tests, packaging and bytecode verification pass. Native
 checks against Point Blank 2.2.0 and Minecraft 1.21.1 verify all four target methods,
 wrapper descriptors/modifiers and cached-state fields. Actual GPU reproduction and
 root-cause confirmation remain pending; this build observes rather than repairs
-the reported rendering issue. Actions artifacts and a draft release are for testing.
+the reported rendering issue. Actions artifacts are for testing.
 
 ## Beta 19: grave GUI VerifyError
 
@@ -150,7 +156,7 @@ and deposits, exact-layout opt-out and repeated retrieval without duplication.
 Native API checks cover private dropStack capture, source references, capability
 containers, normal/cosmetic menu validation/setters and NBT string methods.
 Clean build/regressions and native checks pass; in-game slot synchronization and
-save/restart confirmation remain pending. Release remains a draft for testing.
+save/restart confirmation remain pending. Build remains a test artifact.
 
 ## Beta 13: Aether accessories in Player Graves
 
@@ -171,7 +177,7 @@ Native checks pass against the supplied Graves jar, Aether 1.5.11's bundled
 Accessories beta 48 and Minecraft 1.21.1 spawn/menu/inventory APIs; native grave
 persistence uses the complete ItemStack-list codec. In-game death, save/restart,
 owner restrictions and GUI/quick retrieval testing remain pending. Beta 13 is a
-test artifact/draft release until explicitly published after testing.
+test artifact until explicitly published after testing.
 
 ## Tested-build promotion gate
 

@@ -76,7 +76,7 @@ Point Blank diagnostics: `pointblank/RenderDiagnostics` and four generated
 `RenderDiagnosticsTest` checks sampling, cache comparison and failure isolation;
 `pointBlankRenderNativeCheck` verifies exact target and cached-field bindings using
 the real jars. These temporary observers exist for the missing-solid-terrain
-investigation and can be disabled with `-Dfan4compat.renderDiagnostics=false`.
+investigation and are off by default; enable with `-Dfan4compat.renderDiagnostics=true`.
 
 Point Blank stencil handling: `pointblank/StencilCompat` and generated
 `GunStencilMixin`, `GunStencilClearMixin` and `PortalStencilCacheMixin` keep native
