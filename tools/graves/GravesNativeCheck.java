@@ -89,20 +89,20 @@ public final class GravesNativeCheck implements Opcodes {
         ClassNode api=read(jar,"dev/emi/trinkets/api/TrinketsApi");
         method(api,"getTrinketComponent","("+living+")Ljava/util/Optional;");
         method(api,"getTrinket","(Lnet/minecraft/class_1792;)Ldev/emi/trinkets/api/Trinket;");
-        method(read(jar,"dev/emi/trinkets/api/TrinketComponent"),"forEach","(Ljava/util/function/BiConsumer;)V");
+        ClassNode component=read(jar,"dev/emi/trinkets/api/TrinketComponent"),slotTypeClass=read(jar,"dev/emi/trinkets/api/SlotType");
+        method(component,"forEach","(Ljava/util/function/BiConsumer;)V");
         ClassNode slot=read(jar,"dev/emi/trinkets/api/SlotReference");
         method(slot,"inventory","()Ldev/emi/trinkets/api/TrinketInventory;");method(slot,"index","()I");
         ClassNode inventory=read(jar,"dev/emi/trinkets/api/TrinketInventory");
         method(inventory,"getSlotType","()Ldev/emi/trinkets/api/SlotType;");method(inventory,"method_5438","(I)"+stack);method(inventory,"method_5447","(I"+stack+")V");
-        method(read(jar,"dev/emi/trinkets/api/SlotType"),"getDropRule","()"+rule);
+        method(slotTypeClass,"getDropRule","()"+rule);
         // Original-slot recovery: slot ids are "group/name", looked up through the component's inventory map.
-        method(read(jar,"dev/emi/trinkets/api/SlotType"),"getId","()Ljava/lang/String;");
-        method(read(jar,"dev/emi/trinkets/api/TrinketComponent"),"getInventory","()Ljava/util/Map;");
+        method(slotTypeClass,"getId","()Ljava/lang/String;");
+        method(component,"getInventory","()Ljava/util/Map;");
         method(inventory,"method_5439","()I");
         method(slot,"<init>","(Ldev/emi/trinkets/api/TrinketInventory;I)V");
         MethodNode canInsert=method(read(jar,"dev/emi/trinkets/TrinketSlot"),"canInsert","("+stack+reference+living+")Z");
         if((canInsert.access&ACC_STATIC)==0)throw new AssertionError("TrinketSlot.canInsert is no longer static");
-        method(read(jar,"dev/emi/trinkets/api/Trinket"),"canEquip","("+stack+reference+living+")Z");
         method(read(jar,"dev/emi/trinkets/api/Trinket"),"getDropRule","("+stack+reference+living+")"+rule);
         ClassNode callback=read(jar,"dev/emi/trinkets/api/event/TrinketDropCallback");
         method(callback,"drop","("+rule+stack+reference+living+")"+rule);

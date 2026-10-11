@@ -3,6 +3,8 @@ package dev.fan4.compat.iris;
 import java.util.*;
 import java.util.function.*;
 import static dev.fan4.compat.shared.CompatCalls.*;
+import static dev.fan4.compat.shared.Diagnostics.attachment;
+import static dev.fan4.compat.shared.Diagnostics.integer;
 
 /** Observes IP's existing error result; never consumes another GL error or changes its fallback. */
 public final class PortalDepthDiagnostics {
@@ -24,8 +26,6 @@ public final class PortalDepthDiagnostics {
     public static int observe(int error){return PROBE.observe(error);}
     public static String errorName(int error){return switch(error){case 0->"GL_NO_ERROR(0)";case 1280->"GL_INVALID_ENUM(1280)";case 1281->"GL_INVALID_VALUE(1281)";case 1282->"GL_INVALID_OPERATION(1282)";case 1285->"GL_OUT_OF_MEMORY(1285)";case 1286->"GL_INVALID_FRAMEBUFFER_OPERATION(1286)";default->"UNKNOWN("+error+")";};}
     private static final String GL11="org.lwjgl.opengl.GL11",GL30="org.lwjgl.opengl.GL30";
-    private static int integer(int key){return (Integer)exact(GL11,"glGetInteger",new String[]{"int"},key);}
-    private static int attachment(int target,int point,int key){return (Integer)exact(GL30,"glGetFramebufferAttachmentParameteri",new String[]{"int","int","int"},target,point,key);}
     private static String describe(int target,int binding) {
         int framebuffer=integer(binding);
         if(framebuffer==0)return "defaultFramebuffer";

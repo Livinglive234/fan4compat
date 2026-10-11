@@ -38,14 +38,15 @@ public final class StencilCompat {
         .map(mod->mod.getMetadata().getVersion().getFriendlyString().equals(dev.fan4.compat.shared.CompatibilityRules.VERSIONS.get("immersive_portals"))).orElse(false)&&present(PORTAL);
     private static final String SYSTEM="com.mojang.blaze3d.systems.RenderSystem";
     private static final String[] ONE={"int"},THREE={"int","int","int"};
-    private static final Policy POLICY=new Policy(()->HAS_PORTALS&&(Boolean)call(type(PORTAL),"isRendering"),new Backend(){
+    private static final Backend NATIVE=new Backend(){
         public void function(int function,int reference,int mask){nativeFunction(function,reference,mask);}
         public void mask(int mask){exact(SYSTEM,"stencilMask",ONE,mask);}
         public void operation(int fail,int depthFail,int pass){exact(SYSTEM,"stencilOp",THREE,fail,depthFail,pass);}
         public void clearValue(int value){exact(SYSTEM,"clearStencil",ONE,value);}
         public void clear(int bits,boolean mac){exact(SYSTEM,"clear",new String[]{"int","boolean"},bits,mac);}
         public void test(int capability,boolean enabled){exact("org.lwjgl.opengl.GL11",enabled?"glEnable":"glDisable",ONE,capability);}
-    });
+    };
+    private static final Policy POLICY=new Policy(()->HAS_PORTALS&&(Boolean)call(type(PORTAL),"isRendering"),NATIVE);
     private StencilCompat() {}
     public static void function(int function,int reference,int mask){POLICY.function(function,reference,mask);}
     public static void mask(int mask){POLICY.mask(mask);}
@@ -55,8 +56,8 @@ public final class StencilCompat {
     // IP owns the mask during portal rendering, so its setters always run.
     public static void portalFunction(int function,int reference,int mask){nativeFunction(function,reference,mask);}
     public static void portalFrameClear(int bits){POLICY.prepareWorld();exact("org.lwjgl.opengl.GL11","glClear",ONE,bits);}
-    public static void portalMask(int mask){exact(SYSTEM,"stencilMask",ONE,mask);}
-    public static void portalOperation(int fail,int depthFail,int pass){exact(SYSTEM,"stencilOp",THREE,fail,depthFail,pass);}
+    public static void portalMask(int mask){NATIVE.mask(mask);}
+    public static void portalOperation(int fail,int depthFail,int pass){NATIVE.operation(fail,depthFail,pass);}
     public static void enable(int capability){POLICY.test(capability,true);}
     public static void disable(int capability){POLICY.test(capability,false);}
 }

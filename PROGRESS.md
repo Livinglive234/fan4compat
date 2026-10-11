@@ -171,6 +171,14 @@ Beta 23's opt-in Point Blank diagnostics and all existing rendering fixes remain
 Bounded reporting/error preservation, optional gates and real IP selectors are
 checked; actual Mac reproduction remains pending.
 
+## Maintenance: shared diagnostics plumbing
+
+The four render diagnostics (Point Blank, stencil trace, DH, portal depth copy) now share
+`shared/Diagnostics`: the switch lookups, the rate-limit/report-cap/failure-latch gate and
+the GL query helpers. No runtime fixes changed; every diagnostic keeps its flag, default and
+report limits. Log changes: failures read "Diagnostics disabled after observation failure",
+and the DH snapshot key `mainDepthTexture` is now `mainDepthTex` like the others.
+
 ## Beta 23: diagnostics off by default
 
 The beta 20 Point Blank render diagnostics are no longer installed unless

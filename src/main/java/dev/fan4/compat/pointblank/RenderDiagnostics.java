@@ -3,38 +3,37 @@ package dev.fan4.compat.pointblank;
 import java.nio.*;
 import java.util.*;
 import java.util.function.*;
+import dev.fan4.compat.shared.Diagnostics;
 import static dev.fan4.compat.shared.CompatCalls.*;
+import static dev.fan4.compat.shared.Diagnostics.*;
 
 /** Temporary read-only snapshots; never repairs state or consumes the GL error queue. */
 public final class RenderDiagnostics {
-    private static final boolean ENABLED=Boolean.parseBoolean(System.getProperty("fan4compat.renderDiagnostics","false"));
+    private static final boolean ENABLED=Diagnostics.render();
     public record Sample(String stage,String context,Map<String,String> before) {}
     public static final class Probe {
-        private final LongSupplier clock;private final Supplier<Map<String,String>> reader;private final Consumer<String> log;
-        private final Map<String,Long> next=new HashMap<>();private final Set<String> seen=new HashSet<>();
-        private int reports;private boolean failed;private final Map<String,Integer> stageReports=new HashMap<>();
-        public Probe(LongSupplier clock,Supplier<Map<String,String>> reader,Consumer<String> log){this.clock=clock;this.reader=reader;this.log=log;}
+        private final Supplier<Map<String,String>> reader;private final Consumer<String> log;private final Diagnostics.Gate gate;
+        private final Set<String> seen=new HashSet<>();private final Map<String,Integer> stageReports=new HashMap<>();
+        public Probe(LongSupplier clock,Supplier<Map<String,String>> reader,Consumer<String> log){this.reader=reader;this.log=log;gate=new Diagnostics.Gate(clock,log,1_000_000_000L,96);}
         public Sample begin(String stage,String context) {
-            if(failed||reports>=96||stageReports.getOrDefault(stage,0)>=4)return null;
-            long now=clock.getAsLong();if(now<next.getOrDefault(stage,Long.MIN_VALUE))return null;
-            next.put(stage,now+1_000_000_000L);
-            try{return new Sample(stage,context,new LinkedHashMap<>(reader.get()));}
-            catch(RuntimeException|LinkageError e){failure(e);return null;}
+            if(!gate.open()||stageReports.getOrDefault(stage,0)>=4||!gate.due(stage))return null;
+            Map<String,String> before=gate.read(reader);
+            return before==null?null:new Sample(stage,context,before);
         }
         public void end(Sample sample,boolean exception) {
-            if(sample==null||failed||reports>=96)return;
+            if(sample==null||!gate.open())return;
+            Map<String,String> after=gate.read(reader);if(after==null)return;
             try {
-                Map<String,String> after=new LinkedHashMap<>(reader.get());
                 String fingerprint=sample.stage+sample.context+sample.before+after+exception;
                 if(!seen.add(fingerprint))return;
                 Map<String,String> changes=new LinkedHashMap<>();
                 for(var entry:after.entrySet())if(!Objects.equals(sample.before.get(entry.getKey()),entry.getValue()))changes.put(entry.getKey(),sample.before.get(entry.getKey())+" -> "+entry.getValue());
                 log.accept("stage="+sample.stage+" item="+sample.context+" exception="+exception+" before="+sample.before+" after="+after+" changes="+changes+" cacheMismatchBefore="+mismatches(sample.before)+" cacheMismatchAfter="+mismatches(after));
                 stageReports.merge(sample.stage,1,Integer::sum);
-                if(++reports==96)log.accept("Report limit reached; restart Minecraft for another diagnostic session.");
-            } catch(RuntimeException|LinkageError e){failure(e);}
+                gate.count();
+                if(gate.reachedLimit())log.accept("Report limit reached; restart Minecraft for another diagnostic session.");
+            } catch(RuntimeException|LinkageError e){gate.fail(e);}
         }
-        private void failure(Throwable e){failed=true;log.accept("Diagnostics disabled after snapshot failure: "+e.getClass().getSimpleName()+": "+e.getMessage());}
     }
     public static Map<String,String> mismatches(Map<String,String> values) {
         Map<String,String> result=new LinkedHashMap<>();
@@ -52,9 +51,7 @@ public final class RenderDiagnostics {
         try {
             if(stage.equals("gun-prepare")||stage.equals("gun-item"))StencilTrace.arm();
             if(stage.equals("world")) {
-                boolean gui=present("qouteall.imm_ptl.core.render.GuiPortalRendering")&&(Boolean)call(type("qouteall.imm_ptl.core.render.GuiPortalRendering"),"isRendering");
-                boolean portal=present("qouteall.imm_ptl.core.render.context_management.PortalRendering")&&(Integer)call(type("qouteall.imm_ptl.core.render.context_management.PortalRendering"),"getPortalLayer")>0;
-                stage="world-"+(gui?"gui":"main")+(portal?"-portal":"");
+                stage="world-"+(guiCamera()?"gui":"main")+(portalLayer()>0?"-portal":"");
             }
             String context=item==null?"-":String.valueOf(item);
             if(stage.equals("gui-camera")&&item!=null)context="requestedFbo="+field(item,"field_1476")+" requestedSize="+field(item,"field_1480")+"x"+field(item,"field_1477");
@@ -64,14 +61,11 @@ public final class RenderDiagnostics {
     }
     public static void end(Object token,boolean exception){try{if(token instanceof Sample sample)PROBE.end(sample,exception);}catch(RuntimeException|LinkageError ignored){}}
     private static final String GL="org.lwjgl.opengl.GL11";
-    private static int integer(int key){return (Integer)exact(GL,"glGetInteger",new String[]{"int"},key);}
-    private static boolean enabled(int key){return (Boolean)exact(GL,"glIsEnabled",new String[]{"int"},key);}
-    private static int attachment(int point,int key){return (Integer)exact("org.lwjgl.opengl.GL30","glGetFramebufferAttachmentParameteri",new String[]{"int","int","int"},36009,point,key);}
     // GL_STENCIL_BITS is removed from core profiles. Query an attached stencil image instead.
     private static String stencilBits() {
         if(integer(36006)==0)return "default-unqueried";
-        int kind=attachment(36128,36048);
-        return kind==0?"0":String.valueOf(attachment(36128,33303)); // GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE
+        int kind=attachment(36009,36128,36048);
+        return kind==0?"0":String.valueOf(attachment(36009,36128,33303)); // GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE
     }
     static Map<String,String> stencilSnapshot() {
         Map<String,String> state=new LinkedHashMap<>();
@@ -101,9 +95,7 @@ public final class RenderDiagnostics {
         state.put("viewport",viewport.get(0)+","+viewport.get(1)+","+viewport.get(2)+","+viewport.get(3));
         if(integer(36006)!=0) {
             state.put("fboStatus",String.valueOf(exact("org.lwjgl.opengl.GL30","glCheckFramebufferStatus",new String[]{"int"},36009)));
-            for(int point:new int[]{36096,36128}) {
-                int kind=attachment(point,36048);state.put(point==36096?"depthAttachment":"stencilAttachment",kind+":"+(kind==0?0:attachment(point,36049)));
-            }
+            state.put("depthAttachment",attachmentSummary(36096));state.put("stencilAttachment",attachmentSummary(36128));
         }
         Object cache=type("com.mojang.blaze3d.platform.GlStateManager"),stencil=field(cache,"STENCIL"),function=field(stencil,"field_5149");
         state.put("cached.stencilFunc",String.valueOf(field(function,"field_5148")));
@@ -112,13 +104,8 @@ public final class RenderDiagnostics {
         state.put("cached.stencilWriteMask",String.valueOf(field(stencil,"field_5153")));
         state.put("cached.depthWrite",String.valueOf(field(field(cache,"DEPTH"),"field_5076")));
         Object mask=field(cache,"COLOR_MASK");colors=new StringJoiner(",");for(String name:new String[]{"field_5063","field_5062","field_5061","field_5060"})colors.add(String.valueOf(field(mask,name)));state.put("cached.colorWrite",colors.toString());
-        Object client=call(type("net.minecraft.class_310"),"method_1551"),target=call(client,"method_1522");
-        if(present("qouteall.imm_ptl.core.render.GuiPortalRendering"))state.put("guiCamera",String.valueOf(call(type("qouteall.imm_ptl.core.render.GuiPortalRendering"),"isRendering")));
-        if(present("qouteall.imm_ptl.core.render.context_management.PortalRendering"))state.put("portalLayer",String.valueOf(call(type("qouteall.imm_ptl.core.render.context_management.PortalRendering"),"getPortalLayer")));
-        Object world=field(client,"field_1687");if(world!=null)state.put("dimension",String.valueOf(call(world,"method_27983")));
-        state.put("mainFbo",String.valueOf(field(target,"field_1476")));state.put("mainDepthTex",String.valueOf(field(target,"field_1474")));
         Object config=type("com.vicmatskiv.pointblank.Config");for(String name:new String[]{"pipScopesEnabled","pipFallbackModDetected","customShadersEnabled"})state.put(name,String.valueOf(field(config,name)));
-        if(present("net.irisshaders.iris.api.v0.IrisApi"))state.put("shaders",String.valueOf(call(call(type("net.irisshaders.iris.api.v0.IrisApi"),"getInstance"),"isShaderPackInUse")));else state.put("shaders","Iris absent");
+        context(state);
         return state;
     }
 }
