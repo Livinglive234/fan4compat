@@ -56,9 +56,10 @@ successful portal depth copies with `GL_NO_ERROR`, normal render mode and normal
 shutdown. These are full-pack user reports, not automated GPU tests.
 
 The Mac improvement coincides with the DH repair; a causal link to the earlier
-gun-over-portal overlap has not been established. Explicit visual portal-in-portal
-confirmation, broader shader/GPU coverage and lifecycle edge cases remain separate
-checks. Earlier pending rendering notes below record their status at that build.
+gun-over-portal overlap has not been established. The pack owner also confirmed
+Mac nested portals and reports the discussed restart workflows working. Automatic
+update download/install across a restart has not yet been tested end to end.
+Other shader packs and GPUs are outside this confirmation. Earlier pending rendering notes below record their status at that build.
 Point Blank, Freecam/BSL and Graves were also confirmed working on 2026-10-10.
 
 Render diagnostics can now be disabled: omit or set to false
@@ -80,7 +81,9 @@ On 2026-10-08 the pack owner confirmed all remaining checks proposed for beta:
 | --- | --- |
 | Moving-ship TARDIS entry/exit, landing, placement and repeat crossings | Confirmed by pack owner |
 | Ship waypoints after travel/world restart; save/reload and inventory preservation | Confirmed by pack owner |
-| Dedicated-server checks | Earlier checks confirmed; beta 3 startup/save/restart retest pending |
+| Dedicated-server checks | Earlier checks confirmed; owner reports discussed restart workflows working |
+| Mac nested portals with BSL | Confirmed by pack owner on beta 33 |
+| Automatic update download/install across restart | Not yet tested end to end |
 | Shaders enabled/disabled comparison | Confirmed by pack owner |
 | Alpha 41 portal audio with and without VS | Confirmed by pack owner |
 | Offhand Point Blank gun with main-hand TARDIS key | Confirmed by pack owner |

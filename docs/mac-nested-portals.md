@@ -15,9 +15,9 @@ Apple M2 Pro / BSL_v10.1.5 capture includes shader-enabled gun rendering, portal
 and GUI-camera passes, successful depth copies with `GL_NO_ERROR`, normal render
 mode and normal shutdown. No compatibility fallback appears in that capture.
 
-Explicit visual portal-in-portal confirmation and resize/reload/rejoin coverage
-remain separate checks: layer-1 log entries alone do not prove visible nesting at
-all depths. The DH depth-attachment repair may explain the improvement, but that
+The pack owner subsequently confirmed visible nested portals on Mac and reports
+the discussed restart workflows working. This confirmation supplements the log;
+layer-1 entries alone would not establish visual success at all depths. The DH depth-attachment repair may explain the improvement, but that
 causal link is unproven. Earlier sections preserve the investigation as it occurred.
 Opt-in render/DH diagnostics can now be disabled without disabling the repairs.
 
@@ -482,9 +482,10 @@ successful portal depth copies with `GL_NO_ERROR`, normal render mode and normal
 shutdown. These are full-pack user reports, not automated GPU tests.
 
 The Mac improvement coincides with the DH repair; a causal link to the earlier
-gun-over-portal overlap has not been established. Explicit visual portal-in-portal
-confirmation, broader shader/GPU coverage and lifecycle edge cases remain separate
-checks. Earlier pending rendering notes below record their status at that build.
+gun-over-portal overlap has not been established. The pack owner also confirmed
+Mac nested portals and reports the discussed restart workflows working. Automatic
+update download/install across a restart has not yet been tested end to end.
+Other shader packs and GPUs are outside this confirmation. Earlier pending rendering notes below record their status at that build.
 Point Blank, Freecam/BSL and Graves were also confirmed working on 2026-10-10.
 
 Render diagnostics can now be disabled: omit or set to false

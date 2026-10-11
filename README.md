@@ -36,9 +36,10 @@ successful portal depth copies with `GL_NO_ERROR`, normal render mode and normal
 shutdown. These are full-pack user reports, not automated GPU tests.
 
 The Mac improvement coincides with the DH repair; a causal link to the earlier
-gun-over-portal overlap has not been established. Explicit visual portal-in-portal
-confirmation, broader shader/GPU coverage and lifecycle edge cases remain separate
-checks. Earlier pending rendering notes below record their status at that build.
+gun-over-portal overlap has not been established. The pack owner also confirmed
+Mac nested portals and reports the discussed restart workflows working. Automatic
+update download/install across a restart has not yet been tested end to end.
+Other shader packs and GPUs are outside this confirmation. Earlier pending rendering notes below record their status at that build.
 Point Blank, Freecam/BSL and Graves were also confirmed working on 2026-10-10.
 
 Render diagnostics can now be disabled: omit or set to false
@@ -103,7 +104,7 @@ from the actual main depth texture format, including unsized textures' depth bit
 and component type. Layer buffers are recreated when that representation changes.
 Other GPU vendors retain IP's choice. This targets a possible format mismatch
 behind the compatibility-mode switch; the original error check and fallback stay
-active. Mac portal-in-portal gameplay confirmation remains pending.
+active. The pack owner confirmed Mac nested portals on beta 33.
 
 ## Beta 10 Jade rays and macOS portal copying
 
@@ -116,7 +117,7 @@ framebuffer blits for the portal renderer's depth and color copies. This targets
 the native abort on macOS OpenGL 4.1. The existing image-copy path stays active
 on GPUs supporting it. Temporary framebuffer objects and scissor/binding state
 are cleaned up after each fallback copy. Beta 33 Mac portal/camera rendering is
-owner-confirmed; explicit nested-portal and lifecycle checks remain separate.
+owner-confirmed, including nested portals in the tested BSL setup.
 
 ## Beta 9 Freecam with BSL
 
