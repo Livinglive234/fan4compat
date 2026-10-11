@@ -20,8 +20,11 @@ public final class RenderDiagnosticsTest {
         var broken=new RenderDiagnostics.Probe(clock::get,()->{attempts.incrementAndGet();throw new IllegalStateException("missing GL context");},failure::add);
         check(broken.begin("gun","-")==null&&broken.begin("world","-")==null&&attempts.get()==1&&failure.size()==1,"diagnostic failure disables sampling without touching native render");
         List<String> capped=new ArrayList<>();var limit=new RenderDiagnostics.Probe(clock::get,()->state,capped::add);
-        for(int i=0;i<120;i++){clock.addAndGet(1_000_000_000L);sample=limit.begin("gun","item"+i);limit.end(sample,false);}
+        for(int i=0;i<120;i++){clock.addAndGet(1_000_000_000L);sample=limit.begin("stage"+i,"item"+i);limit.end(sample,false);}
         check(capped.size()==97&&limit.begin("world","-")==null,"96 reports plus one cap notice, then no GL queries");
+        List<String> fair=new ArrayList<>();var budget=new RenderDiagnostics.Probe(clock::get,()->state,fair::add);
+        for(int i=0;i<10;i++){clock.addAndGet(1_000_000_000L);sample=budget.begin("world","context"+i);budget.end(sample,false);}
+        check(fair.size()==4&&budget.begin("gui-camera","new")!=null,"per-stage budget reserves reports for camera and deferred callbacks");
         check(RenderDiagnostics.mismatches(Map.of("colorWrite","false,false,false,false","cached.colorWrite","true,true,true,true")).containsKey("colorWrite"),"color-write cache mismatch detected");
         check(RenderDiagnostics.mismatches(Map.of("depthWrite","true","cached.depthWrite","true")).isEmpty(),"matching state not labelled a leak");
         String previous=System.getProperty("fan4compat.renderDiagnostics");
@@ -31,6 +34,10 @@ public final class RenderDiagnosticsTest {
             check(!dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client.GunWorldDiagnosticMixin"),"diagnostic hooks are off by default");
             System.setProperty("fan4compat.renderDiagnostics","true");
             for(String hook:new String[]{"GunRender","GunPrepare","GunAux","GunWorld"})check(dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client."+hook+"DiagnosticMixin"),hook+" diagnostic installed when opted in");
+            check(!dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client.GunIris5DiagnosticMixin"),"Iris callback observer requires Iris");
+            check(!dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client.GunGuiDiagnosticMixin"),"camera observer requires IP");
+            var full=new java.util.HashMap<>(installed);full.put("iris","1.8.1+mc1.21.1");full.put("immersive_portals","6.0.6");
+            check(dev.fan4.compat.shared.CompatibilityRules.applies(full,false,"dev.fan4.compat.mixin.pointblank.client.GunIris5DiagnosticMixin")&&dev.fan4.compat.shared.CompatibilityRules.applies(full,false,"dev.fan4.compat.mixin.pointblank.client.GunGuiDiagnosticMixin"),"installed supported renderer observers activate");
             System.setProperty("fan4compat.renderDiagnostics","false");
             check(!dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client.GunWorldDiagnosticMixin"),"disabled diagnostic hooks not installed");
             check(dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client.StaleGunDrawMixin"),"existing gun fix unaffected by diagnostic opt-out");

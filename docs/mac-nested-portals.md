@@ -1,6 +1,6 @@
 # Mac nested portals with Iris: investigation and workaround
 
-Updated: 2026-10-10 (America/Chicago). Current implementation: **beta 26** (beta 25 portal workaround retained).
+Updated: 2026-10-10 (America/Chicago). Current implementation: **beta 27** (beta 25 portal workaround retained).
 
 This is the maintained investigation record for shader-enabled nested Immersive
 Portals rendering on macOS. Update this document whenever evidence, implementation
@@ -330,3 +330,27 @@ correctly. The pack owner confirms exterior view means the TARDIS exterior-view
 screen/camera. The changed target is consistent with a separate camera render,
 but its renderer ownership must be traced in code rather than inferred solely
 from the framebuffer ID.
+
+## Beta 27 deferred scope and camera diagnostics
+
+The original gun-item wrapper can finish before buffered render-type callbacks
+execute, so it cannot by itself prove stencil cleanup occurred at the actual draw.
+Beta 27 adds static finally wrappers to shared scope setup/cleanup lambdas, the
+default renderer glow callbacks, Iris scope/effect callbacks, and IP's
+`GuiPortalRendering.renderWorldIntoFrameBuffer` boundary. Reports identify the
+exact callback stage and render key. Snapshots also include GUI-camera status,
+portal layer and dimension, allowing temporary camera targets to be distinguished
+from normal and recursive world rendering. This hook is a generic IP GUI-world
+render boundary, not an exact DWM 1.0.39 method binding.
+
+The diagnostic flag remains opt-in. Four distinct reports per stage and 96 total
+per launch reserve budget for new callback stages. Before/after snapshots execute
+without changing GL state or consuming errors. Original operations execute and
+exceptions propagate; diagnostic failures disable sampling. Additional hooks are
+metadata-gated for supported Iris/IP where needed. This adds evidence collection
+only; no new stencil/framebuffer repair is included.
+
+Test XM3 drawn/aimed versus unequipped, shaders off then on, and the exterior
+camera with the XM3 held versus another item. Include the entire launch log so
+setup and cleanup stages can be correlated. Actual callback snapshots are sampled,
+not a complete chronological trace of every draw. Root cause remains unconfirmed.

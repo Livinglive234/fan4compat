@@ -33,6 +33,24 @@ public final class PointBlankRenderNativeCheck implements Opcodes {
             AnnotationNode annotation=handler.visibleAnnotations.stream().filter(a->a.desc.endsWith("/WrapMethod;")).findFirst().orElseThrow();
             if(!annotation.values.toString().contains(target[2]+target[3]))throw new AssertionError("Wrong selector");
         }
+        try(var generated=java.nio.file.Files.list(java.nio.file.Path.of("build/generated/classes/dev/fan4/compat/mixin/pointblank/client"))) {
+            for(var file:generated.filter(p->p.getFileName().toString().endsWith("DiagnosticMixin.class")).toList()) {
+                String simple=file.getFileName().toString();
+                if(simple.startsWith("GunGui")&&args.length<3)continue;
+                if(!simple.startsWith("GunScope")&&!simple.startsWith("GunDefault")&&!simple.startsWith("GunIris")&&!simple.startsWith("GunGui"))continue;
+                ClassNode mixin=new ClassNode();new ClassReader(java.nio.file.Files.readAllBytes(file)).accept(mixin,0);
+                AnnotationNode annotation=mixin.invisibleAnnotations.stream().filter(a->a.desc.endsWith("/Mixin;")).findFirst().orElseThrow();
+                String owner=((java.util.List<?>)VerifyAddon.value(annotation,"targets")).get(0).toString().replace('.','/');
+                ClassNode nativeClass=read(simple.startsWith("GunGui")?args[2]:args[0],owner);
+                MethodNode handler=mixin.methods.stream().filter(m->m.name.equals("fan4$observe")).findFirst().orElseThrow();
+                AnnotationNode wrap=handler.visibleAnnotations.stream().filter(a->a.desc.endsWith("/WrapMethod;")).findFirst().orElseThrow();
+                String selector=((java.util.List<?>)VerifyAddon.value(wrap,"method")).get(0).toString();
+                MethodNode nativeMethod=nativeClass.methods.stream().filter(m->(m.name+m.desc).equals(selector)).findFirst().orElseThrow();
+                if((nativeMethod.access&ACC_STATIC)==0||(handler.access&ACC_STATIC)==0||((nativeClass.access^mixin.access)&ACC_INTERFACE)!=0||handler.tryCatchBlocks.size()!=1)throw new AssertionError("Static/interface/finally mismatch: "+simple);
+                if(!handler.desc.equals(nativeMethod.desc.replace(")V","Lcom/llamalad7/mixinextras/injector/wrapoperation/Operation;)V")))throw new AssertionError("Diagnostic arguments differ: "+simple);
+            }
+        }
+        System.out.println("PASS: deferred scope callbacks and GUI camera wrappers match native methods/static/interface/finally contracts");
         validateStencil(args);
         String[][] fields={
             {"com/mojang/blaze3d/platform/GlStateManager","STENCIL","DEPTH","COLOR_MASK"},

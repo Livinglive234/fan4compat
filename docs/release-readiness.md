@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.26**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.27**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
@@ -164,3 +164,9 @@ and aiming the XM3, then switching away, both with BSL enabled and shaders off.
 Check scopes, ordinary/nested portals and shader toggle/reload; compare Windows.
 Beta 26 scopes native stencil resize to restore framebuffer bindings. The captured
 leak is addressed by regression checks, but full Mac rendering remains unconfirmed.
+
+## Beta 27 diagnostic capture
+
+With fan4compat.renderDiagnostics=true, test XM3 draw/aim/switch-away and exterior
+camera with gun held versus another item, shaders off and on. Capture deferred
+scope setup/cleanup and gui-camera stages. No new repair is claimed in this build.

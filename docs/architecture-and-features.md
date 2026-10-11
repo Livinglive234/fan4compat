@@ -981,3 +981,14 @@ Point Blank only and does not depend on Iris, IP or diagnostics being enabled.
 `GunFramebufferTest` reproduces the observed main-to-zero leak and verifies
 replacement mapping, distinct targets and failures. Native checks cover both
 redirects. This addresses a captured state leak, not a proven full Mac XM3 repair.
+
+### Beta 27 deferred render diagnostics
+
+`pointblank/RenderDiagnostics` now samples actual shared/default/Iris scope
+setup/cleanup callbacks and the IP GUI-world camera boundary through generated
+`GunScope*DiagnosticMixin`, `GunDefault*DiagnosticMixin`,
+`GunIris*DiagnosticMixin` and `GunGuiDiagnosticMixin`. Static/interface wrappers
+are emitted by `RenderDiagnosticsGenerator`; native checks verify real signatures
+and finally paths. Context reports GUI camera, portal layer and dimension. The
+opt-in flag remains unchanged; per-stage caps reserve the total 96-report budget
+for multiple rendering paths. No rendering state is repaired by these observers.

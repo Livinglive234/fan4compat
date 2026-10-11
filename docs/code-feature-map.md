@@ -102,3 +102,8 @@ Point Blank framebuffer scope: `pointblank/FramebufferCompat`, generated
 bindings after lazy stencil resize. `GunFramebufferTest` verifies recreated IDs,
 unrelated targets and exception handling; `pointBlankRenderNativeCheck` verifies
 the real native call sites.
+
+Beta 27 expands `RenderDiagnosticsGenerator` / `RenderDiagnostics` to deferred
+scope callbacks and IP GUI camera boundaries, with context-aware snapshots and
+per-stage budgets. `RenderDiagnosticsTest` verifies budgets; native checks validate
+static/interface callback contracts. All observers remain opt-in.

@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.26.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.27.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 26 release notes](docs/releases/0.1.0-beta.26.md) ·
+[Beta 27 release notes](docs/releases/0.1.0-beta.27.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -203,7 +203,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.26.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.27.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -529,3 +529,11 @@ native stencil-enablement calls, resolving recreated target IDs. Requires suppor
 Point Blank only; Iris and IP are optional. Mac terrain recovery remains to be
 tested with shaders on and off. Keep `-Dfan4compat.renderDiagnostics=true` enabled
 for that test. The beta 25 Mac portal workaround remains active.
+
+## Deferred scope/camera diagnostics (beta 27)
+
+Enable `-Dfan4compat.renderDiagnostics=true`, draw/aim the XM3 with shaders off
+and on, switch away, then open the TARDIS exterior camera. Reports now include
+actual stencil setup/cleanup callbacks, GUI camera boundaries, dimension and portal
+layer. Sampling allows four distinct reports per stage and 96 total per launch.
+Existing fixes are unchanged; this build does not claim to resolve the Mac issue.

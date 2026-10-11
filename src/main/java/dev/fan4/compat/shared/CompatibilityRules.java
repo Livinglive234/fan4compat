@@ -59,6 +59,8 @@ public final class CompatibilityRules {
         if(path.startsWith("soundphysics."))return vs&&spr;
         if(path.startsWith("bclib."))return bclib;
         if(path.startsWith("distanthorizons."))return dh&&(!path.startsWith("distanthorizons.client.")||ip);
+        if(simple.equals("GunGuiDiagnosticMixin"))return supported(mods,"pointblank")&&ip&&Boolean.parseBoolean(System.getProperty("fan4compat.renderDiagnostics","false"));
+        if(simple.startsWith("GunIris")&&simple.endsWith("DiagnosticMixin"))return supported(mods,"pointblank")&&iris&&Boolean.parseBoolean(System.getProperty("fan4compat.renderDiagnostics","false"));
         if(path.startsWith("pointblank."))return supported(mods,"pointblank")&&(!simple.equals("PortalStencilCacheMixin")||ip)&&(!simple.endsWith("DiagnosticMixin")||Boolean.parseBoolean(System.getProperty("fan4compat.renderDiagnostics","false")));
         if(path.startsWith("elytratrails."))return supported(mods,"elytratrails");
         if(path.startsWith("jade."))return vs&&supported(mods,"jade")&&(simple.equals("JadeShipRaycastMixin")||eureka);

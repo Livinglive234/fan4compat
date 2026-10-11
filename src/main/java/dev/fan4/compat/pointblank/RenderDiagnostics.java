@@ -12,10 +12,10 @@ public final class RenderDiagnostics {
     public static final class Probe {
         private final LongSupplier clock;private final Supplier<Map<String,String>> reader;private final Consumer<String> log;
         private final Map<String,Long> next=new HashMap<>();private final Set<String> seen=new HashSet<>();
-        private int reports;private boolean failed;
+        private int reports;private boolean failed;private final Map<String,Integer> stageReports=new HashMap<>();
         public Probe(LongSupplier clock,Supplier<Map<String,String>> reader,Consumer<String> log){this.clock=clock;this.reader=reader;this.log=log;}
         public Sample begin(String stage,String context) {
-            if(failed||reports>=96)return null;
+            if(failed||reports>=96||stageReports.getOrDefault(stage,0)>=4)return null;
             long now=clock.getAsLong();if(now<next.getOrDefault(stage,Long.MIN_VALUE))return null;
             next.put(stage,now+1_000_000_000L);
             try{return new Sample(stage,context,new LinkedHashMap<>(reader.get()));}
@@ -30,6 +30,7 @@ public final class RenderDiagnostics {
                 Map<String,String> changes=new LinkedHashMap<>();
                 for(var entry:after.entrySet())if(!Objects.equals(sample.before.get(entry.getKey()),entry.getValue()))changes.put(entry.getKey(),sample.before.get(entry.getKey())+" -> "+entry.getValue());
                 log.accept("stage="+sample.stage+" item="+sample.context+" exception="+exception+" before="+sample.before+" after="+after+" changes="+changes+" cacheMismatchBefore="+mismatches(sample.before)+" cacheMismatchAfter="+mismatches(after));
+                stageReports.merge(sample.stage,1,Integer::sum);
                 if(++reports==96)log.accept("Report limit reached; restart Minecraft for another diagnostic session.");
             } catch(RuntimeException|LinkageError e){failure(e);}
         }
@@ -48,7 +49,16 @@ public final class RenderDiagnostics {
     private RenderDiagnostics() {}
     public static Object begin(String stage,Object item) {
         if(!ENABLED)return null;
-        try{return PROBE.begin(stage,item==null?"-":String.valueOf(item));}
+        try {
+            if(stage.equals("world")) {
+                boolean gui=present("qouteall.imm_ptl.core.render.GuiPortalRendering")&&(Boolean)call(type("qouteall.imm_ptl.core.render.GuiPortalRendering"),"isRendering");
+                boolean portal=present("qouteall.imm_ptl.core.render.context_management.PortalRendering")&&(Integer)call(type("qouteall.imm_ptl.core.render.context_management.PortalRendering"),"getPortalLayer")>0;
+                stage="world-"+(gui?"gui":"main")+(portal?"-portal":"");
+            }
+            String context=item==null?"-":String.valueOf(item);
+            if(stage.equals("gui-camera")&&item!=null)context="requestedFbo="+field(item,"field_1476")+" requestedSize="+field(item,"field_1480")+"x"+field(item,"field_1477");
+            return PROBE.begin(stage,context);
+        }
         catch(RuntimeException|LinkageError e){return null;}
     }
     public static void end(Object token,boolean exception){try{if(token instanceof Sample sample)PROBE.end(sample,exception);}catch(RuntimeException|LinkageError ignored){}}
@@ -82,6 +92,9 @@ public final class RenderDiagnostics {
         state.put("cached.depthWrite",String.valueOf(field(field(cache,"DEPTH"),"field_5076")));
         Object mask=field(cache,"COLOR_MASK");colors=new StringJoiner(",");for(String name:new String[]{"field_5063","field_5062","field_5061","field_5060"})colors.add(String.valueOf(field(mask,name)));state.put("cached.colorWrite",colors.toString());
         Object client=call(type("net.minecraft.class_310"),"method_1551"),target=call(client,"method_1522");
+        if(present("qouteall.imm_ptl.core.render.GuiPortalRendering"))state.put("guiCamera",String.valueOf(call(type("qouteall.imm_ptl.core.render.GuiPortalRendering"),"isRendering")));
+        if(present("qouteall.imm_ptl.core.render.context_management.PortalRendering"))state.put("portalLayer",String.valueOf(call(type("qouteall.imm_ptl.core.render.context_management.PortalRendering"),"getPortalLayer")));
+        Object world=field(client,"field_1687");if(world!=null)state.put("dimension",String.valueOf(call(world,"method_27983")));
         state.put("mainFbo",String.valueOf(field(target,"field_1476")));state.put("mainDepthTex",String.valueOf(field(target,"field_1474")));
         Object config=type("com.vicmatskiv.pointblank.Config");for(String name:new String[]{"pipScopesEnabled","pipFallbackModDetected","customShadersEnabled"})state.put(name,String.valueOf(field(config,name)));
         if(present("net.irisshaders.iris.api.v0.IrisApi"))state.put("shaders",String.valueOf(call(call(type("net.irisshaders.iris.api.v0.IrisApi"),"getInstance"),"isShaderPackInUse")));else state.put("shaders","Iris absent");

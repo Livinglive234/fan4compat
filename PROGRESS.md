@@ -1,10 +1,25 @@
 # Fan4Compat progress
 
-Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.26**.
+Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.27**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 27: deferred scope and exterior-camera diagnostics
+
+Expands opt-in Point Blank diagnostics around actual shared/default/Iris stencil
+setup and cleanup lambdas, plus IP's GUI-world render used for camera views. Each
+callback records before/after state in finally, including exceptions, and logs its
+selector-specific stage and render key. Snapshots now distinguish GUI camera,
+portal layer and dimension. Separate static/interface wrappers match actual native
+methods. Reports are capped at four per stage and 96 total, reserving room for
+camera and deferred callbacks instead of letting routine world draws consume the
+entire budget. Existing repairs remain unchanged. No GL errors are consumed and
+no graphics state is altered. New GUI and Iris hooks require their supported mods;
+all diagnostics remain opt-in with fan4compat.renderDiagnostics=true.
+Native checks validate callback signatures, static/interface shape and finally
+paths. Full XM3/camera root cause remains unresolved; this build collects evidence.
 
 ## Beta 26 Mac result: XM3 still hides terrain while held
 
