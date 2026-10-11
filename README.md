@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.31.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.32.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 31 release notes](docs/releases/0.1.0-beta.31.md) ·
+[Beta 32 release notes](docs/releases/0.1.0-beta.32.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -203,7 +203,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.31.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.32.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -551,3 +551,18 @@ XM3 promptly after joining with `-Dfan4compat.renderDiagnostics=true`.
 Beta 31 resets stale scope stencil comparisons before Immersive Portals clears its
 top-level stencil frame. Recursive portal masks remain owned by IP. Mac recovery
 requires gameplay verification; diagnostics remain available.
+
+## Beta 32: persistent DH overlay diagnostics
+
+The Windows AMD capture reports DH LODs overlaying world terrain while guns remain
+visible. Unequipping does not recover; shader reload does. Root cause is unconfirmed.
+Opt-in DHRenderDiagnostics records native layer/fade pass entry/exit framebuffer,
+depth-test/write/function, attachment IDs, shader program, active texture/binding,
+main depth texture, portal layer, GUI-camera status and dimension. Iris DH depth
+getter return IDs are observed without requesting extra getters. Samples occur at
+most every five seconds per stage, capped at 600 total, and remain available for
+late onset. No graphics state is mutated and no error queue consumed. Enable
+-Dfan4compat.dhRenderDiagnostics=true (existing renderDiagnostics also enables it).
+Capture normal rendering, overlay onset, and shader off/on recovery in one log;
+note the onset time. Supported DH is required; depth getter observer also needs
+supported Iris. No Point Blank/IP dependency for the DH pass observers.

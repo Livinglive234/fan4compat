@@ -14,6 +14,17 @@ public final class DistantHorizonsGenerator implements Opcodes {
         m.visitTypeInsn(CHECKCAST,result);m.visitInsn(ARETURN);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
     }
     static void portalRenderMixins()throws Exception {
+        for(String method:new String[]{"renderLodLayer","renderFadeOpaque","renderFadeTransparent"})
+            RenderDiagnosticsGenerator.wrap("distanthorizons/client/"+(method.equals("renderLodLayer")?"DhLodDiagnosticMixin":method.equals("renderFadeOpaque")?"DhOpaqueFadeDiagnosticMixin":"DhTransparentFadeDiagnosticMixin"),"com/seibel/distanthorizons/core/api/internal/ClientApi",method+(method.equals("renderLodLayer")?"(Z)V":"()V"),method,-1,false,false,ROOT+"iris/DhRenderDiagnostics");
+        String depthName=ROOT+"mixin/distanthorizons/client/DhDepthDiagnosticMixin";
+        ClassWriter depthWriter=GenerateAddon.writer(depthName,"net/irisshaders/iris/compat/dh/DHCompat");
+        for(String getter:new String[]{"getDepthTex","getDepthTexNoTranslucent"}) {
+            MethodVisitor observer=depthWriter.visitMethod(ACC_PRIVATE,"fan4$observe"+getter,"(Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable;)V",null,null);
+            GenerateAddon.inject(observer,getter+"()I","RETURN",false);observer.visitCode();observer.visitLdcInsn(getter);observer.visitVarInsn(ALOAD,1);
+            observer.visitMethodInsn(INVOKEVIRTUAL,"org/spongepowered/asm/mixin/injection/callback/CallbackInfoReturnable","getReturnValueI","()I",false);
+            observer.visitMethodInsn(INVOKESTATIC,ROOT+"iris/DhRenderDiagnostics","depth","(Ljava/lang/String;I)V",false);observer.visitInsn(RETURN);observer.visitMaxs(0,0);observer.visitEnd();
+        }
+        GenerateAddon.save(depthName,depthWriter);
         String name=ROOT+"mixin/distanthorizons/client/DhPortalRenderMixin";
         ClassWriter w=GenerateAddon.writer(name,"com/seibel/distanthorizons/core/api/internal/ClientApi");
         for(String method:new String[]{"renderLodLayer","renderFadeOpaque","renderFadeTransparent"}) {

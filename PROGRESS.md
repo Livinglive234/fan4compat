@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.31**.
+Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.32**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
@@ -1792,3 +1792,18 @@ loaded/unloaded transitions, reused shader restoration and portal/disabled gates
 Native DH selectors, uniform field/setter and Minecraft camera getter were checked.
 Clean build passes; in-game confirmation is pending. Destination portal LOD work
 is paused at its documented isolated-prototype stage.
+
+## Beta 32: persistent DH overlay diagnostics
+
+The Windows AMD capture reports DH LODs overlaying world terrain while guns remain
+visible. Unequipping does not recover; shader reload does. Root cause is unconfirmed.
+Opt-in DHRenderDiagnostics records native layer/fade pass entry/exit framebuffer,
+depth-test/write/function, attachment IDs, shader program, active texture/binding,
+main depth texture, portal layer, GUI-camera status and dimension. Iris DH depth
+getter return IDs are observed without requesting extra getters. Samples occur at
+most every five seconds per stage, capped at 600 total, and remain available for
+late onset. No graphics state is mutated and no error queue consumed. Enable
+-Dfan4compat.dhRenderDiagnostics=true (existing renderDiagnostics also enables it).
+Capture normal rendering, overlay onset, and shader off/on recovery in one log;
+note the onset time. Supported DH is required; depth getter observer also needs
+supported Iris. No Point Blank/IP dependency for the DH pass observers.

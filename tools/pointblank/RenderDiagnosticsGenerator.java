@@ -8,7 +8,7 @@ public final class RenderDiagnosticsGenerator implements Opcodes {
         wrap(simple,owner,selector,stage,item,statik,iface,HELPER);
     }
     static void wrap(String simple,String owner,String selector,String stage,int item,boolean statik,boolean iface,String helper)throws Exception {
-        String name=GenerateAddon.ROOT+"mixin/pointblank/client/"+simple;ClassWriter w=GenerateAddon.writer(name,owner);
+        String name=GenerateAddon.ROOT+"mixin/"+(simple.contains("/")?simple:"pointblank/client/"+simple);ClassWriter w=GenerateAddon.writer(name,owner);
         if(iface)w.visit(V17,ACC_PUBLIC|ACC_INTERFACE|ACC_ABSTRACT,name,null,"java/lang/Object",null);
         String desc=selector.substring(selector.indexOf('('));Type[] args=Type.getArgumentTypes(desc);
         String handler=desc.substring(0,desc.indexOf(')'))+"L"+OP+";)V";

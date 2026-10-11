@@ -49,6 +49,10 @@
     "eureka.common.EurekaPortalWarningInfoMixin"
   ],
   "client": [
+    "distanthorizons.client.DhDepthDiagnosticMixin",
+    "distanthorizons.client.DhLodDiagnosticMixin",
+    "distanthorizons.client.DhOpaqueFadeDiagnosticMixin",
+    "distanthorizons.client.DhTransparentFadeDiagnosticMixin",
     "pointblank.client.PortalStencilCacheMixin",
     "pointblank.client.PortalStencilPrepareMixin",
     "pointblank.client.GunStencilMixin",

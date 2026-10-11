@@ -449,3 +449,18 @@ diagnostic flag, and targets only the stencil renderer's prepareRendering clear.
 It does not change Iris shader-renderer preparation or force framebuffer bindings.
 Regression/native checks validate the hook and state policy; Mac testing must still
 confirm visual recovery, including doorway portals and exterior camera.
+
+## Beta 32: persistent DH overlay diagnostics
+
+The Windows AMD capture reports DH LODs overlaying world terrain while guns remain
+visible. Unequipping does not recover; shader reload does. Root cause is unconfirmed.
+Opt-in DHRenderDiagnostics records native layer/fade pass entry/exit framebuffer,
+depth-test/write/function, attachment IDs, shader program, active texture/binding,
+main depth texture, portal layer, GUI-camera status and dimension. Iris DH depth
+getter return IDs are observed without requesting extra getters. Samples occur at
+most every five seconds per stage, capped at 600 total, and remain available for
+late onset. No graphics state is mutated and no error queue consumed. Enable
+-Dfan4compat.dhRenderDiagnostics=true (existing renderDiagnostics also enables it).
+Capture normal rendering, overlay onset, and shader off/on recovery in one log;
+note the onset time. Supported DH is required; depth getter observer also needs
+supported Iris. No Point Blank/IP dependency for the DH pass observers.

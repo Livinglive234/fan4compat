@@ -58,6 +58,7 @@ public final class CompatibilityRules {
         if(simple.equals("PortalSoundRayMixin"))return ip&&spr&&!mods.containsKey("valkyrienskies");
         if(path.startsWith("soundphysics."))return vs&&spr;
         if(path.startsWith("bclib."))return bclib;
+        if(path.startsWith("distanthorizons.")&&simple.endsWith("DiagnosticMixin"))return dh&&(!simple.equals("DhDepthDiagnosticMixin")||iris)&&Boolean.parseBoolean(System.getProperty("fan4compat.dhRenderDiagnostics",System.getProperty("fan4compat.renderDiagnostics","false")));
         if(path.startsWith("distanthorizons."))return dh&&(!path.startsWith("distanthorizons.client.")||ip);
         if(simple.equals("IrisScopeStencilMixin"))return supported(mods,"pointblank")&&iris;
         if(simple.equals("GunGuiDiagnosticMixin"))return supported(mods,"pointblank")&&ip&&Boolean.parseBoolean(System.getProperty("fan4compat.renderDiagnostics","false"));

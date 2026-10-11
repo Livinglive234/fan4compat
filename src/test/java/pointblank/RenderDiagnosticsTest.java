@@ -43,6 +43,12 @@ public final class RenderDiagnosticsTest {
         var cappedTrace=new StencilTrace.Probe(()->0L,()->traceState,()->"caller",traceLogs::add);cappedTrace.arm();
         for(int i=0;i<100;i++){transition=cappedTrace.begin("setter");traceState.put("stencilRef",String.valueOf(i));cappedTrace.end(transition,false);}
         check(cappedTrace.begin("bind")==null,"96 trace transitions stop subsequent native queries");
+        AtomicLong dhClock=new AtomicLong();AtomicInteger dhReads=new AtomicInteger();List<String> dhLogs=new ArrayList<>();
+        var dhProbe=new dev.fan4.compat.iris.DhRenderDiagnostics.Probe(dhClock::get,()->{dhReads.incrementAndGet();return state;},dhLogs::add);
+        var dhSample=dhProbe.begin("lod");dhProbe.end(dhSample,false);
+        check(dhProbe.begin("lod")==null&&dhReads.get()==2,"DH sampling avoids per-frame queries");
+        dhClock.set(180_000_000_000L);state.put("drawFbo","99");dhSample=dhProbe.begin("lod");dhProbe.end(dhSample,false);
+        check(dhLogs.size()==2&&dhLogs.get(1).contains("drawFbo=99"),"DH diagnostics still capture late changes rather than exhausting four samples");
         String previous=System.getProperty("fan4compat.renderDiagnostics");
         try {
             var installed=Map.of("pointblank","2.2.0");
