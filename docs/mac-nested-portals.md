@@ -1,6 +1,6 @@
 # Mac nested portals with Iris: investigation and workaround
 
-Updated: 2026-10-11 (America/Chicago). Current implementation: **beta 31** (beta 25 portal workaround retained).
+Updated: 2026-10-11 (America/Chicago). Current implementation: **beta 33** (beta 25 portal workaround retained).
 
 This is the maintained investigation record for shader-enabled nested Immersive
 Portals rendering on macOS. Update this document whenever evidence, implementation
@@ -9,10 +9,17 @@ validation and actual GPU results separate.
 
 ## Current status
 
-**Beta 25's Mac log confirms the separate attachment layout and a successful
-layer-0 depth copy. No compatibility fallback appears in the supplied capture.
-Visible nested-portal rendering and the broader gameplay checklist still need
-pack-owner confirmation.**
+**The pack owner reports normal rendering on beta 33, including the previously
+reported XM3 shader overlap and TARDIS exterior camera symptoms.** The latest
+Apple M2 Pro / BSL_v10.1.5 capture includes shader-enabled gun rendering, portal
+and GUI-camera passes, successful depth copies with `GL_NO_ERROR`, normal render
+mode and normal shutdown. No compatibility fallback appears in that capture.
+
+Explicit visual portal-in-portal confirmation and resize/reload/rejoin coverage
+remain separate checks: layer-1 log entries alone do not prove visible nesting at
+all depths. The DH depth-attachment repair may explain the improvement, but that
+causal link is unproven. Earlier sections preserve the investigation as it occurred.
+Opt-in render/DH diagnostics can now be disabled without disabling the repairs.
 
 The affected setup is Apple M2 Pro, Apple OpenGL 4.1 Metal - 91.7, Minecraft
 1.21.1, Iris 1.8.1+mc1.21.1 and BSL_v10.1.5. The supplied IP jar is named
@@ -464,3 +471,25 @@ late onset. No graphics state is mutated and no error queue consumed. Enable
 Capture normal rendering, overlay onset, and shader off/on recovery in one log;
 note the onset time. Supported DH is required; depth getter observer also needs
 supported Iris. No Point Blank/IP dependency for the DH pass observers.
+
+## Latest gameplay validation (2026-10-11)
+
+The pack owner confirmed beta 33 resolves the Windows DH terrain overlay and
+reported normal Mac XM3, portal and TARDIS exterior-camera rendering. The Windows
+AMD RX 7700 XT log retains DH's own depth attachment during Iris main-depth
+refresh. The Apple M2 Pro log captures BSL_v10.1.5 gun and camera rendering,
+successful portal depth copies with `GL_NO_ERROR`, normal render mode and normal
+shutdown. These are full-pack user reports, not automated GPU tests.
+
+The Mac improvement coincides with the DH repair; a causal link to the earlier
+gun-over-portal overlap has not been established. Explicit visual portal-in-portal
+confirmation, broader shader/GPU coverage and lifecycle edge cases remain separate
+checks. Earlier pending rendering notes below record their status at that build.
+Point Blank, Freecam/BSL and Graves were also confirmed working on 2026-10-10.
+
+Render diagnostics can now be disabled: omit or set to false
+`fan4compat.renderDiagnostics` and `fan4compat.dhRenderDiagnostics`. Runtime fixes
+remain active. The separate portal depth observer can be disabled with
+`-Dfan4compat.portalDepthDiagnostics=false`.
+
+See [beta 33 release notes](releases/0.1.0-beta.33.md) for the DH attachment repair.

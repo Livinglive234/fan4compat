@@ -26,6 +26,26 @@ Ship visibility through reopened doors before exiting remains a known limitation
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
 
+## Latest gameplay validation (2026-10-11)
+
+The pack owner confirmed beta 33 resolves the Windows DH terrain overlay and
+reported normal Mac XM3, portal and TARDIS exterior-camera rendering. The Windows
+AMD RX 7700 XT log retains DH's own depth attachment during Iris main-depth
+refresh. The Apple M2 Pro log captures BSL_v10.1.5 gun and camera rendering,
+successful portal depth copies with `GL_NO_ERROR`, normal render mode and normal
+shutdown. These are full-pack user reports, not automated GPU tests.
+
+The Mac improvement coincides with the DH repair; a causal link to the earlier
+gun-over-portal overlap has not been established. Explicit visual portal-in-portal
+confirmation, broader shader/GPU coverage and lifecycle edge cases remain separate
+checks. Earlier pending rendering notes below record their status at that build.
+Point Blank, Freecam/BSL and Graves were also confirmed working on 2026-10-10.
+
+Render diagnostics can now be disabled: omit or set to false
+`fan4compat.renderDiagnostics` and `fan4compat.dhRenderDiagnostics`. Runtime fixes
+remain active. The separate portal depth observer can be disabled with
+`-Dfan4compat.portalDepthDiagnostics=false`.
+
 ## Aether accessory graves
 
 With Aether, Accessories 1.1.0-beta.48+1.21.1 and Player Graves 1.0.0 installed,
@@ -43,7 +63,8 @@ The grave screen has six rows. If it fills, reopen it after taking items to expo
 remaining stacks; quick retrieval handles the whole grave. Items persist with the
 grave across world saves. Keep Fan4Compat installed until these graves are emptied.
 The grave stores up to 128 stacks; accessories beyond that capacity drop normally.
-Install the same build on client and server. Gameplay testing is pending.
+Install the same build on client and server. The pack owner confirmed Graves
+working on 2026-10-10; unusual recovery/save edge cases remain in the checklist.
 
 ## Automatic Fan4Compat updates
 
@@ -94,7 +115,8 @@ With supported Iris/IP, contexts lacking `glCopyImageSubData` use OpenGL 3
 framebuffer blits for the portal renderer's depth and color copies. This targets
 the native abort on macOS OpenGL 4.1. The existing image-copy path stays active
 on GPUs supporting it. Temporary framebuffer objects and scissor/binding state
-are cleaned up after each fallback copy. Mac visual confirmation remains pending.
+are cleaned up after each fallback copy. Beta 33 Mac portal/camera rendering is
+owner-confirmed; explicit nested-portal and lifecycle checks remain separate.
 
 ## Beta 9 Freecam with BSL
 
@@ -103,8 +125,8 @@ independent DH terrain/water distance discard that beta 8's native clip changes
 do not affect. Beta 9 bypasses that specific discard while the active Freecam
 is in an unloaded full-terrain chunk. Loaded terrain, disabled Freecam and portal
 views keep the original rule. Requires supported Freecam, DH and Iris versions;
-shader pack files and global settings remain unchanged. In-game confirmation is
-pending.
+shader pack files and global settings remain unchanged. Freecam with BSL was
+confirmed working by the pack owner on 2026-10-10.
 
 ## Beta 8 Freecam nearby LOD clipping
 
@@ -113,8 +135,8 @@ plane is capped at half a block and its native terrain near-clip uniform is zero
 This targets native clipping around a camera where full chunks cannot replace them.
 Native clipping returns in loaded terrain or when Freecam is disabled. Normal
 player views, other dimensions and portal views retain their native behavior.
-No terrain generation or permanent DH setting is changed. In-game verification
-of the reported disappearing/reappearing terrain remains pending.
+No terrain generation or permanent DH setting is changed. The combined Freecam/BSL
+fixes were confirmed working on 2026-10-10.
 
 ## Beta 7 Freecam / Distant Horizons
 
@@ -124,7 +146,7 @@ installed. Minecraft's inherited player tick otherwise returns at that boundary,
 even when DH displays distant terrain. The hook changes that one tick condition
 for the active camera only; the real player retains the native terrain check.
 It does not request extra chunks, enable interactions with LODs, or alter ship
-collision guards. Camera movement beyond the boundary needs in-game verification.
+collision guards. Freecam was confirmed working on 2026-10-10.
 
 ## Beta 6 cleanup
 
@@ -581,5 +603,6 @@ ordinary framebuffer updates and DH's native reconnection/resizing remain intact
 Hook requires supported Iris and DH, without requiring PB/IP or diagnostics.
 No recurring GL queries, forced pipeline reload or texture allocation is added.
 Regression checks cover identity and repeated refresh; native selectors checked
-against Iris 1.8.1. Gameplay recovery remains to be verified. Existing beta 32
-diagnostics remain available. This is separate from Mac gun/portal overlap.
+against Iris 1.8.1. The pack owner confirmed Windows DH recovery and normal Mac
+rendering on beta 33 (2026-10-11). Existing beta 32 diagnostics remain available;
+the causal link to Mac gun/portal overlap remains unproven.

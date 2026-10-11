@@ -46,6 +46,26 @@ and switching away from the XM3, ordinary/nested portals, scope rendering and
 shaders off/on. The pack owner confirmed Point Blank fixed on 2026-10-10;
 this does not separately confirm every nested-portal case. Diagnostics remain available.
 
+## Latest gameplay validation (2026-10-11)
+
+The pack owner confirmed beta 33 resolves the Windows DH terrain overlay and
+reported normal Mac XM3, portal and TARDIS exterior-camera rendering. The Windows
+AMD RX 7700 XT log retains DH's own depth attachment during Iris main-depth
+refresh. The Apple M2 Pro log captures BSL_v10.1.5 gun and camera rendering,
+successful portal depth copies with `GL_NO_ERROR`, normal render mode and normal
+shutdown. These are full-pack user reports, not automated GPU tests.
+
+The Mac improvement coincides with the DH repair; a causal link to the earlier
+gun-over-portal overlap has not been established. Explicit visual portal-in-portal
+confirmation, broader shader/GPU coverage and lifecycle edge cases remain separate
+checks. Earlier pending rendering notes below record their status at that build.
+Point Blank, Freecam/BSL and Graves were also confirmed working on 2026-10-10.
+
+Render diagnostics can now be disabled: omit or set to false
+`fan4compat.renderDiagnostics` and `fan4compat.dhRenderDiagnostics`. Runtime fixes
+remain active. The separate portal depth observer can be disabled with
+`-Dfan4compat.portalDepthDiagnostics=false`.
+
 ## Confirmed release checks
 
 On 2026-10-10 the pack owner also confirmed Point Blank rendering, Freecam with
@@ -73,7 +93,7 @@ changes. Log warning count alone is not a release criterion.
 
 Beta 1 freezes the current supported feature set. Exact supported versions,
 installation instructions and known limitations remain in the README and
-[release notes](releases/0.1.0-beta.12.md).
+[release notes](releases/0.1.0-beta.33.md).
 
 ## Move from beta to stable
 
@@ -111,7 +131,8 @@ or XP, a full respawn inventory, keepInventory/keepAccessoryInventory, KEEP and
 DESTROY rules, protected graves, and save/restart before recovery. For a full grave
 screen, take items and reopen to recover remaining stacks. Native API and fixture
 checks pass; gameplay/save-restart confirmation is pending. Publish a release
-only after these checks.
+after checking the affected workflows; the owner subsequently confirmed Graves
+working on 2026-10-10. The listed edge cases remain a regression checklist.
 
 ## Beta 14 original accessory-slot checks
 

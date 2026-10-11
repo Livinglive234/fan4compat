@@ -1,11 +1,25 @@
 # Remaining log follow-ups
 
-Reviewed 2026-10-07. Current release: alpha 35. The newest supplied crash excerpt
-is the alpha 31 waypoint selection stack overflow, addressed in alpha 32. The
-most recent full startup log reviewed here is alpha 28; its warnings are evidence
-of unresolved candidates, not proof that every issue persists in alpha 35.
-The pack owner accepts the resource/model candidates below as low priority;
-they are not release blockers without a demonstrated functional problem.
+Reviewed through **0.1.0-beta.33**, 2026-10-11. The latest Windows and Mac
+captures end normally; the pack owner confirms the DH overlay and Mac rendering
+symptoms are gone. The beta 33 Windows capture retains DH depth attachments,
+and the Mac capture reports successful portal depth copying. This does not mean
+every warning in the pack is fixed.
+
+Recent captures still contain Macaw's/Biomes O' Plenty model-property warnings,
+Create/Flywheel backend fallback, an invalid IronChest resource path, empty
+Moonlight/Porting Lib registry notices and a stale update-version list. These
+need a demonstrated functional symptom before another runtime patch. The stale
+third-party update check is separate from Fan4Compat's release updater.
+
+One Mac `Raycast too far` error came from IP's portal block-targeting path before
+shaders were enabled. It was nonfatal; reproduce a targeting/interaction failure
+before diagnosing it as an unresolved gameplay defect. An earlier native SQLite
+crash was not reproduced in these normal exits; its cause remains unconfirmed.
+
+The following older alpha-log candidates remain historical follow-ups, not proof
+that they persist in beta 33. The pack owner accepts cosmetic/resource issues as
+low priority. ChestTracker remains explicitly excluded from this patch scope.
 
 | Candidate | Observed evidence | Next useful check |
 | --- | --- | --- |

@@ -1,9 +1,29 @@
 # Fan4Compat: architecture, features and contributor guide
 
-This document explains the active implementation at **0.1.0-beta.23**, reviewed
-2026-10-10 (America/Chicago). It is an onboarding guide for human contributors and
+This document explains the active implementation at **0.1.0-beta.33**, reviewed
+2026-10-11 (America/Chicago). It is an onboarding guide for human contributors and
 AI coding assistants. The source and version gates describe what actually runs;
 older release notes describe historical builds and can contain superseded behavior.
+
+## Latest gameplay validation (2026-10-11)
+
+The pack owner confirmed beta 33 resolves the Windows DH terrain overlay and
+reported normal Mac XM3, portal and TARDIS exterior-camera rendering. The Windows
+AMD RX 7700 XT log retains DH's own depth attachment during Iris main-depth
+refresh. The Apple M2 Pro log captures BSL_v10.1.5 gun and camera rendering,
+successful portal depth copies with `GL_NO_ERROR`, normal render mode and normal
+shutdown. These are full-pack user reports, not automated GPU tests.
+
+The Mac improvement coincides with the DH repair; a causal link to the earlier
+gun-over-portal overlap has not been established. Explicit visual portal-in-portal
+confirmation, broader shader/GPU coverage and lifecycle edge cases remain separate
+checks. Earlier pending rendering notes below record their status at that build.
+Point Blank, Freecam/BSL and Graves were also confirmed working on 2026-10-10.
+
+Render diagnostics can now be disabled: omit or set to false
+`fan4compat.renderDiagnostics` and `fan4compat.dhRenderDiagnostics`. Runtime fixes
+remain active. The separate portal depth observer can be disabled with
+`-Dfan4compat.portalDepthDiagnostics=false`.
 
 ## Contents
 
@@ -1036,5 +1056,6 @@ ordinary framebuffer updates and DH's native reconnection/resizing remain intact
 Hook requires supported Iris and DH, without requiring PB/IP or diagnostics.
 No recurring GL queries, forced pipeline reload or texture allocation is added.
 Regression checks cover identity and repeated refresh; native selectors checked
-against Iris 1.8.1. Gameplay recovery remains to be verified. Existing beta 32
-diagnostics remain available. This is separate from Mac gun/portal overlap.
+against Iris 1.8.1. The pack owner confirmed Windows DH recovery and normal Mac
+rendering on beta 33 (2026-10-11). Existing beta 32 diagnostics remain available;
+the causal link to Mac gun/portal overlap remains unproven.
