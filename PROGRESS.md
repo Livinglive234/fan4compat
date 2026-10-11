@@ -1,10 +1,25 @@
 # Fan4Compat progress
 
-Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.28**.
+Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.29**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 29: trace the remaining Mac XM3 failure
+
+Pack-owner beta 28 testing confirms terrain still disappears with XM3 held.
+Scope setup applies reference 2 correctly, but the next gun-item boundary reports
+actual reference 0 with cached 2. Captured cleanup restores color/depth writes.
+Beta 29 observes native Minecraft framebuffer binds and cached stencil setters,
+including arguments, before/after references, stencil bits and caller stacks.
+The opt-in trace arms at the first gun preparation/item callback, stops after
+45 seconds or 96 distinct reports, and performs no state changes or GL error reads.
+No additional rendering repair is claimed. Native binding/descriptor/finally
+checks and regressions cover arming, expiry, deduplication and query limits.
+The separate native SQLite crash needs hs_err_pid14505.log; a subsequent run exits
+normally with a DH closed-statement error during shutdown. The TARDIS [-1,-2]
+chunk-loading failure repeats without an accompanying stack.
 
 ## Beta 28: reapply stencil functions and cover Iris effects
 

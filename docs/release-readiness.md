@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.28**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.29**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
@@ -176,3 +176,6 @@ after cache updates, and adds `IrisScopeStencilMixin` for Iris glow/muzzle-flash
 raw calls. Regression/native checks cover the cached-no-op mismatch and callback
 bindings. Mac XM3/exterior-camera visual recovery still needs testing; retain
 `-Dfan4compat.renderDiagnostics=true`. See the maintained Mac investigation.
+
+Beta 29 is a diagnostic build. Beta 28 did not resolve the Mac XM3 disappearance;
+the short caller trace is pending Mac testing. No new visual recovery is claimed.

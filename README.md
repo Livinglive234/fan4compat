@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.28.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.29.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 28 release notes](docs/releases/0.1.0-beta.28.md) ·
+[Beta 29 release notes](docs/releases/0.1.0-beta.29.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -203,7 +203,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.28.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.29.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -543,3 +543,7 @@ after cache updates, and adds `IrisScopeStencilMixin` for Iris glow/muzzle-flash
 raw calls. Regression/native checks cover the cached-no-op mismatch and callback
 bindings. Mac XM3/exterior-camera visual recovery still needs testing; retain
 `-Dfan4compat.renderDiagnostics=true`. See the maintained Mac investigation.
+
+Beta 29 adds an opt-in 45-second framebuffer/stencil caller trace to investigate the
+remaining Mac XM3 disappearance. It does not add a new rendering repair. Draw the
+XM3 promptly after joining with `-Dfan4compat.renderDiagnostics=true`.

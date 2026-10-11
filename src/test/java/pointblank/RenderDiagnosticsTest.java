@@ -1,4 +1,5 @@
 import dev.fan4.compat.pointblank.RenderDiagnostics;
+import dev.fan4.compat.pointblank.StencilTrace;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 
@@ -27,13 +28,28 @@ public final class RenderDiagnosticsTest {
         check(fair.size()==4&&budget.begin("gui-camera","new")!=null,"per-stage budget reserves reports for camera and deferred callbacks");
         check(RenderDiagnostics.mismatches(Map.of("colorWrite","false,false,false,false","cached.colorWrite","true,true,true,true")).containsKey("colorWrite"),"color-write cache mismatch detected");
         check(RenderDiagnostics.mismatches(Map.of("depthWrite","true","cached.depthWrite","true")).isEmpty(),"matching state not labelled a leak");
+        AtomicLong traceClock=new AtomicLong();AtomicInteger traceReads=new AtomicInteger();List<String> traceLogs=new ArrayList<>();
+        Map<String,String> traceState=new LinkedHashMap<>(Map.of("drawFbo","1","stencilRef","2"));
+        var trace=new StencilTrace.Probe(traceClock::get,()->{traceReads.incrementAndGet();return traceState;},()->"caller",traceLogs::add);
+        check(trace.begin("bind")==null&&traceReads.get()==0,"unarmed trace performs no state queries");
+        trace.arm();var transition=trace.begin("bind");traceState.put("drawFbo","0");traceState.put("stencilRef","0");trace.end(transition,false);
+        check(traceLogs.size()==1&&traceLogs.get(0).contains("caller=caller")&&traceLogs.get(0).contains("stencilRef=2")&&traceLogs.get(0).contains("stencilRef=0"),"binding change keeps chronological state and caller");
+        transition=trace.begin("framebuffer-bind");trace.end(transition,false);check(traceLogs.size()==1,"unchanged framebuffer calls do not fill trace budget");
+        transition=trace.begin("cached-stencil-setter","[517, 2, 255]");trace.end(transition,false);
+        check(traceLogs.size()==2&&traceLogs.get(1).contains("arguments=[517, 2, 255]"),"cached no-op setter retains requested arguments");
+        transition=trace.begin("cached-stencil-setter","[517, 2, 255]");trace.end(transition,false);check(traceLogs.size()==2,"identical setter observations deduplicated");
+        traceClock.set(45_000_000_000L);trace.arm();int beforeTraceReads=traceReads.get();
+        check(trace.begin("bind")==null&&traceReads.get()==beforeTraceReads,"trace expires after 45 seconds and cannot rearm each frame");
+        var cappedTrace=new StencilTrace.Probe(()->0L,()->traceState,()->"caller",traceLogs::add);cappedTrace.arm();
+        for(int i=0;i<100;i++){transition=cappedTrace.begin("setter");traceState.put("stencilRef",String.valueOf(i));cappedTrace.end(transition,false);}
+        check(cappedTrace.begin("bind")==null,"96 trace transitions stop subsequent native queries");
         String previous=System.getProperty("fan4compat.renderDiagnostics");
         try {
             var installed=Map.of("pointblank","2.2.0");
             System.clearProperty("fan4compat.renderDiagnostics");
             check(!dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client.GunWorldDiagnosticMixin"),"diagnostic hooks are off by default");
             System.setProperty("fan4compat.renderDiagnostics","true");
-            for(String hook:new String[]{"GunRender","GunPrepare","GunAux","GunWorld"})check(dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client."+hook+"DiagnosticMixin"),hook+" diagnostic installed when opted in");
+            for(String hook:new String[]{"GunRender","GunPrepare","GunAux","GunWorld","GunBind","GunSetter"})check(dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client."+hook+"DiagnosticMixin"),hook+" diagnostic installed when opted in");
             check(!dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client.GunIris5DiagnosticMixin"),"Iris callback observer requires Iris");
             check(!dev.fan4.compat.shared.CompatibilityRules.applies(installed,false,"dev.fan4.compat.mixin.pointblank.client.GunGuiDiagnosticMixin"),"camera observer requires IP");
             var full=new java.util.HashMap<>(installed);full.put("iris","1.8.1+mc1.21.1");full.put("immersive_portals","6.0.6");

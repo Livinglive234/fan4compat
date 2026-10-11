@@ -113,3 +113,7 @@ after cache updates, and adds `IrisScopeStencilMixin` for Iris glow/muzzle-flash
 raw calls. Regression/native checks cover the cached-no-op mismatch and callback
 bindings. Mac XM3/exterior-camera visual recovery still needs testing; retain
 `-Dfan4compat.renderDiagnostics=true`. See the maintained Mac investigation.
+
+Beta 29: `pointblank/StencilTrace.java` and generated GunBind/GunSetterDiagnosticMixin
+observe native Minecraft framebuffer binds and stencil setters. Opt-in, armed by
+gun callbacks, capped at 45 seconds/96 distinct reports; no rendering repair.

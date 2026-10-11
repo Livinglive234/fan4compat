@@ -5,6 +5,9 @@ public final class RenderDiagnosticsGenerator implements Opcodes {
     static final String OP="com/llamalad7/mixinextras/injector/wrapoperation/Operation",HELPER=GenerateAddon.ROOT+"pointblank/RenderDiagnostics";
     static void wrap(String simple,String owner,String selector,String stage,int item)throws Exception {wrap(simple,owner,selector,stage,item,false,false);}
     static void wrap(String simple,String owner,String selector,String stage,int item,boolean statik,boolean iface)throws Exception {
+        wrap(simple,owner,selector,stage,item,statik,iface,HELPER);
+    }
+    static void wrap(String simple,String owner,String selector,String stage,int item,boolean statik,boolean iface,String helper)throws Exception {
         String name=GenerateAddon.ROOT+"mixin/pointblank/client/"+simple;ClassWriter w=GenerateAddon.writer(name,owner);
         if(iface)w.visit(V17,ACC_PUBLIC|ACC_INTERFACE|ACC_ABSTRACT,name,null,"java/lang/Object",null);
         String desc=selector.substring(selector.indexOf('('));Type[] args=Type.getArgumentTypes(desc);
@@ -12,8 +15,13 @@ public final class RenderDiagnosticsGenerator implements Opcodes {
         MethodVisitor m=w.visitMethod(ACC_PRIVATE|(statik?ACC_STATIC:0),"fan4$observe",handler,null,null);
         AnnotationVisitor a=m.visitAnnotation("Lcom/llamalad7/mixinextras/injector/wrapmethod/WrapMethod;",true),array=a.visitArray("method");array.visit(null,selector);array.visitEnd();a.visit("remap",false);a.visitEnd();
         int[] locals=new int[args.length];int opLocal=statik?0:1;for(int i=0;i<args.length;i++){locals[i]=opLocal;opLocal+=args[i].getSize();}int token=opLocal+1,error=token+1;
-        m.visitCode();m.visitLdcInsn(stage);if(item<0)m.visitInsn(ACONST_NULL);else m.visitVarInsn(ALOAD,locals[item]);
-        m.visitMethodInsn(INVOKESTATIC,HELPER,"begin","(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;",false);m.visitVarInsn(ASTORE,token);
+        m.visitCode();m.visitLdcInsn(stage);
+        if(item==-2){
+            m.visitLdcInsn(args.length);m.visitIntInsn(NEWARRAY,T_INT);
+            for(int i=0;i<args.length;i++){m.visitInsn(DUP);m.visitLdcInsn(i);m.visitVarInsn(ILOAD,locals[i]);m.visitInsn(IASTORE);}
+            m.visitMethodInsn(INVOKESTATIC,"java/util/Arrays","toString","([I)Ljava/lang/String;",false);
+        }else if(item<0)m.visitInsn(ACONST_NULL);else m.visitVarInsn(ALOAD,locals[item]);
+        m.visitMethodInsn(INVOKESTATIC,helper,"begin","(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;",false);m.visitVarInsn(ASTORE,token);
         Label begin=new Label(),finish=new Label(),fail=new Label();m.visitTryCatchBlock(begin,finish,fail,null);m.visitLabel(begin);
         m.visitVarInsn(ALOAD,opLocal);m.visitLdcInsn(args.length);m.visitTypeInsn(ANEWARRAY,"java/lang/Object");
         for(int i=0;i<args.length;i++) {
@@ -24,10 +32,13 @@ public final class RenderDiagnosticsGenerator implements Opcodes {
             m.visitInsn(AASTORE);
         }
         m.visitMethodInsn(INVOKEINTERFACE,OP,"call","([Ljava/lang/Object;)Ljava/lang/Object;",true);m.visitInsn(POP);m.visitLabel(finish);
-        m.visitVarInsn(ALOAD,token);m.visitInsn(ICONST_0);m.visitMethodInsn(INVOKESTATIC,HELPER,"end","(Ljava/lang/Object;Z)V",false);m.visitInsn(RETURN);
-        m.visitLabel(fail);m.visitVarInsn(ASTORE,error);m.visitVarInsn(ALOAD,token);m.visitInsn(ICONST_1);m.visitMethodInsn(INVOKESTATIC,HELPER,"end","(Ljava/lang/Object;Z)V",false);m.visitVarInsn(ALOAD,error);m.visitInsn(ATHROW);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
+        m.visitVarInsn(ALOAD,token);m.visitInsn(ICONST_0);m.visitMethodInsn(INVOKESTATIC,helper,"end","(Ljava/lang/Object;Z)V",false);m.visitInsn(RETURN);
+        m.visitLabel(fail);m.visitVarInsn(ASTORE,error);m.visitVarInsn(ALOAD,token);m.visitInsn(ICONST_1);m.visitMethodInsn(INVOKESTATIC,helper,"end","(Ljava/lang/Object;Z)V",false);m.visitVarInsn(ALOAD,error);m.visitInsn(ATHROW);m.visitMaxs(0,0);m.visitEnd();GenerateAddon.save(name,w);
     }
     public static void generate()throws Exception {
+        String gl="com/mojang/blaze3d/platform/GlStateManager",trace=GenerateAddon.ROOT+"pointblank/StencilTrace";
+        wrap("GunBindDiagnosticMixin",gl,"_glBindFramebuffer(II)V","framebuffer-bind",-2,true,false,trace);
+        wrap("GunSetterDiagnosticMixin",gl,"_stencilFunc(III)V","cached-stencil-setter",-2,true,false,trace);
         String key="(Lcom/vicmatskiv/pointblank/client/render/RenderTypeKey;)V";
         for(int i=3;i<=7;i++)wrap("GunScope"+i+"DiagnosticMixin",StencilGenerator.PROVIDER,"lambda$static$"+i+key,"scope-shared-"+i,0,true,true);
         for(int i=20;i<=21;i++)wrap("GunDefault"+i+"DiagnosticMixin","com/vicmatskiv/pointblank/client/render/DefaultRenderTypeProvider","lambda$createGlowRenderType$"+i+"()V","scope-default-glow-"+i,-1,true,false);

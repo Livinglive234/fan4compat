@@ -50,6 +50,7 @@ public final class RenderDiagnostics {
     public static Object begin(String stage,Object item) {
         if(!ENABLED)return null;
         try {
+            if(stage.equals("gun-prepare")||stage.equals("gun-item"))StencilTrace.arm();
             if(stage.equals("world")) {
                 boolean gui=present("qouteall.imm_ptl.core.render.GuiPortalRendering")&&(Boolean)call(type("qouteall.imm_ptl.core.render.GuiPortalRendering"),"isRendering");
                 boolean portal=present("qouteall.imm_ptl.core.render.context_management.PortalRendering")&&(Integer)call(type("qouteall.imm_ptl.core.render.context_management.PortalRendering"),"getPortalLayer")>0;
@@ -66,11 +67,24 @@ public final class RenderDiagnostics {
     private static int integer(int key){return (Integer)exact(GL,"glGetInteger",new String[]{"int"},key);}
     private static boolean enabled(int key){return (Boolean)exact(GL,"glIsEnabled",new String[]{"int"},key);}
     private static int attachment(int point,int key){return (Integer)exact("org.lwjgl.opengl.GL30","glGetFramebufferAttachmentParameteri",new String[]{"int","int","int"},36009,point,key);}
-    private static Map<String,String> snapshot() {
+    static Map<String,String> stencilSnapshot() {
+        Map<String,String> state=new LinkedHashMap<>();
+        String[] names={"drawFbo","readFbo","stencilBits","stencilFunc","stencilRef","stencilReadMask"};
+        int[] keys={36006,36010,3415,2962,2967,2963};
+        for(int i=0;i<keys.length;i++)state.put(names[i],String.valueOf(integer(keys[i])));
+        state.put("stencilTest",String.valueOf(enabled(2960)));
+        Object function=field(field(type("com.mojang.blaze3d.platform.GlStateManager"),"STENCIL"),"field_5149");
+        state.put("cached.stencilFunc",String.valueOf(field(function,"field_5148")));
+        state.put("cached.stencilRef",String.valueOf(field(function,"field_16203")));
+        state.put("cached.stencilReadMask",String.valueOf(field(function,"field_5147")));
+        return state;
+    }
+    static Map<String,String> snapshot() {
         Map<String,String> state=new LinkedHashMap<>();
         String[] names={"drawFbo","readFbo","program","depthFunc","stencilFunc","stencilRef","stencilReadMask","stencilWriteMask","stencilFail","stencilDepthFail","stencilDepthPass","backStencilFunc","backStencilRef","backStencilReadMask","backStencilWriteMask"};
         int[] keys={36006,36010,35725,2932,2962,2967,2963,2968,2964,2965,2966,34816,36003,36004,36005};
         for(int i=0;i<keys.length;i++)state.put(names[i],String.valueOf(integer(keys[i])));
+        state.put("stencilBits",String.valueOf(integer(3415)));
         state.put("depthWrite",String.valueOf((Boolean)exact(GL,"glGetBoolean",new String[]{"int"},2930)));
         String[] toggles={"depthTest","stencilTest","blend","cull","scissor"};int[] caps={2929,2960,3042,2884,3089};
         for(int i=0;i<caps.length;i++)state.put(toggles[i],String.valueOf(enabled(caps[i])));

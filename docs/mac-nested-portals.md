@@ -1,6 +1,6 @@
 # Mac nested portals with Iris: investigation and workaround
 
-Updated: 2026-10-10 (America/Chicago). Current implementation: **beta 28** (beta 25 portal workaround retained).
+Updated: 2026-10-10 (America/Chicago). Current implementation: **beta 29** (beta 25 portal workaround retained).
 
 This is the maintained investigation record for shader-enabled nested Immersive
 Portals rendering on macOS. Update this document whenever evidence, implementation
@@ -375,3 +375,36 @@ policy. The additional hook requires supported Iris and Point Blank; no IP is
 needed for the shared repair. Portal masks remain protected. Existing diagnostics
 are retained. Automated and native checks validate the repair path; Mac gameplay
 remains pending. Retest held/unequipped XM3 and the exterior camera, shaders off/on.
+
+
+## Beta 28 result and beta 29 caller trace
+
+The pack owner confirms XM3 still hides terrain. This shader-off capture shows
+shared stencil setup applying NOTEQUAL/reference 2 with matching cache and driver;
+the next gun-item callback already has actual reference 0 while cached remains 2.
+Mask cleanup restores color/depth writes. Setter resynchronization alone therefore
+has not resolved the visual failure, and the responsible intervening operation
+is not yet identified. Do not treat reference 2333 clamping to 255 as that failure.
+
+Beta 29 adds opt-in WrapMethod observers around GlStateManager._glBindFramebuffer
+and _stencilFunc. They record requested integer arguments, chronological event
+numbers, before/after draw/read FBO, stencil bits/function/reference/read-mask/test,
+cached function/reference/read-mask, and up to 18 caller frames. This covers
+Minecraft-routed calls; raw third-party GL calls bypassing GlStateManager are not
+intercepted. A binding-dependent reference change or a cached no-op can now be
+localized to observed callers. This is evidence collection, not a rendering repair.
+
+The trace arms at the first gun preparation/item callback and cannot rearm during
+the launch. It expires after 45 seconds or 96 distinct reports; unchanged binding
+calls are omitted and duplicate setter reports are suppressed. All observations
+are read-only; no GL errors are consumed. Native methods still run exactly once,
+and their exceptions propagate while diagnostic errors disable tracing. Hooks
+require supported Point Blank and fan4compat.renderDiagnostics=true.
+
+For the next Mac test, restart with that flag, join, promptly draw XM3, put it away
+and draw it again within 45 seconds. Capture the full launch log. Check the exterior
+camera in that interval if convenient; that visual issue remains unconfirmed too.
+The preceding SQLite native crash is a separate unresolved investigation requiring
+the JVM fatal-error report. The later test exited normally, reported a closed DH
+statement during shutdown, and repeated TARDIS chunk failure [-1,-2]. Neither log
+establishes permanent chunk loss.

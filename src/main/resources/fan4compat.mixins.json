@@ -55,6 +55,8 @@
     "pointblank.client.GunFramebufferMixin",
     "pointblank.client.GunAuxFramebufferMixin",
     "pointblank.client.GunStencilClearMixin",
+    "pointblank.client.GunBindDiagnosticMixin",
+    "pointblank.client.GunSetterDiagnosticMixin",
     "pointblank.client.GunRenderDiagnosticMixin",
     "pointblank.client.GunPrepareDiagnosticMixin",
     "pointblank.client.GunAuxDiagnosticMixin",

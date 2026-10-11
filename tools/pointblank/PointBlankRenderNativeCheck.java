@@ -37,11 +37,11 @@ public final class PointBlankRenderNativeCheck implements Opcodes {
             for(var file:generated.filter(p->p.getFileName().toString().endsWith("DiagnosticMixin.class")).toList()) {
                 String simple=file.getFileName().toString();
                 if(simple.startsWith("GunGui")&&args.length<3)continue;
-                if(!simple.startsWith("GunScope")&&!simple.startsWith("GunDefault")&&!simple.startsWith("GunIris")&&!simple.startsWith("GunGui"))continue;
+                if(!simple.startsWith("GunScope")&&!simple.startsWith("GunDefault")&&!simple.startsWith("GunIris")&&!simple.startsWith("GunGui")&&!simple.startsWith("GunBind")&&!simple.startsWith("GunSetter"))continue;
                 ClassNode mixin=new ClassNode();new ClassReader(java.nio.file.Files.readAllBytes(file)).accept(mixin,0);
                 AnnotationNode annotation=mixin.invisibleAnnotations.stream().filter(a->a.desc.endsWith("/Mixin;")).findFirst().orElseThrow();
                 String owner=((java.util.List<?>)VerifyAddon.value(annotation,"targets")).get(0).toString().replace('.','/');
-                ClassNode nativeClass=read(simple.startsWith("GunGui")?args[2]:args[0],owner);
+                ClassNode nativeClass=read(simple.startsWith("GunGui")?args[2]:simple.startsWith("GunBind")||simple.startsWith("GunSetter")?args[1]:args[0],owner);
                 MethodNode handler=mixin.methods.stream().filter(m->m.name.equals("fan4$observe")).findFirst().orElseThrow();
                 AnnotationNode wrap=handler.visibleAnnotations.stream().filter(a->a.desc.endsWith("/WrapMethod;")).findFirst().orElseThrow();
                 String selector=((java.util.List<?>)VerifyAddon.value(wrap,"method")).get(0).toString();
