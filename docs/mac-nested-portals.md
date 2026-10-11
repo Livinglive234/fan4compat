@@ -312,3 +312,21 @@ should not itself be diagnosed as corruption. Native Point Blank's Iris renderer
 has additional raw stencil operations beyond the shared provider lambdas patched
 in beta 21. Those are a shader-on coverage gap, but cannot alone explain this
 shader-disabled capture. Do not claim a complete root cause or visual fix yet.
+
+### Beta 26 extended capture: exterior view also affected
+
+The pack owner additionally reports exterior view is visually broken. The extended
+beta 26 capture includes shader-off testing, then BSL enabled at 19:14:35. A gun
+draw changes shader read/draw framebuffer IDs 216/218 to main target 1. Later world
+samples use framebuffer 403, which is also the reported current main target, with
+a different size/depth texture and no stencil attachment. Stencil testing is
+disabled in those later samples. Consequently the earlier enabled-stencil pattern
+is not sufficient to explain every exterior-view render. Temporary main-target
+substitution and Point Blank's shader draw transitions need investigation.
+
+The separate-stencil setup report appears, without a recorded compatibility-mode
+fallback in this capture. This does not establish that exterior view renders
+correctly. The pack owner confirms exterior view means the TARDIS exterior-view
+screen/camera. The changed target is consistent with a separate camera render,
+but its renderer ownership must be traced in code rather than inferred solely
+from the framebuffer ID.
