@@ -294,3 +294,21 @@ portals with shaders on and off. Keep `fan4compat.renderDiagnostics=true` enable
 No explicit beta 26 gameplay result has been received. Windows/Mac behavior has
 not been established by matched diagnostic runs; the platform-specific cause
 remains uncertain.
+
+### Beta 26 Mac result: XM3 issue remains
+
+The pack owner reports terrain vanishes only while the XM3 is held. Beta 26
+diagnostics were enabled with shaders disabled in this capture. Gun preparation
+and gun-item callbacks retain framebuffer 1 for both read and draw; no binding
+change is recorded across those callbacks. This supports the binding repair but
+does not resolve the visible defect.
+
+Stencil testing is enabled before gun callbacks and before world rendering.
+Some samples show GL_NOTEQUAL/reference 2 and later reference 0, while the cache
+retains 2. This warrants investigating stencil enable/disable ownership and deferred
+render-type execution across frames. IP's finish code also uses reference 2333;
+clamping that reference to 255 on an eight-bit stencil attachment is expected and
+should not itself be diagnosed as corruption. Native Point Blank's Iris renderer
+has additional raw stencil operations beyond the shared provider lambdas patched
+in beta 21. Those are a shader-on coverage gap, but cannot alone explain this
+shader-disabled capture. Do not claim a complete root cause or visual fix yet.

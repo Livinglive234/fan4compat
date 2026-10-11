@@ -6,6 +6,16 @@ Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
 
+## Beta 26 Mac result: XM3 still hides terrain while held
+
+Pack-owner testing reports the issue remains and now clarifies terrain returns
+when the XM3 is no longer held. Shader-disabled diagnostics show framebuffer
+bindings preserved across gun callbacks, but stencil testing active entering world
+rendering. Investigate stencil enable/disable lifetime and deferred render-type
+cleanup. Additional Iris-specific raw stencil calls are a shader-on coverage gap;
+they do not alone explain the shader-off result. Reference 2333 clamping to 255 is
+expected for an eight-bit stencil attachment. No complete root cause established.
+
 ## Beta 26: Point Blank lazy-stencil framebuffer restoration
 
 The pack owner reports XM3 terrain disappearance on Mac with shaders both on and
