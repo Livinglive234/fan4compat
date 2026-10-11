@@ -6,6 +6,14 @@ Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
 
+## Beta 25 Mac diagnostic result
+
+The pack owner's 19:00 test capture confirms separate stencil storage enabled on
+Apple M2 Pro and a successful layer-0 depth copy (GL_NO_ERROR), with complete
+framebuffers and matching depth-only float attachments. No compatibility fallback
+appears in the supplied capture. Visible nested rendering and resize/reload/rejoin
+checks remain unconfirmed. Updated the maintained investigation; runtime unchanged.
+
 ## Maintained Mac portal investigation
 
 Added [Mac nested portals with Iris](docs/mac-nested-portals.md): captured beta 24

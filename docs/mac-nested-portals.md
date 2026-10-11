@@ -9,8 +9,10 @@ validation and actual GPU results separate.
 
 ## Current status
 
-**The depth-copy failure and compatibility fallback are reproduced. The beta 25
-workaround has passed automated checks, but has not yet been confirmed on the Mac.**
+**Beta 25's Mac log confirms the separate attachment layout and a successful
+layer-0 depth copy. No compatibility fallback appears in the supplied capture.
+Visible nested-portal rendering and the broader gameplay checklist still need
+pack-owner confirmation.**
 
 The affected setup is Apple M2 Pro, Apple OpenGL 4.1 Metal - 91.7, Minecraft
 1.21.1, Iris 1.8.1+mc1.21.1 and BSL_v10.1.5. The supplied IP jar is named
@@ -244,7 +246,8 @@ Do not remove error checks merely to hide the fallback.
 | --- | --- |
 | 2026-10-10, beta 24 | Pack-owner Mac log reproduced depth-copy error 1282 and compatibility fallback at layers 0 and 1. |
 | 2026-10-10, beta 25 | Clean local build, regression checks, native selector checks and GitHub Actions passed. |
-| Beta 25 Mac gameplay | Pending. No success or failure report received yet. |
+| 2026-10-10, beta 25 Mac log | Separate stencil layout enabled; layer-0 depth copy returned GL_NO_ERROR (0), with complete framebuffers. No compatibility fallback recorded. |
+| Beta 25 visual/gameplay checks | Pending explicit confirmation of visible nesting, crossings, resize/reload and rejoin. |
 
 For each future result, add the tested build, exact GPU/driver/shader versions,
 reproduction, relevant diagnostic lines, visible outcome and any change to the
@@ -252,3 +255,19 @@ working hypothesis. Record partial success as partial success. Update the curren
 status, implementation description, README, progress notes and affected release
 notes when behavior changes. Keep this document as the primary investigation
 record and link to it instead of duplicating detailed explanations elsewhere.
+
+### Beta 25 Mac log result
+
+At 19:00:31 the same Apple M2 Pro setup selected `IrisPortalRenderer` and
+reported separate float-depth/stencil storage enabled. At 19:00:33 the observed
+layer-0 copy returned `GL_NO_ERROR (0)` in normal mode. The source had 32-bit float
+depth without stencil; the destination had matching 32-bit float depth without
+stencil in its depth image and a distinct renderbuffer with eight stencil bits.
+Both framebuffers were complete. No failed depth-copy or compatibility-mode switch
+was recorded in this capture, which continues through 19:01:19.
+
+This verifies the changed attachment layout and successful sampled operation on
+the affected driver, supporting the storage-representation hypothesis. The observer
+logs only the first successful copy per launch, so the layer-0 report does not
+establish that a visible nested layer was exercised or rendered correctly. Obtain
+explicit visual confirmation before marking the full issue resolved.

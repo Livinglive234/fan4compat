@@ -151,3 +151,8 @@ Verify a portal visible through another portal, portal crossings, resize, shader
 toggle/reload and world rejoin. If separate attachments are rejected, native
 layout/fallback must remain functional. Windows/non-Apple rendering should retain
 native allocation. Automated/native checks do not establish Mac GPU success.
+
+Beta 25 Mac log follow-up (2026-10-10): separate attachments enabled and layer-0
+depth copy succeeded with GL_NO_ERROR. No compatibility fallback appears in the
+supplied capture. Explicit visual nesting and lifecycle confirmation remain pending.
+See [the investigation record](mac-nested-portals.md).
