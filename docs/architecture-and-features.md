@@ -992,3 +992,9 @@ are emitted by `RenderDiagnosticsGenerator`; native checks verify real signature
 and finally paths. Context reports GUI camera, portal layer and dimension. The
 opt-in flag remains unchanged; per-stage caps reserve the total 96-report budget
 for multiple rendering paths. No rendering state is repaired by these observers.
+
+Beta 28 extends `pointblank/StencilCompat` to reapply owned stencil functions
+after cache updates, and adds `IrisScopeStencilMixin` for Iris glow/muzzle-flash
+raw calls. Regression/native checks cover the cached-no-op mismatch and callback
+bindings. Mac XM3/exterior-camera visual recovery still needs testing; retain
+`-Dfan4compat.renderDiagnostics=true`. See the maintained Mac investigation.

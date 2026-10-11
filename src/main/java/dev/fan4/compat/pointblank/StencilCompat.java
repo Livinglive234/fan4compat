@@ -5,6 +5,15 @@ import static dev.fan4.compat.shared.CompatCalls.*;
 
 /** Scope stencil changes must share Minecraft's cache and respect portal-owned masks. */
 public final class StencilCompat {
+    @FunctionalInterface public interface FunctionSetter {void set(int function,int reference,int mask);}
+    /** A cached no-op is unsafe after external state changes or target-dependent reference clamping. */
+    public static void synchronizeFunction(FunctionSetter cached,FunctionSetter actual,int function,int reference,int mask) {
+        cached.set(function,reference,mask);actual.set(function,reference,mask);
+    }
+    private static void nativeFunction(int function,int reference,int mask) {
+        synchronizeFunction((f,r,m)->exact(SYSTEM,"stencilFunc",THREE,f,r,m),
+            (f,r,m)->exact("org.lwjgl.opengl.GL11","glStencilFunc",THREE,f,r,m),function,reference,mask);
+    }
     public interface Backend {
         void function(int function,int reference,int mask);
         void mask(int mask);
@@ -29,7 +38,7 @@ public final class StencilCompat {
     private static final String SYSTEM="com.mojang.blaze3d.systems.RenderSystem";
     private static final String[] ONE={"int"},THREE={"int","int","int"};
     private static final Policy POLICY=new Policy(()->HAS_PORTALS&&(Boolean)call(type(PORTAL),"isRendering"),new Backend(){
-        public void function(int function,int reference,int mask){exact(SYSTEM,"stencilFunc",THREE,function,reference,mask);}
+        public void function(int function,int reference,int mask){nativeFunction(function,reference,mask);}
         public void mask(int mask){exact(SYSTEM,"stencilMask",ONE,mask);}
         public void operation(int fail,int depthFail,int pass){exact(SYSTEM,"stencilOp",THREE,fail,depthFail,pass);}
         public void clearValue(int value){exact(SYSTEM,"clearStencil",ONE,value);}
@@ -43,7 +52,7 @@ public final class StencilCompat {
     public static void clearValue(int value){POLICY.clearValue(value);}
     public static void clear(int bits,boolean mac){POLICY.clear(bits,mac);}
     // IP owns the mask during portal rendering, so its setters always run.
-    public static void portalFunction(int function,int reference,int mask){exact(SYSTEM,"stencilFunc",THREE,function,reference,mask);}
+    public static void portalFunction(int function,int reference,int mask){nativeFunction(function,reference,mask);}
     public static void portalMask(int mask){exact(SYSTEM,"stencilMask",ONE,mask);}
     public static void portalOperation(int fail,int depthFail,int pass){exact(SYSTEM,"stencilOp",THREE,fail,depthFail,pass);}
     public static void enable(int capability){POLICY.test(capability,true);}

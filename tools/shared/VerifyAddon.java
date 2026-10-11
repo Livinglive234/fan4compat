@@ -141,7 +141,9 @@ public class VerifyAddon {
         for(Path p:Files.walk(Path.of(args[0])).filter(f->f.toString().endsWith(".class")).toList()) {
             ClassNode c=new ClassNode();new ClassReader(Files.readAllBytes(p)).accept(c,0);
             if(args.length>1)injectionTargets(c);
+            Set<String> signatures=new HashSet<>();
             for(MethodNode m:c.methods) {
+                if(!signatures.add(m.name+m.desc))throw new AssertionError("Duplicate JVM method in "+c.name+": "+m.name+m.desc);
                 if((m.access & (Opcodes.ACC_ABSTRACT | Opcodes.ACC_NATIVE))==0)new Analyzer<>(new BasicVerifier()).analyze(c.name,m);
                 for(var i:m.instructions)if(i instanceof MethodInsnNode call&&(call.owner.startsWith("org/valkyrienskies/")||call.owner.startsWith("qouteall/imm_ptl/")||call.owner.startsWith("com/seibel/distanthorizons/")||call.owner.startsWith("net/drgmes/dwm/"))&&classes.containsKey(call.owner)&&!exists(call.owner,call.name,call.desc,new HashSet<>()))throw new AssertionError("Unresolved compatibility method "+call.owner+"."+call.name+call.desc);
             }

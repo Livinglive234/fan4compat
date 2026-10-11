@@ -32,6 +32,10 @@ public final class StencilCompatTest {
         check(state.calls.equals(List.of("clear:16640:true","test:3042:true")),"only stencil bit removed; unrelated clear bits/capabilities and platform flag preserved");
         portal.set(false);policy.mask(255);policy.clear(1024,true);
         check(state.actualMask==255&&state.calls.contains("clear:1024:true"),"normal scope resumes after portal rendering ends");
+        state.cachedFunction=517;state.cachedReference=2;state.actualFunction=517;state.actualReference=0;
+        state.function(517,2,255);check(state.actualReference==0,"cached identical call skips observed actual-reference correction");
+        StencilCompat.synchronizeFunction(state::function,(f,r,m)->{state.actualFunction=f;state.actualReference=r;},517,2,255);
+        check(state.actualReference==2&&state.cachedReference==2,"forced function resynchronizes cache and actual reference even for identical arguments");
         generated(policy,state,portal);
         System.out.println("PASS: observed cache-bypass reproduction, cache-aware scope state and portal stencil ownership (test backend)");
     }

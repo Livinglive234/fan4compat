@@ -51,6 +51,7 @@
   "client": [
     "pointblank.client.PortalStencilCacheMixin",
     "pointblank.client.GunStencilMixin",
+    "pointblank.client.IrisScopeStencilMixin",
     "pointblank.client.GunFramebufferMixin",
     "pointblank.client.GunAuxFramebufferMixin",
     "pointblank.client.GunStencilClearMixin",

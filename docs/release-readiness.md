@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.27**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.28**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
@@ -170,3 +170,9 @@ leak is addressed by regression checks, but full Mac rendering remains unconfirm
 With fan4compat.renderDiagnostics=true, test XM3 draw/aim/switch-away and exterior
 camera with gun held versus another item, shaders off and on. Capture deferred
 scope setup/cleanup and gui-camera stages. No new repair is claimed in this build.
+
+Beta 28 extends `pointblank/StencilCompat` to reapply owned stencil functions
+after cache updates, and adds `IrisScopeStencilMixin` for Iris glow/muzzle-flash
+raw calls. Regression/native checks cover the cached-no-op mismatch and callback
+bindings. Mac XM3/exterior-camera visual recovery still needs testing; retain
+`-Dfan4compat.renderDiagnostics=true`. See the maintained Mac investigation.

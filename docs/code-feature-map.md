@@ -107,3 +107,9 @@ Beta 27 expands `RenderDiagnosticsGenerator` / `RenderDiagnostics` to deferred
 scope callbacks and IP GUI camera boundaries, with context-aware snapshots and
 per-stage budgets. `RenderDiagnosticsTest` verifies budgets; native checks validate
 static/interface callback contracts. All observers remain opt-in.
+
+Beta 28 extends `pointblank/StencilCompat` to reapply owned stencil functions
+after cache updates, and adds `IrisScopeStencilMixin` for Iris glow/muzzle-flash
+raw calls. Regression/native checks cover the cached-no-op mismatch and callback
+bindings. Mac XM3/exterior-camera visual recovery still needs testing; retain
+`-Dfan4compat.renderDiagnostics=true`. See the maintained Mac investigation.

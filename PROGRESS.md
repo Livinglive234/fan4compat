@@ -1,10 +1,23 @@
 # Fan4Compat progress
 
-Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.27**.
+Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.28**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 28: reapply stencil functions and cover Iris effects
+
+Beta 27 captures actual stencil reference 0 with cached reference 2. Identical
+RenderSystem requests can skip the GL setter despite this mismatch. Owned function
+setters now update the cache and explicitly reapply glStencilFunc. This runs only
+where existing policies permit scope changes; IP's own setters always retain
+portal ownership. A regression reproduces the skipped correction and verifies
+resynchronization. Raw Iris glow/muzzle-flash stencil setup/cleanup now shares the
+same cache/policy; native checks verify its real static callbacks. Sampled mask
+cleanup restores color/depth writes, and the 2333-to-255 clamp remains benign.
+The exact origin of reference 0 and full Mac visual recovery are not proven.
+Beta 27 diagnostics remain available for comparison; no new error suppression.
 
 ## Beta 27: deferred scope and exterior-camera diagnostics
 

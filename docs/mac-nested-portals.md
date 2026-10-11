@@ -1,6 +1,6 @@
 # Mac nested portals with Iris: investigation and workaround
 
-Updated: 2026-10-10 (America/Chicago). Current implementation: **beta 27** (beta 25 portal workaround retained).
+Updated: 2026-10-10 (America/Chicago). Current implementation: **beta 28** (beta 25 portal workaround retained).
 
 This is the maintained investigation record for shader-enabled nested Immersive
 Portals rendering on macOS. Update this document whenever evidence, implementation
@@ -354,3 +354,24 @@ Test XM3 drawn/aimed versus unequipped, shaders off then on, and the exterior
 camera with the XM3 held versus another item. Include the entire launch log so
 setup and cleanup stages can be correlated. Actual callback snapshots are sampled,
 not a complete chronological trace of every draw. Root cause remains unconfirmed.
+
+## Beta 27 evidence and beta 28 candidate repair
+
+The supplied beta 27 capture shows sampled shared/Iris mask cleanup restoring
+color and depth writes. It does not prove every draw is correctly paired, but
+weakens the simple persistent-write-mask explanation. The GUI camera returns to
+its original target in sampled boundaries. A portal depth copy succeeds.
+
+Actual stencil reference 0 versus cached reference 2 remains captured. A repeated
+RenderSystem function request may be skipped if cached arguments are unchanged.
+Beta 28 updates the cache then explicitly reapplies the stencil function for
+existing scope/IP-owned setters. This corrects that class of mismatch without
+assuming its origin; target-dependent reference clamping or external raw setters
+remain candidate causes. The expected 2333-to-255 clamp is not treated as failure.
+
+Iris glow/muzzle-flash callbacks also show raw mask changes bypassing the cache.
+Their function/mask/operation/test setup and cleanup now use the existing guarded
+policy. The additional hook requires supported Iris and Point Blank; no IP is
+needed for the shared repair. Portal masks remain protected. Existing diagnostics
+are retained. Automated and native checks validate the repair path; Mac gameplay
+remains pending. Retest held/unequipped XM3 and the exterior camera, shaders off/on.

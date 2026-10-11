@@ -57,6 +57,8 @@ public final class OptionalCompatibilityTest {
         check(!applies(portalIris,"iris.client.IrisPortalDepthDiagnosticMixin"),"depth diagnostics can be disabled");
         check(applies(portalIris,"iris.client.IrisDepthFormatMixin"),"disabling diagnostics preserves depth fix");
         System.clearProperty("fan4compat.portalDepthDiagnostics");
+        check(!applies(Map.of("pointblank","2.2.0"),"pointblank.client.IrisScopeStencilMixin"),"Iris stencil path requires Iris");
+        check(applies(Map.of("pointblank","2.2.0","iris","1.8.1+mc1.21.1"),"pointblank.client.IrisScopeStencilMixin"),"Iris stencil repair requires no IP");
         Map<String,String> pair=Map.of("pointblank","2.2.0","dwm","1.0.38.4");
         Set<String> expected=new HashSet<>();expected.add("pointblank.client.StaleGunAnimationMixin");expected.add("pointblank.client.StaleGunDrawMixin");expected.add("pointblank.client.OffhandGunDrawMixin");
         expected.add("pointblank.client.GunStencilMixin");expected.add("pointblank.client.GunStencilClearMixin");expected.add("pointblank.client.GunFramebufferMixin");expected.add("pointblank.client.GunAuxFramebufferMixin");
