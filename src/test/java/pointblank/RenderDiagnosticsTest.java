@@ -49,6 +49,12 @@ public final class RenderDiagnosticsTest {
         check(dhProbe.begin("lod")==null&&dhReads.get()==2,"DH sampling avoids per-frame queries");
         dhClock.set(180_000_000_000L);state.put("drawFbo","99");dhSample=dhProbe.begin("lod");dhProbe.end(dhSample,false);
         check(dhLogs.size()==2&&dhLogs.get(1).contains("drawFbo=99"),"DH diagnostics still capture late changes rather than exhausting four samples");
+        var ownership=new dev.fan4.compat.iris.DhDepthAttachmentCompat.Ownership();
+        Object dhFramebuffer=new String("equal"),worldFramebuffer=new String("equal");List<Integer> attachments=new ArrayList<>();
+        ownership.remember(dhFramebuffer);ownership.refresh(dhFramebuffer,4,(f,t)->attachments.add(t));
+        ownership.refresh(worldFramebuffer,4,(f,t)->attachments.add(t));
+        check(attachments.equals(List.of(4)),"main-depth refresh preserves DH but refreshes an equal distinct framebuffer by identity");
+        ownership.refresh(dhFramebuffer,9,(f,t)->attachments.add(t));check(attachments.size()==1,"repeated main-depth refresh cannot replace DH attachment");
         String previous=System.getProperty("fan4compat.renderDiagnostics");
         try {
             var installed=Map.of("pointblank","2.2.0");

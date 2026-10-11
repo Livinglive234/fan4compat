@@ -49,6 +49,7 @@
     "eureka.common.EurekaPortalWarningInfoMixin"
   ],
   "client": [
+    "iris.client.DhDepthAttachmentMixin",
     "distanthorizons.client.DhDepthDiagnosticMixin",
     "distanthorizons.client.DhLodDiagnosticMixin",
     "distanthorizons.client.DhOpaqueFadeDiagnosticMixin",

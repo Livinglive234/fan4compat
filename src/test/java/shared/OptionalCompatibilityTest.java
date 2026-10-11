@@ -76,7 +76,10 @@ public final class OptionalCompatibilityTest {
         Map<String,String> ship=new HashMap<>(all);ship.remove("valkyrienskies");
         for(String name:mixins)if(name.startsWith("immersiveportals.")||name.contains("ShipAcoustic")||name.startsWith("sable.")||name.startsWith("jade.")||name.contains("ShipNetherPortal")||name.contains("ShipAetherPortal")||(name.startsWith("doctorwho.")&&!name.contains("ModelCache")))check(!applies(ship,name),"ship hook without VS: "+name);
         ship=new HashMap<>(all);ship.remove("immersive_portals");
-        for(String name:mixins)if(name.startsWith("immersiveportals.")||name.startsWith("accessories.")||name.startsWith("iris.")||name.contains("EurekaPortalWarning")||name.contains("TardisShipPortal")||name.contains("ExteriorShape"))check(!applies(ship,name),"portal hook without IP: "+name);
+        for(String name:mixins)if(name.startsWith("immersiveportals.")||name.startsWith("accessories.")||(name.startsWith("iris.")&&!name.equals("iris.client.DhDepthAttachmentMixin"))||name.contains("EurekaPortalWarning")||name.contains("TardisShipPortal")||name.contains("ExteriorShape"))check(!applies(ship,name),"portal hook without IP: "+name);
+        Map<String,String> dhIris=Map.of("iris",CompatibilityRules.VERSIONS.get("iris"),"distanthorizons",CompatibilityRules.VERSIONS.get("distanthorizons"));
+        check(applies(dhIris,"iris.client.DhDepthAttachmentMixin"),"DH depth ownership needs no IP or Point Blank");
+        check(!applies(Map.of("iris",CompatibilityRules.VERSIONS.get("iris")),"iris.client.DhDepthAttachmentMixin"),"DH depth ownership requires DH");
         Map<String,String> wrongIp=new HashMap<>(all);wrongIp.put("immersive_portals","unsupported-test-version");
         for(String name:mixins)if(name.startsWith("doctorwho.")&&!name.contains("ModelCache"))check(!applies(wrongIp,name),"indirect ship portal update with unsupported IP: "+name);
         Map<String,String> audio=Map.of("immersive_portals","6.0.6","sound_physics_remastered","1.21.1-1.5.1");

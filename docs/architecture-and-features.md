@@ -1021,3 +1021,20 @@ late onset. No graphics state is mutated and no error queue consumed. Enable
 Capture normal rendering, overlay onset, and shader off/on recovery in one log;
 note the onset time. Supported DH is required; depth getter observer also needs
 supported Iris. No Point Blank/IP dependency for the DH pass observers.
+
+## Beta 33: preserve DH depth attachments during Iris main-depth refresh
+
+Beta 32 captures DH FBO 29 changing depth attachment from DH texture 106 to main
+texture 4; shader reload rebuilds a DH framebuffer with 106 and restores rendering.
+Iris RenderTargets.resizeIfNeeded assigns the changed main depth texture to owned
+framebuffers. DH framebuffers are in that collection, while DH reconnectDHTextures
+skips attachment updates when its stored DH texture ID remains unchanged.
+
+DhDepthAttachmentMixin records objects returned by RenderTargets.createDHFramebuffer
+in a weak identity map. Only that class's main-depth refresh skips these objects;
+ordinary framebuffer updates and DH's native reconnection/resizing remain intact.
+Hook requires supported Iris and DH, without requiring PB/IP or diagnostics.
+No recurring GL queries, forced pipeline reload or texture allocation is added.
+Regression checks cover identity and repeated refresh; native selectors checked
+against Iris 1.8.1. Gameplay recovery remains to be verified. Existing beta 32
+diagnostics remain available. This is separate from Mac gun/portal overlap.

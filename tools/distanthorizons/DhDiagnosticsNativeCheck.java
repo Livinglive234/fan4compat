@@ -15,6 +15,7 @@ public final class DhDiagnosticsNativeCheck {
                 if((nativeMethod.access&Opcodes.ACC_STATIC)!=0||!m.desc.equals(nativeMethod.desc.replace(")V","Lcom/llamalad7/mixinextras/injector/wrapoperation/Operation;)V")))throw new AssertionError("Native observer descriptor differs");
             }
         }
+        ClassNode repair=new ClassNode();new ClassReader(Files.readAllBytes(Path.of("build/generated/classes/dev/fan4/compat/mixin/iris/client/DhDepthAttachmentMixin.class"))).accept(repair,0);VerifyAddon.injectionTargets(repair);
         System.out.println("PASS: DH layer/fade wrappers and Iris depth getter selectors match native jars");
     }
 }

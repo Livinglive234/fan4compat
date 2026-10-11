@@ -43,6 +43,7 @@ public class GenerateAddon implements Opcodes {
         FramebufferCopyGenerator.generate();
         DistantHorizonsGenerator.dhDimensionMixin();
         DistantHorizonsGenerator.portalRenderMixins();
+        DhDepthAttachmentGenerator.generate();
         ImmersivePortalsGenerator.chunkCacheDuckMixin();
         TardisBridgeGenerator.generate();
         ShipTransitGenerator.transit();

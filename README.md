@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.32.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.33.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 32 release notes](docs/releases/0.1.0-beta.32.md) ·
+[Beta 33 release notes](docs/releases/0.1.0-beta.33.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -203,7 +203,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.32.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.33.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -566,3 +566,20 @@ late onset. No graphics state is mutated and no error queue consumed. Enable
 Capture normal rendering, overlay onset, and shader off/on recovery in one log;
 note the onset time. Supported DH is required; depth getter observer also needs
 supported Iris. No Point Blank/IP dependency for the DH pass observers.
+
+## Beta 33: preserve DH depth attachments during Iris main-depth refresh
+
+Beta 32 captures DH FBO 29 changing depth attachment from DH texture 106 to main
+texture 4; shader reload rebuilds a DH framebuffer with 106 and restores rendering.
+Iris RenderTargets.resizeIfNeeded assigns the changed main depth texture to owned
+framebuffers. DH framebuffers are in that collection, while DH reconnectDHTextures
+skips attachment updates when its stored DH texture ID remains unchanged.
+
+DhDepthAttachmentMixin records objects returned by RenderTargets.createDHFramebuffer
+in a weak identity map. Only that class's main-depth refresh skips these objects;
+ordinary framebuffer updates and DH's native reconnection/resizing remain intact.
+Hook requires supported Iris and DH, without requiring PB/IP or diagnostics.
+No recurring GL queries, forced pipeline reload or texture allocation is added.
+Regression checks cover identity and repeated refresh; native selectors checked
+against Iris 1.8.1. Gameplay recovery remains to be verified. Existing beta 32
+diagnostics remain available. This is separate from Mac gun/portal overlap.

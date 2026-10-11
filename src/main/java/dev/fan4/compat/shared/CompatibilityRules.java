@@ -52,6 +52,7 @@ public final class CompatibilityRules {
             return vs&&(!mods.containsKey("immersive_portals")||ip)&&(!PORTAL_TARDIS.contains(simple)||ip);
         }
         if(path.startsWith("accessories."))return ip&&accessories;
+        if(simple.equals("DhDepthAttachmentMixin"))return iris&&dh;
         if(simple.equals("DhPortalShaderMixin"))return ip&&iris&&dh;
         if(path.startsWith("iris."))return ip&&iris&&(!simple.equals("IrisPortalDepthDiagnosticMixin")||Boolean.parseBoolean(System.getProperty("fan4compat.portalDepthDiagnostics","true")));
         if(simple.equals("PortalSoundSnapshotMixin"))return ip&&spr;
