@@ -1,6 +1,6 @@
 # Mac nested portals with Iris: investigation and workaround
 
-Updated: 2026-10-10 (America/Chicago). Current implementation: **beta 29** (beta 25 portal workaround retained).
+Updated: 2026-10-11 (America/Chicago). Current implementation: **beta 30** (beta 25 portal workaround retained).
 
 This is the maintained investigation record for shader-enabled nested Immersive
 Portals rendering on macOS. Update this document whenever evidence, implementation
@@ -408,3 +408,20 @@ The preceding SQLite native crash is a separate unresolved investigation requiri
 the JVM fatal-error report. The later test exited normally, reported a closed DH
 statement during shutdown, and repeated TARDIS chunk failure [-1,-2]. Neither log
 establishes permanent chunk loss.
+
+
+## Beta 29 diagnostic error and beta 30 correction
+
+The next Mac capture crashes at Xaero RadarIconCreator.initFramebuffers when it
+checks GL error 1280 (INVALID_ENUM). Beta 29 introduced glGetInteger(GL_STENCIL_BITS),
+a legacy query removed from core profiles. This diagnostic mistake can leave the
+error consumed by a later checker. All beta 29 reported stencilBits=0 values are
+therefore unreliable. The crash location alone does not establish a Xaero defect.
+
+Beta 30 replaces that query in both snapshot paths with the core framebuffer
+attachment STENCIL_SIZE query (33303), only when a non-default framebuffer has an
+attached stencil image. Missing stencil images report 0; default framebuffer bits
+are marked default-unqueried. No errors are drained, and no Xaero checks disabled.
+The trace records reference changes on framebuffer binds, but this run captures
+no gun-item callback and therefore cannot localize the held-XM3 failure. Repeat
+the beta 29 test on beta 30 with the same diagnostic flag. No XM3 repair claimed.

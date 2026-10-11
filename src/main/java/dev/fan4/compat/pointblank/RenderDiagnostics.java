@@ -67,11 +67,18 @@ public final class RenderDiagnostics {
     private static int integer(int key){return (Integer)exact(GL,"glGetInteger",new String[]{"int"},key);}
     private static boolean enabled(int key){return (Boolean)exact(GL,"glIsEnabled",new String[]{"int"},key);}
     private static int attachment(int point,int key){return (Integer)exact("org.lwjgl.opengl.GL30","glGetFramebufferAttachmentParameteri",new String[]{"int","int","int"},36009,point,key);}
+    // GL_STENCIL_BITS is removed from core profiles. Query an attached stencil image instead.
+    private static String stencilBits() {
+        if(integer(36006)==0)return "default-unqueried";
+        int kind=attachment(36128,36048);
+        return kind==0?"0":String.valueOf(attachment(36128,33303)); // GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE
+    }
     static Map<String,String> stencilSnapshot() {
         Map<String,String> state=new LinkedHashMap<>();
-        String[] names={"drawFbo","readFbo","stencilBits","stencilFunc","stencilRef","stencilReadMask"};
-        int[] keys={36006,36010,3415,2962,2967,2963};
+        String[] names={"drawFbo","readFbo","stencilFunc","stencilRef","stencilReadMask"};
+        int[] keys={36006,36010,2962,2967,2963};
         for(int i=0;i<keys.length;i++)state.put(names[i],String.valueOf(integer(keys[i])));
+        state.put("stencilBits",stencilBits());
         state.put("stencilTest",String.valueOf(enabled(2960)));
         Object function=field(field(type("com.mojang.blaze3d.platform.GlStateManager"),"STENCIL"),"field_5149");
         state.put("cached.stencilFunc",String.valueOf(field(function,"field_5148")));
@@ -84,7 +91,7 @@ public final class RenderDiagnostics {
         String[] names={"drawFbo","readFbo","program","depthFunc","stencilFunc","stencilRef","stencilReadMask","stencilWriteMask","stencilFail","stencilDepthFail","stencilDepthPass","backStencilFunc","backStencilRef","backStencilReadMask","backStencilWriteMask"};
         int[] keys={36006,36010,35725,2932,2962,2967,2963,2968,2964,2965,2966,34816,36003,36004,36005};
         for(int i=0;i<keys.length;i++)state.put(names[i],String.valueOf(integer(keys[i])));
-        state.put("stencilBits",String.valueOf(integer(3415)));
+        state.put("stencilBits",stencilBits());
         state.put("depthWrite",String.valueOf((Boolean)exact(GL,"glGetBoolean",new String[]{"int"},2930)));
         String[] toggles={"depthTest","stencilTest","blend","cull","scissor"};int[] caps={2929,2960,3042,2884,3089};
         for(int i=0;i<caps.length;i++)state.put(toggles[i],String.valueOf(enabled(caps[i])));

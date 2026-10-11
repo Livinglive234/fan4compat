@@ -1,10 +1,21 @@
 # Fan4Compat progress
 
-Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.29**.
+Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.30**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 30: correct the core-profile stencil diagnostic query
+
+Beta 29 Mac testing crashed during Xaero framebuffer initialization with GL error
+1280. The newly introduced GL_STENCIL_BITS query is not valid in a core profile;
+its returned zeros are not reliable attachment-size evidence and it can pollute
+the error queue observed by later checks. Replace both snapshot paths with
+GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE for an existing attached stencil image.
+Missing images report zero; the default framebuffer is left unqueried. No error
+queue draining or Xaero error suppression is added. The XM3 callback was not
+captured before this crash; its original visual problem remains unresolved.
 
 ## Beta 29: trace the remaining Mac XM3 failure
 
