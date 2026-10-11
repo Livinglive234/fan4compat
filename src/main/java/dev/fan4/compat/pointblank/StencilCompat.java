@@ -25,6 +25,7 @@ public final class StencilCompat {
     public static final class Policy {
         private final BooleanSupplier portal;private final Backend backend;
         public Policy(BooleanSupplier portal,Backend backend){this.portal=portal;this.backend=backend;}
+        public void prepareWorld(){if(!portal.getAsBoolean()){backend.mask(255);backend.function(519,0,255);backend.operation(7680,7680,7680);}}
         public void function(int function,int reference,int mask){if(!portal.getAsBoolean())backend.function(function,reference,mask);}
         public void mask(int mask){if(!portal.getAsBoolean())backend.mask(mask);}
         public void operation(int fail,int depthFail,int pass){if(!portal.getAsBoolean())backend.operation(fail,depthFail,pass);}
@@ -53,6 +54,7 @@ public final class StencilCompat {
     public static void clear(int bits,boolean mac){POLICY.clear(bits,mac);}
     // IP owns the mask during portal rendering, so its setters always run.
     public static void portalFunction(int function,int reference,int mask){nativeFunction(function,reference,mask);}
+    public static void portalFrameClear(int bits){POLICY.prepareWorld();exact("org.lwjgl.opengl.GL11","glClear",ONE,bits);}
     public static void portalMask(int mask){exact(SYSTEM,"stencilMask",ONE,mask);}
     public static void portalOperation(int fail,int depthFail,int pass){exact(SYSTEM,"stencilOp",THREE,fail,depthFail,pass);}
     public static void enable(int capability){POLICY.test(capability,true);}

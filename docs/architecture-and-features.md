@@ -1002,3 +1002,7 @@ bindings. Mac XM3/exterior-camera visual recovery still needs testing; retain
 Beta 29: `pointblank/StencilTrace.java` and generated GunBind/GunSetterDiagnosticMixin
 observe native Minecraft framebuffer binds and stencil setters. Opt-in, armed by
 gun callbacks, capped at 45 seconds/96 distinct reports; no rendering repair.
+
+Beta 31: PortalStencilPrepareMixin redirects IP stencil-renderer preparation clear
+through StencilCompat.portalFrameClear, normalizing top-level comparison/write
+mask/operations before the native clear; recursive portal state is preserved.

@@ -50,6 +50,7 @@
   ],
   "client": [
     "pointblank.client.PortalStencilCacheMixin",
+    "pointblank.client.PortalStencilPrepareMixin",
     "pointblank.client.GunStencilMixin",
     "pointblank.client.IrisScopeStencilMixin",
     "pointblank.client.GunFramebufferMixin",

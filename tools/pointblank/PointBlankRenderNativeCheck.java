@@ -66,8 +66,8 @@ public final class PointBlankRenderNativeCheck implements Opcodes {
         System.out.println("PASS: all four Point Blank/Minecraft render wrappers match native modifiers/descriptors; finally handlers and cached-state fields verified");
     }
     static void validateStencil(String[] args)throws Exception {
-        for(String simple:args.length>2?new String[]{"GunStencilMixin","GunStencilClearMixin","IrisScopeStencilMixin","PortalStencilCacheMixin"}:new String[]{"GunStencilMixin","GunStencilClearMixin","IrisScopeStencilMixin"}) {
-            boolean iris=simple.equals("IrisScopeStencilMixin"),provider=simple.equals("GunStencilMixin"),portal=simple.equals("PortalStencilCacheMixin");
+        for(String simple:args.length>2?new String[]{"GunStencilMixin","GunStencilClearMixin","IrisScopeStencilMixin","PortalStencilCacheMixin","PortalStencilPrepareMixin"}:new String[]{"GunStencilMixin","GunStencilClearMixin","IrisScopeStencilMixin"}) {
+            boolean iris=simple.equals("IrisScopeStencilMixin"),provider=simple.equals("GunStencilMixin"),portal=simple.equals("PortalStencilCacheMixin")||simple.equals("PortalStencilPrepareMixin");
             String owner=portal?"qouteall/imm_ptl/core/render/renderer/RendererUsingStencil":iris?"com/vicmatskiv/pointblank/compat/iris/IrisRenderTypeProvider":provider?StencilGenerator.PROVIDER:"com/vicmatskiv/pointblank/client/ClientSystem";
             ClassNode nativeClass=read(portal?args[2]:args[0],owner),mixin=new ClassNode();
             new ClassReader(java.nio.file.Files.readAllBytes(java.nio.file.Path.of("build/generated/classes/dev/fan4/compat/mixin/pointblank/client/"+simple+".class"))).accept(mixin,0);

@@ -1,10 +1,24 @@
 # Fan4Compat progress
 
-Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.30**.
+Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.31**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 31: neutral stencil state before top-level portal frame clear
+
+Beta 30 exits normally; held XM3 hides terrain, unequipping restores it, redraw
+repeats it. The broken frame retains scope NOTEQUAL while IP enables testing at
+frame start without resetting the comparison until before translucent rendering.
+Captured actual reference 0 rejects cleared zero-valued stencil pixels. Reset
+comparison to ALWAYS/ref 0, write mask 255 and operations KEEP before IP's native
+prepareRendering stencil clear. Recursive portal state is preserved. Hook requires
+supported IP and Point Blank, independent of diagnostics. Existing native clear
+still runs once. Tests cover stale NOTEQUAL and zero-write-mask state plus recursion;
+native checks bind the exact clear invocation. Mac visual recovery remains pending.
+Framebuffer-only reference changes on stencil-less targets can reflect clamping;
+these changes alone are not evidence of corruption or a Xaero defect.
 
 ## Beta 30: correct the core-profile stencil diagnostic query
 

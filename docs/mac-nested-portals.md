@@ -1,6 +1,6 @@
 # Mac nested portals with Iris: investigation and workaround
 
-Updated: 2026-10-11 (America/Chicago). Current implementation: **beta 30** (beta 25 portal workaround retained).
+Updated: 2026-10-11 (America/Chicago). Current implementation: **beta 31** (beta 25 portal workaround retained).
 
 This is the maintained investigation record for shader-enabled nested Immersive
 Portals rendering on macOS. Update this document whenever evidence, implementation
@@ -425,3 +425,27 @@ are marked default-unqueried. No errors are drained, and no Xaero checks disable
 The trace records reference changes on framebuffer binds, but this run captures
 no gun-item callback and therefore cannot localize the held-XM3 failure. Repeat
 the beta 29 test on beta 30 with the same diagnostic flag. No XM3 repair claimed.
+
+
+## Beta 30 evidence and beta 31 preparation repair
+
+The run exits normally. User confirms held XM3 hides terrain, unequipping restores
+it, and redrawing repeats it. Scope setup/cleanup matches cache and restores writes.
+Framebuffer traces show stencil-less targets reporting reference zero and returning
+to reference two on stencil-equipped targets: that alone is attachment-dependent
+clamping, not proof of a corrupt setter. A broken main-FBO sample nevertheless has
+8 stencil bits, enabled NOTEQUAL and actual reference zero with cached two.
+
+Native RendererUsingStencil.prepareRendering clears stencil and enables testing
+without resetting its function. Its first comparison reset is myFinishRendering,
+at the before-translucent stage. Point Blank leaves NOTEQUAL selected after drawing.
+This can therefore reject zero-valued cleared pixels during opaque terrain rendering
+when the actual reference is zero. Beta 31 normalizes the top-level preparation
+before the existing clear: ALWAYS/ref 0/read mask 255, write mask 255, operations
+KEEP. The native GL clear runs once unchanged. Nested portal state is not normalized.
+
+PortalStencilPrepareMixin requires supported PB and IP, runs independently of the
+diagnostic flag, and targets only the stencil renderer's prepareRendering clear.
+It does not change Iris shader-renderer preparation or force framebuffer bindings.
+Regression/native checks validate the hook and state policy; Mac testing must still
+confirm visual recovery, including doorway portals and exterior camera.

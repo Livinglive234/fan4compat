@@ -41,6 +41,11 @@ public final class StencilGenerator implements Opcodes {
         redirect(w,true,portalMethods,gl,"glStencilMask","(I)V","portalMask");
         GenerateAddon.save(name,w);
 
+        name=GenerateAddon.ROOT+"mixin/pointblank/client/PortalStencilPrepareMixin";
+        w=GenerateAddon.writer(name,"qouteall/imm_ptl/core/render/renderer/RendererUsingStencil");
+        redirect(w,true,new String[]{"prepareRendering()V"},gl,"glClear","(I)V","portalFrameClear");
+        GenerateAddon.save(name,w);
+
         name=GenerateAddon.ROOT+"mixin/pointblank/client/IrisScopeStencilMixin";
         w=GenerateAddon.writer(name,"com/vicmatskiv/pointblank/compat/iris/IrisRenderTypeProvider");
         String[] setup={"lambda$createGlowRenderType$23()V","lambda$createMuzzleFlashRenderType$25()V"};

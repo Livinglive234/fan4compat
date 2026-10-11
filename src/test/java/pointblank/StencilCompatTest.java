@@ -25,6 +25,12 @@ public final class StencilCompatTest {
         check(state.actualFunction==514&&state.actualReference==1&&state.actualMask==0,"next portal setup cannot skip its stencil reset");
         policy.operation(7680,7680,7681);policy.clearValue(0);policy.clear(1024,false);policy.test(2960,false);
         check(!state.enabled&&state.calls.contains("op:7680:7680:7681")&&state.calls.contains("clear:1024:false"),"ordinary scope drawing retains operations and clearing");
+        state.actualFunction=state.cachedFunction=517;state.actualReference=0;state.cachedReference=2;
+        state.actualMask=state.cachedMask=0;state.calls.clear();policy.prepareWorld();
+        check(state.actualFunction==519&&state.actualReference==0&&state.actualMask==255,"top-level preparation replaces rejecting scope comparison and restores full clear writes");
+        check(state.calls.equals(List.of("mask:255","function:519:0:255","op:7680:7680:7680")),"neutral state established before native clear");
+        portal.set(true);state.calls.clear();policy.prepareWorld();check(state.calls.isEmpty(),"recursive portal preparation keeps portal state");
+        portal.set(false);policy.function(514,1,255);policy.mask(0);
         state.enabled=true;state.calls.clear();portal.set(true);
         policy.function(519,255,255);policy.mask(255);policy.operation(7680,7680,7681);policy.clearValue(0);policy.clear(1024,false);policy.test(2960,false);policy.test(2960,true);
         check(state.calls.isEmpty()&&state.enabled&&state.actualFunction==514&&state.actualReference==1&&state.actualMask==0,"nested portal pass retains comparison, writes, test and stencil contents");
