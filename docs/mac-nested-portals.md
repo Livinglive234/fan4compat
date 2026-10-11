@@ -1,6 +1,6 @@
 # Mac nested portals with Iris: investigation and workaround
 
-Updated: 2026-10-10 (America/Chicago). Current implementation: **beta 25**.
+Updated: 2026-10-10 (America/Chicago). Current implementation: **beta 26** (beta 25 portal workaround retained).
 
 This is the maintained investigation record for shader-enabled nested Immersive
 Portals rendering on macOS. Update this document whenever evidence, implementation
@@ -271,3 +271,26 @@ the affected driver, supporting the storage-representation hypothesis. The obser
 logs only the first successful copy per launch, so the layer-0 report does not
 establish that a visible nested layer was exercised or rendered correctly. Obtain
 explicit visual confirmation before marking the full issue resolved.
+
+## XM3 regression on Mac and beta 26 follow-up
+
+The pack owner reports solid terrain disappearing again after using the XM3 on
+Mac, with both shaders enabled and disabled. Windows remains reported working.
+The supplied beta 25 log includes Point Blank diagnostics. At 19:00:42 gun
+preparation changes read/draw bindings from main framebuffer 1 to default
+framebuffer 0, and the main target later acquires packed stencil storage. Native
+Point Blank code enables scope stencil by resizing the main framebuffer.
+
+Beta 26 scopes both native stencil-enablement calls, preserving independent
+read/draw bindings and resolving the replacement ID after resize. It does not
+disable scope stencil or the beta 25 portal workaround. It also applies without
+Iris/IP, because the reported failure occurs with shaders disabled too. Later gun
+draws change Iris targets as well; those changes may be intentional composition
+and have not been blindly reversed. The captured binding leak is evidence for
+a focused repair, not proof that it explains every missing-terrain symptom.
+
+Retest drawing/aiming the XM3, switching away, main terrain and ordinary/nested
+portals with shaders on and off. Keep `fan4compat.renderDiagnostics=true` enabled.
+No explicit beta 26 gameplay result has been received. Windows/Mac behavior has
+not been established by matched diagnostic runs; the platform-specific cause
+remains uncertain.

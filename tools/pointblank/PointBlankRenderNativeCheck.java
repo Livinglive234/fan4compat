@@ -9,6 +9,13 @@ public final class PointBlankRenderNativeCheck implements Opcodes {
         try(ZipFile zip=new ZipFile(jar)){ClassNode n=new ClassNode();new ClassReader(zip.getInputStream(zip.getEntry(owner+".class"))).accept(n,0);return n;}
     }
     public static void main(String[] args)throws Exception {
+        for(String[] binding:new String[][]{{"GunFramebufferMixin","com/vicmatskiv/pointblank/client/ClientSystem"},{"GunAuxFramebufferMixin","com/vicmatskiv/pointblank/client/render/AuxLevelRenderer"}}) {
+            ClassNode nativeClass=read(args[0],binding[1]),mixin=new ClassNode();
+            new ClassReader(java.nio.file.Files.readAllBytes(java.nio.file.Path.of("build/generated/classes/dev/fan4/compat/mixin/pointblank/client/"+binding[0]+".class"))).accept(mixin,0);
+            VerifyAddon.classes.put(nativeClass.name,nativeClass);VerifyAddon.injectionTargets(mixin);
+            MethodNode handler=mixin.methods.stream().filter(m->m.name.equals("fan4$preserveStencilFramebuffer")).findFirst().orElseThrow();
+            if((handler.access&ACC_STATIC)!=0||!handler.desc.equals("(Lcom/vicmatskiv/pointblank/client/render/RenderTargetExt;)V"))throw new AssertionError("Framebuffer redirect receiver mismatch");
+        }
         String[][] targets={
             {"GunRenderDiagnosticMixin","com/vicmatskiv/pointblank/client/render/GunItemRenderer","method_3166","(Lnet/minecraft/class_1799;Lnet/minecraft/class_811;Lnet/minecraft/class_4587;Lnet/minecraft/class_4597;II)V"},
             {"GunPrepareDiagnosticMixin","com/vicmatskiv/pointblank/client/ClientSystem","preRender","(Lcom/vicmatskiv/pointblank/client/GunClientState;Lnet/minecraft/class_9779;)V"},

@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.25**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.26**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
@@ -156,3 +156,11 @@ Beta 25 Mac log follow-up (2026-10-10): separate attachments enabled and layer-0
 depth copy succeeded with GL_NO_ERROR. No compatibility fallback appears in the
 supplied capture. Explicit visual nesting and lifecycle confirmation remain pending.
 See [the investigation record](mac-nested-portals.md).
+
+## Beta 26 XM3 Mac retest
+
+With Point Blank diagnostics enabled, reproduce terrain disappearance by drawing
+and aiming the XM3, then switching away, both with BSL enabled and shaders off.
+Check scopes, ordinary/nested portals and shader toggle/reload; compare Windows.
+Beta 26 scopes native stencil resize to restore framebuffer bindings. The captured
+leak is addressed by regression checks, but full Mac rendering remains unconfirmed.

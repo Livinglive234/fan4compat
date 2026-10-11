@@ -59,7 +59,7 @@ public final class OptionalCompatibilityTest {
         System.clearProperty("fan4compat.portalDepthDiagnostics");
         Map<String,String> pair=Map.of("pointblank","2.2.0","dwm","1.0.38.4");
         Set<String> expected=new HashSet<>();expected.add("pointblank.client.StaleGunAnimationMixin");expected.add("pointblank.client.StaleGunDrawMixin");expected.add("pointblank.client.OffhandGunDrawMixin");
-        expected.add("pointblank.client.GunStencilMixin");expected.add("pointblank.client.GunStencilClearMixin");
+        expected.add("pointblank.client.GunStencilMixin");expected.add("pointblank.client.GunStencilClearMixin");expected.add("pointblank.client.GunFramebufferMixin");expected.add("pointblank.client.GunAuxFramebufferMixin");
         for(int i=0;i<5;i++)expected.add("doctorwho.client.TardisShipModelCache"+i+"Mixin");
         for(String name:mixins)check(applies(pair,name)==expected.contains(name),"Point Blank/TARDIS setup: "+name);
         for(String id:CompatibilityRules.VERSIONS.keySet()){

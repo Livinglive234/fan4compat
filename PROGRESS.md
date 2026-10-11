@@ -1,10 +1,26 @@
 # Fan4Compat progress
 
-Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.25**.
+Updated: 2026-10-10 (America/Chicago). Current build: **0.1.0-beta.26**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
 are recorded separately.
+
+## Beta 26: Point Blank lazy-stencil framebuffer restoration
+
+The pack owner reports XM3 terrain disappearance on Mac with shaders both on and
+off. Beta 25 diagnostics show gun preparation changing read/draw bindings from
+main framebuffer 1 to 0 when Point Blank lazily enables stencil via framebuffer
+resize. Two exact native calls (ClientSystem.preparePipFallback and
+AuxLevelRenderer.renderToTarget) now preserve read/draw bindings around stencil
+enablement. References to the rebuilt target resolve to its replacement ID;
+unrelated Iris/portal bindings stay separate, and a failed recreation uses default
+framebuffer 0 rather than an invalid/deleted ID. Restoration runs in finally and
+original exceptions propagate. Stencil setup and earlier fixes remain enabled;
+this also runs without Iris/IP. Later shader rendering transitions are not blindly
+changed. Regressions reproduce the binding leak and cover distinct shader targets,
+replacement IDs and failures; native checks verify both redirect selectors.
+Mac terrain and scope/portal gameplay remain pending. Diagnostics remain opt-in.
 
 ## Beta 25 Mac diagnostic result
 

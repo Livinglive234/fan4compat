@@ -967,3 +967,17 @@ Diagnostics remain enabled; Mac gameplay verification is still required.
 
 Detailed evidence, lifecycle contracts and ongoing test results are maintained in
 [Mac nested portals with Iris](mac-nested-portals.md).
+
+### Beta 26 Point Blank lazy-stencil framebuffer scope
+
+`pointblank/FramebufferCompat` and generated `GunFramebufferMixin` /
+`GunAuxFramebufferMixin` redirect the `RenderTargetExt.enablePointblankStencil`
+calls in native gun preparation and auxiliary scope rendering. The native call
+still executes. Read and draw framebuffer bindings are captured independently and
+restored in finally; if a binding referred to the resized target, it resolves to
+the new framebuffer ID. Failed recreation maps an invalid target ID to framebuffer
+0. Other shader/portal target IDs retain their exact bindings. The helper requires
+Point Blank only and does not depend on Iris, IP or diagnostics being enabled.
+`GunFramebufferTest` reproduces the observed main-to-zero leak and verifies
+replacement mapping, distinct targets and failures. Native checks cover both
+redirects. This addresses a captured state leak, not a proven full Mac XM3 repair.

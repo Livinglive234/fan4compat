@@ -96,3 +96,9 @@ and `IrisStencilCleanupMixin` supply depth-only float portal targets with owned
 stencil renderbuffers. `SeparateStencilTest` covers resource reuse, cleanup,
 rejected-layout rollback and GL binding restoration. Native checks verify IP
 setup and Minecraft deletion selectors.
+
+Point Blank framebuffer scope: `pointblank/FramebufferCompat`, generated
+`GunFramebufferMixin` and `GunAuxFramebufferMixin` restore independent read/draw
+bindings after lazy stencil resize. `GunFramebufferTest` verifies recreated IDs,
+unrelated targets and exception handling; `pointBlankRenderNativeCheck` verifies
+the real native call sites.
