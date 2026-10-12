@@ -42,8 +42,7 @@ public final class FeaturesTest {
         }
         ALL.put("aether","1.5.11");
         for(Features.Feature feature:Features.ALL) {
-            List<String> controlled=mixins.stream().filter(name->feature.id().equals(Features.hookedMixins().get(name.substring(name.lastIndexOf('.')+1)))
-                ||(feature.id().equals("freecamFixes")&&name.startsWith("freecam."))||(feature.id().equals("tardisModelCache")&&name.contains("TardisShipModelCache"))).toList();
+            List<String> controlled=mixins.stream().filter(name->feature.id().equals(Features.featureFor(name.substring(0,name.lastIndexOf('.')),name.substring(name.lastIndexOf('.')+1)))).toList();
             Features.reset(dir.resolve("none.properties"));
             Features.set(feature.id(),false);
             for(String name:mixins) {

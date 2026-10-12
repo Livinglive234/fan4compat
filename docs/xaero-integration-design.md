@@ -290,6 +290,11 @@ leave everything else, including the player marker and the corner minimap, alone
 Still to confirm in `GuiMap`'s initialization: the order in which it picks the viewed dimension and camera, and what the
 dimension toggle button does afterward. Travel-following and the minimap remain later work.
 
+**Built (beta 38): minimap and waypoints.** The pack owner asked for the corner minimap and waypoints to follow the exterior. The
+minimap's terrain comes from the World Map's stored regions (the outside is not loaded on the client), its centre and the waypoint
+dialogs' coordinates from the player-position helpers, and its waypoints from the minimap session's custom world path, the same
+override the waypoint menu uses. See the architecture guide for the hooks and what is not handled.
+
 **Built (beta 37): landed-exterior World Map.** Exactly the proposed first build: a client-only hook on `GuiMap`'s
 constructor. Two checks resolved the open questions: the synced TARDIS state includes `step`/`mode`/`isMaterialized`, so
 landed versus in flight is known on the client; and Xaero's own dimension button calls `setCustomDimensionId` followed by

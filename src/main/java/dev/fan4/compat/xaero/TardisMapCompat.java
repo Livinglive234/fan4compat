@@ -21,7 +21,7 @@ public final class TardisMapCompat {
     private static boolean warned;
     /** The dimension we last put into the map's custom slot, so a stale one is cleared when it no longer applies. */
     private static Object applied;
-    public record Exterior(Object dimension,int x,int z) {}
+    public record Exterior(Object dimension,int x,int y,int z) {}
     private TardisMapCompat() {}
 
     /** Called at the end of {@code GuiMap}'s constructor. Never throws: the map must always open. */
@@ -48,10 +48,31 @@ public final class TardisMapCompat {
         }
     }
 
+    /** Continuous mode (minimap): keep the World Map viewing the exterior while inside a landed TARDIS, and put it back after. */
+    static void applyMapDimension(Exterior exterior) {
+        if(!present("xaero.map.WorldMapSession"))return;
+        Object session=call(type("xaero.map.WorldMapSession"),"getCurrentSession");
+        if(session==null)return;
+        Object processor=call(session,"getMapProcessor");
+        if(processor==null)return;
+        Object mapWorld=call(processor,"getMapWorld");
+        if(mapWorld==null)return;
+        Object custom=call(mapWorld,"getCustomDimensionId");
+        if(exterior==null){
+            if(applied!=null&&applied.equals(custom)){call(mapWorld,"setCustomDimensionId",(Object)null);call(processor,"checkForWorldUpdate");}
+            applied=null;
+            return;
+        }
+        if(exterior.dimension().equals(custom)){applied=exterior.dimension();return;}
+        call(mapWorld,"setCustomDimensionId",exterior.dimension());
+        call(processor,"checkForWorldUpdate");
+        applied=exterior.dimension();
+    }
+
     /** Called when the map screen is closed or replaced: put the map back, but only if the view is still the one we set. */
     public static void closed(Object gui) {
         try {
-            if(applied==null)return;
+            if(applied==null||TardisLocation.current()!=null)return;
             Object processor=call(gui,"getMapProcessor"),mapWorld=call(processor,"getMapWorld");
             if(applied.equals(call(mapWorld,"getCustomDimensionId"))){call(mapWorld,"setCustomDimensionId",(Object)null);call(processor,"checkForWorldUpdate");}
             applied=null;
@@ -76,7 +97,7 @@ public final class TardisMapCompat {
                         Object state=field(entity,"tardisStateManager");
                         if(!(Boolean)call(call(state,"getSystem",type(MATERIALIZATION)),"isMaterialized"))return null;
                         Object position=call(state,"getCurrentExteriorPosition");
-                        return new Exterior(call(state,"getCurrentExteriorDimension"),(Integer)call(position,"method_10263"),(Integer)call(position,"method_10260"));
+                        return new Exterior(call(state,"getCurrentExteriorDimension"),(Integer)call(position,"method_10263"),(Integer)call(position,"method_10264"),(Integer)call(position,"method_10260"));
                     }
                 }
         return null;

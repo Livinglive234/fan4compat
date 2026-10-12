@@ -50,6 +50,12 @@
   ],
   "client": [
     "xaero.client.TardisMapMixin",
+    "xaero.client.TardisMapEntityMixin",
+    "xaero.client.TardisMapProcessorMixin",
+    "xaero.client.TardisMinimapEntityMixin",
+    "xaero.client.TardisMinimapWaypointMixin",
+    "xaero.client.TardisMinimapHotkeyMixin",
+    "xaero.client.TardisMinimapRenderMixin",
     "iris.client.DhDepthAttachmentMixin",
     "distanthorizons.client.DhDepthDiagnosticMixin",
     "distanthorizons.client.DhLodDiagnosticMixin",

@@ -1,6 +1,6 @@
 # Fan4Compat: architecture, features and contributor guide
 
-This document explains the active implementation at **0.1.0-beta.37**, reviewed
+This document explains the active implementation at **0.1.0-beta.38**, reviewed
 2026-10-11 (America/Chicago). It is an onboarding guide for human contributors and
 AI coding assistants. The source and version gates describe what actually runs;
 older release notes describe historical builds and can contain superseded behavior.
@@ -206,6 +206,7 @@ optional-recipe filter checks installed recipe dependencies individually.
 | BCLib stack codec/recipe format | Supported BCLib. |
 | Optional recipe dependency filter | BCLib or one of JEED/Supplementaries/Amendments/Moonlight installed. |
 | Wing-tip fallback | Supported Elytra Contrails. |
+| Xaero minimap/waypoints follow the TARDIS exterior | Client only: Xaero Minimap `26.5.0` + World Map `1.46.0` + supported DWM; six more hooks (see below). |
 | Xaero map TARDIS exterior | Client only: Xaero World Map `1.46.0` + supported DWM; one hook on `GuiMap`'s constructor. |
 | Xaero waypoint sync | Server: Fabric API and the `xaeroWaypointSync` switch. Client: the same plus Xaero's Minimap `26.5.0` (no mixins; Fabric API networking only). |
 | Updater/settings entrypoints | Always initialized; updater can be disabled and requires an eligible installed jar to operate. |
@@ -815,6 +816,27 @@ current dimension, so no interior chunk is ever written into the exterior's map.
 we set earlier is cleared, but the player's own dimension choice is never touched. The corner minimap (loaded chunks around
 the player, keyed by the real dimension) is unaffected and does not show the exterior. Everything is wrapped so the map always opens; failure logs one warning.
 
+### Minimap and waypoints: the TARDIS location
+
+[`TardisLocation`](../src/main/java/dev/fan4/compat/xaero/TardisLocation.java) is a virtual location: while the player is inside a
+landed TARDIS (found by the same console scan, refreshed four times a second) Xaero is told the player is at the exterior. Six
+more generated hooks in `xaero.client` call it: `TardisMinimapEntityMixin` and `TardisMapEntityMixin` return the exterior's
+coordinate from each mod's `EntityUtils.getEntityX/Y/Z` for the player only (centering, markers, camera);
+`TardisMinimapWaypointMixin` and `TardisMinimapHotkeyMixin` redirect the player-position reads in the new-waypoint dialog and the
+temporary-waypoint hotkey; `TardisMapProcessorMixin` redirects the position `MapProcessor.setMainValues` loads regions around;
+`TardisMinimapRenderMixin` calls `TardisLocation.frame` at the start of `MinimapRenderer.renderMinimap` and redirects the
+client-world dimension it draws. `frame` does two things, each reversible and only ever undoing its own change: it sets the
+minimap session's custom world path (`MinimapWorldState.setCustomWorldPath`, built the way `MinimapWorldStateUpdater` builds
+an auto world path: root container + `MinimapDimensionHelper.getDimensionDirectoryName` + `getPotentialWorldNode`), which is what
+the waypoint menu's world selector sets; and keeps the World Map's custom dimension on the exterior (continuous mode, which
+supersedes the close-on-screen-closed undo of the map-screen feature while active). Terrain on the minimap comes from
+`SupportXaeroWorldmap.drawMinimap`, i.e. previously mapped World Map regions; the exterior's chunks are not loaded on the client.
+
+Not handled: the radar (it still draws interior entities relative to an exterior centre), scaled exterior dimensions (the
+division between the real and the displayed dimension is applied to our already-exterior coordinates), and any other Xaero code
+that reads the player's position or dimension directly (the death-point handler, the in-world waypoint renderer).
+`xaeroMapNativeCheck` binds every hook to the real classes (it caught a wrong redirect selector while this was written).
+
 Unverified in game: the camera is set before Xaero's asynchronous dimension switch finishes, and Xaero rescales the
 camera when the player-to-map dimension scale changes, so an exterior in a differently scaled dimension (the Nether) may
 open off-center. `xaeroMapNativeCheck` pins every member against the real Xaero, DWM (1.0.38.4 and 1.0.39) and Minecraft jars.
@@ -938,7 +960,7 @@ Native checks added with the settings screen and the Xaero features, each skippe
 | --- | --- |
 | `configNativeCheck` | `yaclJar`, `modMenuJar` |
 | `xaeroSyncNativeCheck` | `fabricNetworkingJar` (the networking module nested in Fabric API's `META-INF/jars`), `xaeroMinecraftJar` |
-| `xaeroMapNativeCheck` | `worldMapJar`, `dwmJar` (Fabric build), `xaeroMinecraftJar` |
+| `xaeroMapNativeCheck` | `worldMapJar`, `minimapJar`, `dwmJar` (Fabric build), `xaeroMinecraftJar` |
 
 Jar roles that are easy to get wrong. `xaeroMinecraftJar`, `gravesMinecraftJar`, `pointBlankRenderMinecraftJar` and
 `portalDepthMinecraftJar` are Minecraft 1.21.1 jars **with intermediary class names** (for example Loom's

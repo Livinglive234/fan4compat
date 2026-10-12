@@ -31,6 +31,7 @@ public final class Features {
         of("eurekaWarnings",PACK,"Hide Eureka portal warnings","Removes Eureka from Immersive Portals' incompatibility notices; other warnings are not touched.",true,true,"vs_eureka","immersive_portals"),
         of("jadeHelm",PACK,"Hide Jade while at a helm","Hides the Jade overlay while you steer a ship from a helm, and brings it back when you dismount.",true,true,"jade","vs_eureka"),
         of("xaeroTardisMap",PACK,"Xaero map shows the TARDIS exterior","While you are inside a TARDIS that has landed, Xaero's World Map opens on the exterior's dimension, centered on where the TARDIS is. In flight, or when the exterior is not known, the map behaves as normal.",true,true,"xaeroworldmap","dwm"),
+        of("xaeroTardisMinimap",PACK,"Xaero minimap and waypoints follow the TARDIS exterior","While you are inside a TARDIS that has landed, Xaero treats you as standing at the exterior: the minimap centers there, new waypoints and the waypoint list belong to the outside dimension, and the minimap and World Map draw what the World Map has stored for that spot. The outside is not loaded on your client, so only terrain you have already mapped appears.",true,true,"xaerominimap","xaeroworldmap","dwm"),
         of("xaeroWaypointSync",PACK,"Xaero waypoint sync","Keeps your Xaero's Minimap waypoints on the server so they follow you between PCs. The join is held briefly while the files are exchanged, so Xaero loads the up-to-date copy. Needs Fan4Compat on the server and Xaero's Minimap 26.5.0 on your client; when both sides changed a file, the newer save wins and the other copy is backed up.",true,true,"xaerominimap"),
         of("trinketGraves",PACK,"Trinkets items in graves","Puts equipped Trinkets items into Player Graves graves and restores them to their slot on quick retrieve.",true,false,"trinkets","graves"),
         of("eurekaDebugLogging",TROUBLESHOOTING,"Eureka ship debug logging","Shows Eureka's ship debug messages in the log.",false,true,"vs_eureka"),
@@ -52,11 +53,13 @@ public final class Features {
         hooks("eurekaWarnings","EurekaPortalWarningMixin","EurekaPortalWarningInfoMixin");
         hooks("jadeHelm","JadeHelmMixin");
         hooks("xaeroTardisMap","TardisMapMixin");
+        hooks("xaeroTardisMinimap","TardisMapEntityMixin","TardisMapProcessorMixin");
     }
     /** The switch for a generated mixin, or null when it is always installed. */
-    static String featureFor(String path,String simple) {
+    public static String featureFor(String path,String simple) {
         if(path.startsWith("freecam."))return "freecamFixes";
         if(simple.startsWith("TardisShipModelCache"))return "tardisModelCache";
+        if(simple.startsWith("TardisMinimap"))return "xaeroTardisMinimap";
         return HOOKS.get(simple);
     }
     /** Generated mixin simple names that a switch controls, for tests that guard against renames. */

@@ -7,7 +7,7 @@ import org.objectweb.asm.tree.*;
 /**
  * Real Xaero World Map, Doctor Who Mod (Fabric) and intermediary-named Minecraft jars: the generated hook binds to
  * GuiMap's constructor, and every member TardisMapCompat reaches reflectively exists.
- * Arguments: world map jar, DWM jar, Minecraft jar, generated classes directory.
+ * Arguments: world map jar, minimap jar, DWM jar, Minecraft jar, generated classes directory.
  */
 public final class XaeroMapNativeCheck implements Opcodes {
     static String[] jars;
@@ -33,16 +33,35 @@ public final class XaeroMapNativeCheck implements Opcodes {
         throw new AssertionError("Missing native field: "+owner+"."+name);
     }
     public static void main(String[] args)throws Exception {
-        jars=Arrays.copyOf(args,3);
+        jars=Arrays.copyOf(args,4);
         String mc="net/minecraft/",guiMap="xaero/map/gui/GuiMap",key="Lnet/minecraft/class_5321;";
-        // The hook must bind to the real constructor.
+        // Every generated hook must bind to the real classes (constructors, methods, redirected call sites).
         ClassNode gui=find(guiMap);
-        ClassNode mixin=new ClassNode();new ClassReader(Files.readAllBytes(Path.of(args[3],"dev/fan4/compat/mixin/xaero/client/TardisMapMixin.class"))).accept(mixin,0);
-        VerifyAddon.classes.put(guiMap,gui);VerifyAddon.injectionTargets(mixin);
+        int hooks=0;
+        try(var files=Files.list(Path.of(args[4],"dev/fan4/compat/mixin/xaero/client"))) {
+            for(Path file:files.filter(f->f.toString().endsWith(".class")).toList()) {
+                ClassNode mixin=new ClassNode();new ClassReader(Files.readAllBytes(file)).accept(mixin,0);
+                @SuppressWarnings("unchecked") List<String> targets=(List<String>)mixin.invisibleAnnotations.stream().filter(n->n.desc.equals("Lorg/spongepowered/asm/mixin/Mixin;")).findFirst().orElseThrow().values.get(1);
+                String target=targets.get(0).replace('.','/');
+                VerifyAddon.classes.put(target,find(target));VerifyAddon.injectionTargets(mixin);hooks++;
+            }
+        }
+        if(hooks!=7)throw new AssertionError("Expected seven generated Xaero hooks, found "+hooks);
         method(guiMap,"getMapProcessor","()",false);
         field(guiMap,"cameraX","D",false);field(guiMap,"cameraZ","D",false);field(guiMap,"shouldResetCameraPos","Z",false);
         method("xaero/map/MapProcessor","getMapWorld","()",false);method("xaero/map/MapProcessor","checkForWorldUpdate","()",false);
         method("xaero/map/world/MapWorld","setCustomDimensionId","("+key+")",false);method("xaero/map/world/MapWorld","getCustomDimensionId","()",false);
+        // Minimap and World Map members reached by reflection.
+        String session="xaero/hud/minimap/module/MinimapSession",worldState="xaero/hud/minimap/world/state/MinimapWorldState",path="Lxaero/hud/path/XaeroPath;";
+        method(session,"getWorldState","()",false);method(session,"getDimensionHelper","()",false);method(session,"getWorldStateUpdater","()",false);method(session,"getWorldManager","()",false);
+        method(worldState,"getCustomWorldPath","()",false);method(worldState,"setCustomWorldPath","("+path+")",false);method(worldState,"getAutoRootContainerPath","()",false);
+        method("xaero/hud/minimap/world/MinimapDimensionHelper","getDimensionDirectoryName","("+key+")",false);
+        method("xaero/hud/path/XaeroPath","resolve","(Ljava/lang/String;)",false);
+        field("xaero/hud/minimap/world/state/MinimapWorldStateUpdater","modMain",null,false);method("xaero/hud/minimap/world/state/MinimapWorldStateUpdater","getPotentialWorldNode","("+key+"Z)",false);
+        method("xaero/common/HudMod","getSupportMods","()",false);method("xaero/common/mods/SupportMods","worldmap","()",false);
+        method("xaero/hud/minimap/world/MinimapWorldManager","getWorld","("+path+")",false);method("xaero/hud/minimap/world/MinimapWorldManager","addWorld","("+path+")",false);
+        method("xaero/map/WorldMapSession","getCurrentSession","()",true);method("xaero/map/WorldMapSession","getMapProcessor","()",false);
+        method(mc+"class_2382","method_10264","()",false);
         // Doctor Who Mod: the client console's synced TARDIS state.
         method("net/drgmes/dwm/utils/helpers/TardisHelper","isTardisDimension","("+key+")",true);
         field("net/drgmes/dwm/blocks/tardis/consoleunits/BaseTardisConsoleUnitBlockEntity","tardisStateManager",null,false);
@@ -55,6 +74,6 @@ public final class XaeroMapNativeCheck implements Opcodes {
         method(mc+"class_631","method_2857","(IIL"+mc+"class_2806;Z)",false);field(mc+"class_2806","field_12803",null,true);
         method(mc+"class_2818","method_12214","()",false);method(mc+"class_1297","method_23317","()",false);method(mc+"class_1297","method_23321","()",false);
         method(mc+"class_2382","method_10263","()",false);method(mc+"class_2382","method_10260","()",false);
-        System.out.println("PASS: Xaero map hook binds to GuiMap's constructor; every Xaero, Doctor Who Mod and Minecraft member used by the TARDIS map helper exists");
+        System.out.println("PASS: all seven Xaero TARDIS hooks bind to the real Minimap and World Map classes; every Xaero, Doctor Who Mod and Minecraft member used by the helpers exists");
     }
 }

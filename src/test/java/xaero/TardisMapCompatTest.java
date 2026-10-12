@@ -6,7 +6,7 @@ import net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlockEntit
 public final class TardisMapCompatTest {
     static void check(boolean condition,String reason){if(!condition)throw new AssertionError(reason);}
     public static final class Key {final String name;Key(String name){this.name=name;}}
-    public static final class Pos {final int x,z;Pos(int x,int z){this.x=x;this.z=z;}public int method_10263(){return x;}public int method_10260(){return z;}}
+    public static final class Pos {final int x,y,z;Pos(int x,int z){this.x=x;this.y=70;this.z=z;}public int method_10263(){return x;}public int method_10264(){return y;}public int method_10260(){return z;}}
     public static final class Player {public double method_23317(){return 40.5;}public double method_23321(){return -70.2;}}
     public static final class Chunk {final Map<Object,Object> entities=new HashMap<>();public Map<Object,Object> method_12214(){return entities;}}
     public static final class Chunks {
@@ -19,6 +19,7 @@ public final class TardisMapCompatTest {
     public static final class Gui {private double cameraX,cameraZ;private boolean shouldResetCameraPos=true;final Processor processor=new Processor();public Processor getMapProcessor(){return processor;}}
     public static void main(String[] args)throws Exception {
         Path dir=Files.createTempDirectory("fan4tardismap");Features.reset(dir.resolve("fan4compat.properties"));
+        Features.set("xaeroTardisMinimap",false);
         World world=new World();net.minecraft.class_310.INSTANCE.field_1687=world;net.minecraft.class_310.INSTANCE.field_1724=new Player();
         BaseTardisConsoleUnitBlockEntity console=new BaseTardisConsoleUnitBlockEntity();
         Key overworld=new Key("minecraft:overworld");console.tardisStateManager.dimension=overworld;console.tardisStateManager.position=new Pos(1200,-340);
@@ -64,6 +65,12 @@ public final class TardisMapCompatTest {
         Gui chosenGui=new Gui();dev.fan4.compat.xaero.TardisMapCompat.opened(chosenGui);chosenGui.processor.world.custom=chosen;
         dev.fan4.compat.xaero.TardisMapCompat.closed(chosenGui);
         check(chosenGui.processor.world.custom==chosen,"a dimension the player picked afterwards is left alone on close");
+
+        // With the minimap mode on, it owns the view: closing the map screen leaves it in place.
+        Features.set("xaeroTardisMinimap",true);dev.fan4.compat.xaero.TardisLocation.refresh();
+        Gui owned=new Gui();dev.fan4.compat.xaero.TardisMapCompat.opened(owned);dev.fan4.compat.xaero.TardisMapCompat.closed(owned);
+        check(owned.processor.world.custom==overworld,"minimap mode keeps the exterior view after the map screen closes");
+        Features.set("xaeroTardisMinimap",false);dev.fan4.compat.xaero.TardisLocation.refresh();
 
         Features.set("xaeroTardisMap",false);
         Gui off=new Gui();dev.fan4.compat.xaero.TardisMapCompat.opened(off);

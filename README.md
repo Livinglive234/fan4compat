@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.37.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.38.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 37 release notes](docs/releases/0.1.0-beta.37.md) ·
+[Beta 38 release notes](docs/releases/0.1.0-beta.38.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -227,7 +227,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.37.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.38.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -394,6 +394,7 @@ switches (check for updates, download automatically, include beta releases), sav
 | Hide Eureka portal warnings | `eurekaWarnings` | on | after restart |
 | Hide Jade while at a helm | `jadeHelm` | on | after restart |
 | Xaero map shows the TARDIS exterior | `xaeroTardisMap` | on | after restart |
+| Xaero minimap and waypoints follow the TARDIS exterior | `xaeroTardisMinimap` | on | after restart |
 | Xaero waypoint sync | `xaeroWaypointSync` | on | after restart |
 | Trinkets items in graves | `trinketGraves` | on | immediately |
 | Eureka ship debug logging | `eurekaDebugLogging` | off | after restart |
@@ -410,6 +411,25 @@ older `-Dfan4compat.renderDiagnostics`, `-Dfan4compat.dhRenderDiagnostics`,
 `-Dfan4compat.portalDepthDiagnostics` and `-Dfan4compat.shipDebug` arguments still work.
 The render diagnostics switch also turns on the Distant Horizons diagnostics unless those are set
 separately. Xaero waypoint sync has its entry above.
+
+## Xaero minimap and waypoints follow the TARDIS exterior
+
+Client only; needs Xaero's Minimap 26.5.0, Xaero's World Map 1.46.0 and Doctor Who Mod. While you are inside a TARDIS that
+has landed, Xaero treats you as standing at the exterior:
+
+- **Waypoints** belong to the outside. The waypoint list shows the exterior dimension's waypoints (the same world switch the
+  waypoint menu's own world selector makes), and new waypoints, the waypoint dialog's default coordinates and the temporary
+  waypoint hotkey use the exterior's dimension and coordinates, not the interior's.
+- **The minimap** centers on the exterior and shows waypoints relative to it. Its terrain comes from the World Map's stored
+  data for that spot: the outside is not loaded on your client, so you see terrain you have already mapped there, and blank
+  where you have not.
+- **The World Map** keeps viewing the exterior's dimension while you are inside, loads regions around the exterior, and puts
+  your marker there.
+
+In flight, outside a TARDIS, or when the exterior cannot be found, everything is normal, and anything it changed is put back
+(a waypoint world or map dimension you chose yourself is never touched). While the exterior is shown, Xaero does not record the
+interior's chunks (Xaero's own rule whenever the map shows another dimension). Not covered: the radar, an exterior in a
+differently scaled dimension such as the Nether (coordinates may be scaled wrongly), and live terrain. On by default.
 
 ## Xaero waypoint sync
 

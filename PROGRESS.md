@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.37**.
+Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.38**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
@@ -171,6 +171,13 @@ observer without interrupting rendering. Enable with the setting or
 Beta 23's opt-in Point Blank diagnostics and all existing rendering fixes remain.
 Bounded reporting/error preservation, optional gates and real IP selectors are
 checked; actual Mac reproduction remains pending.
+
+## Beta 38: Xaero minimap and waypoints follow the TARDIS exterior
+
+Client-only, default on, switch "Xaero minimap and waypoints follow the TARDIS exterior": inside a landed TARDIS, Xaero is told
+the player is at the exterior (position for minimap, waypoint dialog, hotkey and World Map; the waypoint world through
+`setCustomWorldPath`; the World Map's viewed dimension kept on the exterior). Minimap terrain is only what the World Map has
+stored there. Six new hooks bound to the real Xaero classes by `xaeroMapNativeCheck`; fixtures cover the helper; not run in game.
 
 ## Beta 37: Xaero map shows the TARDIS exterior (Feature C, first version)
 
