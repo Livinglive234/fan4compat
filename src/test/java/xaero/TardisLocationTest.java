@@ -14,7 +14,10 @@ public final class TardisLocationTest {
     public static final class Support {public boolean worldmap(){return true;}}
     public static final class Mod {public Support getSupportMods(){return new Support();}}
     public static final class Updater {public Object modMain=new Mod();public String getPotentialWorldNode(Object key,boolean worldMap){return worldMap?"mw$default":"null";}}
-    public static final class Manager {final Set<XPath> worlds=new HashSet<>();final List<XPath> added=new ArrayList<>();
+    public static final class DimType {final boolean ceiling;DimType(boolean ceiling){this.ceiling=ceiling;}public boolean comp_643(){return ceiling;}}
+    public static final class Container {Object type;public Object getDimensionType(Object key){return type;}}
+    public static final class Manager {final Container container=new Container();public Object getAutoRootContainer(){return container;}
+        final Set<XPath> worlds=new HashSet<>();final List<XPath> added=new ArrayList<>();
         public Object getWorld(Object path){return worlds.contains(path)?path:null;}public Object addWorld(Object path){worlds.add((XPath)path);added.add((XPath)path);return path;}}
     public static final class Session {final State state=new State();final Manager manager=new Manager();
         public State getWorldState(){return state;}public DimHelper getDimensionHelper(){return new DimHelper();}public Updater getWorldStateUpdater(){return new Updater();}public Manager getWorldManager(){return manager;}}
@@ -48,10 +51,21 @@ public final class TardisLocationTest {
         TardisLocation.frame(session);
         check(session.manager.added.size()==1&&processor.updates==1,"a steady state does no repeated work");
 
+        // Cave start: under a ceiling the exterior's own height, otherwise the plain top view; never Xaero's scan of the interior.
+        session.manager.container.type=new DimType(false);
+        check(TardisLocation.caving()==Integer.MAX_VALUE,"an open-sky exterior keeps the top view");
+        session.manager.container.type=new DimType(true);
+        check(TardisLocation.caving()==71,"a ceiling exterior shows the layer at the TARDIS's height (y 70 + 1)");
+        session.manager.container.type=null;
+        check(TardisLocation.caving()==Integer.MAX_VALUE,"unknown type, not the Nether: top view");
+        console.tardisStateManager.dimension=new TardisMapCompatTest.Key("minecraft:the_nether");TardisLocation.refresh();
+        check(TardisLocation.caving()==71,"unknown type but the Nether: still a ceiling dimension");
+        console.tardisStateManager.dimension=overworld;TardisLocation.refresh();
+
         // Landing state, switch and leaving all undo exactly what we did.
         console.tardisStateManager.materialization.landed=false;TardisLocation.refresh();
         TardisLocation.frame(session);
-        check(session.state.custom==null&&processor.world.custom==null&&TardisLocation.x(player,5.5)==5.5,"in flight everything returns to normal");
+        check(session.state.custom==null&&processor.world.custom==null&&TardisLocation.x(player,5.5)==5.5&&TardisLocation.caving()==null,"in flight everything returns to normal, Xaero works out its own cave start");
         console.tardisStateManager.materialization.landed=true;TardisLocation.refresh();TardisLocation.frame(session);
         check(expected.equals(session.state.custom),"landing again restores the exterior");
         Features.set("xaeroTardisMinimap",false);TardisLocation.refresh();TardisLocation.frame(session);

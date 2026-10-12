@@ -1,6 +1,6 @@
 # Fan4Compat: architecture, features and contributor guide
 
-This document explains the active implementation at **0.1.0-beta.38**, reviewed
+This document explains the active implementation at **0.1.0-beta.39**, reviewed
 2026-10-11 (America/Chicago). It is an onboarding guide for human contributors and
 AI coding assistants. The source and version gates describe what actually runs;
 older release notes describe historical builds and can contain superseded behavior.
@@ -831,6 +831,21 @@ an auto world path: root container + `MinimapDimensionHelper.getDimensionDirecto
 the waypoint menu's world selector sets; and keeps the World Map's custom dimension on the exterior (continuous mode, which
 supersedes the close-on-screen-closed undo of the map-screen feature while active). Terrain on the minimap comes from
 `SupportXaeroWorldmap.drawMinimap`, i.e. previously mapped World Map regions; the exterior's chunks are not loaded on the client.
+
+Ships (beta 39): on a Valkyrien Skies ship DWM's exterior position is a shipyard block address, so the helper asks
+`TardisShipCompat.displayPosition(state, "curr")` first. On the client that returns the transformed world position Fan4Compat
+wrote into the synced state, or DWM's own block when there is no ship data.
+
+Cave start (beta 39). Xaero shows the layer at the player's height in a ceiling dimension by scanning the real world's
+blocks for a roof (`CaveStartCalculator.getCaving` in the World Map, `MinimapWriter.getCaving` in the minimap), and
+`MapProcessor.updateCaveStart` forces the plain top view whenever the map's dimension differs from the real world's. Inside a
+TARDIS those scans see the interior (above the Nether's roof, with the exterior's chunks not loaded), so the Nether showed its
+bedrock ceiling. Three more hooks fix it: `TardisMapProcessorMixin` redirects the dimension read in `updateCaveStart` so the
+view is not treated as "elsewhere", and `TardisMapCaveMixin` / `TardisMinimapCaveMixin` cancel the two `getCaving` methods with
+`TardisLocation.caving()`: the exterior's Y + 1 when its dimension type has a ceiling (`DimensionType.hasCeiling`, read from
+Xaero's recorded dimension types, falling back to the key `minecraft:the_nether`), otherwise Integer.MAX_VALUE (top view). The
+layer shown is only what the World Map stored at that cave start, and the exact layer index Xaero used while you explored may
+differ from our Y + 1, so a layer you mapped at a different cave start can look blank.
 
 Not handled: the radar (it still draws interior entities relative to an exterior centre), scaled exterior dimensions (the
 division between the real and the displayed dimension is applied to our already-exterior coordinates), and any other Xaero code

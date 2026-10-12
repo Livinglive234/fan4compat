@@ -46,7 +46,7 @@ public final class XaeroMapNativeCheck implements Opcodes {
                 VerifyAddon.classes.put(target,find(target));VerifyAddon.injectionTargets(mixin);hooks++;
             }
         }
-        if(hooks!=7)throw new AssertionError("Expected seven generated Xaero hooks, found "+hooks);
+        if(hooks!=9)throw new AssertionError("Expected nine generated Xaero hooks, found "+hooks);
         method(guiMap,"getMapProcessor","()",false);
         field(guiMap,"cameraX","D",false);field(guiMap,"cameraZ","D",false);field(guiMap,"shouldResetCameraPos","Z",false);
         method("xaero/map/MapProcessor","getMapWorld","()",false);method("xaero/map/MapProcessor","checkForWorldUpdate","()",false);
@@ -62,6 +62,8 @@ public final class XaeroMapNativeCheck implements Opcodes {
         method("xaero/hud/minimap/world/MinimapWorldManager","getWorld","("+path+")",false);method("xaero/hud/minimap/world/MinimapWorldManager","addWorld","("+path+")",false);
         method("xaero/map/WorldMapSession","getCurrentSession","()",true);method("xaero/map/WorldMapSession","getMapProcessor","()",false);
         method(mc+"class_2382","method_10264","()",false);
+        method("xaero/hud/minimap/world/MinimapWorldManager","getAutoRootContainer","()",false);method("xaero/hud/minimap/world/container/MinimapWorldRootContainer","getDimensionType","("+key+")",false);
+        method(mc+"class_2874","comp_643","()",false);method(mc+"class_5321","method_29177","()",false);
         // Doctor Who Mod: the client console's synced TARDIS state.
         method("net/drgmes/dwm/utils/helpers/TardisHelper","isTardisDimension","("+key+")",true);
         field("net/drgmes/dwm/blocks/tardis/consoleunits/BaseTardisConsoleUnitBlockEntity","tardisStateManager",null,false);
@@ -74,6 +76,6 @@ public final class XaeroMapNativeCheck implements Opcodes {
         method(mc+"class_631","method_2857","(IIL"+mc+"class_2806;Z)",false);field(mc+"class_2806","field_12803",null,true);
         method(mc+"class_2818","method_12214","()",false);method(mc+"class_1297","method_23317","()",false);method(mc+"class_1297","method_23321","()",false);
         method(mc+"class_2382","method_10263","()",false);method(mc+"class_2382","method_10260","()",false);
-        System.out.println("PASS: all seven Xaero TARDIS hooks bind to the real Minimap and World Map classes; every Xaero, Doctor Who Mod and Minecraft member used by the helpers exists");
+        System.out.println("PASS: all nine Xaero TARDIS hooks bind to the real Minimap and World Map classes; every Xaero, Doctor Who Mod and Minecraft member used by the helpers exists");
     }
 }

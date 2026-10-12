@@ -44,6 +44,25 @@ public final class XaeroMapGenerator implements Opcodes {
     }
     static void positionReads(String simple,String target,String method)throws Exception {positionReads(simple,target,new String[]{method},new String[]{method},new String[]{method});}
 
+    /** Head injector on an instance {@code getCaving(DDDLclass_1937;)I}: the virtual location supplies the cave start. */
+    static void cavingOverride(String simple,String target)throws Exception {
+        String name=ROOT+simple;ClassWriter w=GenerateAddon.writer(name,target);
+        MethodVisitor m=w.visitMethod(ACC_PRIVATE,"fan4$caving","(DDDLnet/minecraft/class_1937;L"+CIR+";)V",null,null);
+        GenerateAddon.inject(m,"getCaving(DDDLnet/minecraft/class_1937;)I","HEAD",true);
+        m.visitCode();m.visitMethodInsn(INVOKESTATIC,LOCATION,"caving","()Ljava/lang/Integer;",false);m.visitVarInsn(ASTORE,9);
+        Label skip=new Label();m.visitVarInsn(ALOAD,9);m.visitJumpInsn(IFNULL,skip);
+        m.visitVarInsn(ALOAD,8);m.visitVarInsn(ALOAD,9);m.visitMethodInsn(INVOKEVIRTUAL,CIR,"setReturnValue","(Ljava/lang/Object;)V",false);
+        m.visitLabel(skip);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();
+        GenerateAddon.save(name,w);
+    }
+    /** The client world's dimension as read by a method, redirected to the virtual location's dimension. */
+    static void dimensionRead(ClassWriter w,String method)throws Exception {
+        MethodVisitor m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$tardisDimension","(L"+WORLD+";)L"+KEY+";",null,null);
+        redirect(m,new String[]{method},"L"+WORLD+";method_27983()L"+KEY+";");
+        m.visitCode();m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKEVIRTUAL,WORLD,"method_27983","()L"+KEY+";",false);
+        m.visitMethodInsn(INVOKESTATIC,LOCATION,"dimension","(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",false);m.visitTypeInsn(CHECKCAST,KEY);m.visitInsn(ARETURN);m.visitMaxs(0,0);m.visitEnd();
+    }
+
     public static void generate()throws Exception {
         // World Map screen: choose what it shows when it opens, and undo that when it closes (unless the minimap mode owns the view).
         String name=ROOT+"TardisMapMixin";
@@ -65,13 +84,17 @@ public final class XaeroMapGenerator implements Opcodes {
         m=w.visitMethod(ACC_PRIVATE,"fan4$tardisFrame","(Lxaero/hud/minimap/module/MinimapSession;Lnet/minecraft/class_332;Lxaero/common/minimap/MinimapProcessor;IIIIDIFLxaero/common/graphics/CustomVertexConsumers;L"+GenerateAddon.CI+";)V",null,null);
         GenerateAddon.inject(m,RENDER_MINIMAP,"HEAD",false);
         m.visitCode();m.visitVarInsn(ALOAD,1);m.visitMethodInsn(INVOKESTATIC,LOCATION,"frame","(Ljava/lang/Object;)V",false);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();
-        m=w.visitMethod(ACC_PRIVATE|ACC_STATIC,"fan4$tardisDimension","(L"+WORLD+";)L"+KEY+";",null,null);
-        redirect(m,new String[]{RENDER_MINIMAP},"L"+WORLD+";method_27983()L"+KEY+";");
-        m.visitCode();m.visitVarInsn(ALOAD,0);m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKEVIRTUAL,WORLD,"method_27983","()L"+KEY+";",false);
-        m.visitMethodInsn(INVOKESTATIC,LOCATION,"dimension","(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",false);m.visitTypeInsn(CHECKCAST,KEY);m.visitInsn(ARETURN);m.visitMaxs(0,0);m.visitEnd();
+        dimensionRead(w,RENDER_MINIMAP);
         GenerateAddon.save(name,w);
         // World Map: its own position helper (map marker, camera) and the position it loads regions around.
         entityUtils("TardisMapEntityMixin","xaero/map/entity/util/EntityUtil");
-        positionReads("TardisMapProcessorMixin","xaero/map/MapProcessor","setMainValues()V");
+        // updateCaveStart treats a map dimension other than the real one as "viewing elsewhere" and falls back to the top view (the Nether's roof).
+        name=ROOT+"TardisMapProcessorMixin";w=GenerateAddon.writer(name,"xaero/map/MapProcessor");
+        positionRead(w,new String[]{"setMainValues()V"},"method_23317","x");positionRead(w,new String[]{"setMainValues()V"},"method_23318","y");positionRead(w,new String[]{"setMainValues()V"},"method_23321","z");
+        dimensionRead(w,"updateCaveStart()V");
+        GenerateAddon.save(name,w);
+        // The cave start itself: both mods scan the real (interior) world for a roof, which tells them nothing about the exterior.
+        cavingOverride("TardisMapCaveMixin","xaero/map/misc/CaveStartCalculator");
+        cavingOverride("TardisMinimapCaveMixin","xaero/common/minimap/write/MinimapWriter");
     }
 }

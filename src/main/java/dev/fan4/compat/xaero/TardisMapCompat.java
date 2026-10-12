@@ -81,6 +81,19 @@ public final class TardisMapCompat {
         }
     }
 
+    /**
+     * Where the exterior really is. On a Valkyrien Skies ship DWM's own address is a shipyard block, far from the world
+     * position; Fan4Compat's ship support keeps the transformed world position beside it (and syncs it to the client with the
+     * rest of the state), so prefer that. Without ship data it is the same block DWM reports.
+     */
+    private static Object exteriorPosition(Object state) {
+        try {
+            Object shown=dev.fan4.compat.doctorwho.TardisShipCompat.displayPosition(state,"curr");
+            if(shown!=null)return shown;
+        } catch(RuntimeException|LinkageError unavailable){}
+        return call(state,"getCurrentExteriorPosition");
+    }
+
     /** The landed exterior of the TARDIS the player is inside, or null when unknown or in flight. */
     static Exterior exterior(Object world,Object player) {
         int centerX=(int)Math.floor((Double)call(player,"method_23317"))>>4,centerZ=(int)Math.floor((Double)call(player,"method_23321"))>>4;
@@ -96,7 +109,7 @@ public final class TardisMapCompat {
                         if(!console.isInstance(entity))continue;
                         Object state=field(entity,"tardisStateManager");
                         if(!(Boolean)call(call(state,"getSystem",type(MATERIALIZATION)),"isMaterialized"))return null;
-                        Object position=call(state,"getCurrentExteriorPosition");
+                        Object position=exteriorPosition(state);
                         return new Exterior(call(state,"getCurrentExteriorDimension"),(Integer)call(position,"method_10263"),(Integer)call(position,"method_10264"),(Integer)call(position,"method_10260"));
                     }
                 }

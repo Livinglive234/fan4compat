@@ -52,6 +52,8 @@
     "xaero.client.TardisMapMixin",
     "xaero.client.TardisMapEntityMixin",
     "xaero.client.TardisMapProcessorMixin",
+    "xaero.client.TardisMapCaveMixin",
+    "xaero.client.TardisMinimapCaveMixin",
     "xaero.client.TardisMinimapEntityMixin",
     "xaero.client.TardisMinimapWaypointMixin",
     "xaero.client.TardisMinimapHotkeyMixin",

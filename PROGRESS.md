@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.38**.
+Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.39**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
@@ -171,6 +171,13 @@ observer without interrupting rendering. Enable with the setting or
 Beta 23's opt-in Point Blank diagnostics and all existing rendering fixes remain.
 Bounded reporting/error preservation, optional gates and real IP selectors are
 checked; actual Mac reproduction remains pending.
+
+## Beta 39: cave start for the TARDIS exterior
+
+The minimap showed the Nether's bedrock roof inside a TARDIS: Xaero scanned the interior for a roof and the map-dimension
+mismatch forced the top view. Three hooks (`updateCaveStart` dimension read, both `getCaving` methods) now supply the exterior's
+Y + 1 under a ceiling dimension, and the top view otherwise. Nine Xaero hooks in all, bound to the real jars; the exact stored
+layer match is unverified in game. Also uses `TardisShipCompat.displayPosition` so a TARDIS on a ship maps at its world position.
 
 ## Beta 38: Xaero minimap and waypoints follow the TARDIS exterior
 

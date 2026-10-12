@@ -16,6 +16,8 @@ public final class TardisLocation {
     private static boolean warned,haveChecked;
     /** The custom world path and map dimension this class put in place, so only our own are ever undone. */
     private static Object appliedWorldPath;
+    /** The latest minimap session seen by {@link #frame}, used to look up the exterior dimension's type. */
+    private static volatile Object lastSession;
     private TardisLocation() {}
 
     /** The landed exterior of the TARDIS the player is inside, refreshed a few times a second; null when inactive. */
@@ -61,9 +63,33 @@ public final class TardisLocation {
         } catch(RuntimeException|LinkageError failure){warn(failure);return original;}
     }
 
+    /**
+     * The cave start (Xaero's "caving" height) for the virtual location, or null to let Xaero work it out. Xaero scans the
+     * real world's blocks around the player for a roof; inside the TARDIS that is the interior and the exterior is not loaded,
+     * so it would find none and show the top view (the bedrock ceiling in the Nether). Under a ceiling dimension use the
+     * exterior's own height so the minimap shows the layer at that level; otherwise the plain top view.
+     */
+    public static Integer caving() {
+        TardisMapCompat.Exterior exterior=current();
+        if(exterior==null)return null;
+        try{if(hasCeiling(exterior.dimension()))return exterior.y()+1;}
+        catch(RuntimeException|LinkageError failure){warn(failure);}
+        return Integer.MAX_VALUE;
+    }
+    private static boolean hasCeiling(Object dimension) {
+        Object session=lastSession;
+        if(session!=null) {
+            Object type=call(call(call(session,"getWorldManager"),"getAutoRootContainer"),"getDimensionType",dimension);
+            if(type!=null)return (Boolean)call(type,"comp_643");
+        }
+        // Xaero has not recorded this dimension's type yet: the one ceiling dimension every pack has.
+        return "minecraft:the_nether".equals(String.valueOf(call(dimension,"method_29177")));
+    }
+
     /** Once per minimap frame: keep the waypoint world and the World Map's viewed dimension matching the player's location. */
     public static void frame(Object session) {
         try {
+            lastSession=session;
             TardisMapCompat.Exterior exterior=current();
             applyWaypointWorld(session,exterior);
             TardisMapCompat.applyMapDimension(exterior);

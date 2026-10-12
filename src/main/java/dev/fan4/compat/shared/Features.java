@@ -53,7 +53,7 @@ public final class Features {
         hooks("eurekaWarnings","EurekaPortalWarningMixin","EurekaPortalWarningInfoMixin");
         hooks("jadeHelm","JadeHelmMixin");
         hooks("xaeroTardisMap","TardisMapMixin");
-        hooks("xaeroTardisMinimap","TardisMapEntityMixin","TardisMapProcessorMixin");
+        hooks("xaeroTardisMinimap","TardisMapEntityMixin","TardisMapProcessorMixin","TardisMapCaveMixin");
     }
     /** The switch for a generated mixin, or null when it is always installed. */
     public static String featureFor(String path,String simple) {

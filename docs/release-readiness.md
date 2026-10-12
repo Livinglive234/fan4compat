@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.38**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.39**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
@@ -97,7 +97,7 @@ changes. Log warning count alone is not a release criterion.
 
 Beta 1 freezes the current supported feature set. Exact supported versions,
 installation instructions and known limitations remain in the README and
-[release notes](releases/0.1.0-beta.38.md).
+[release notes](releases/0.1.0-beta.39.md).
 
 ## Move from beta to stable
 

@@ -290,6 +290,8 @@ leave everything else, including the player marker and the corner minimap, alone
 Still to confirm in `GuiMap`'s initialization: the order in which it picks the viewed dimension and camera, and what the
 dimension toggle button does afterward. Travel-following and the minimap remain later work.
 
+**Built (beta 39): cave start.** Under a ceiling dimension the minimap and World Map now use the exterior's height as the cave start (see the architecture guide).
+
 **Built (beta 38): minimap and waypoints.** The pack owner asked for the corner minimap and waypoints to follow the exterior. The
 minimap's terrain comes from the World Map's stored regions (the outside is not loaded on the client), its centre and the waypoint
 dialogs' coordinates from the player-position helpers, and its waypoints from the minimap session's custom world path, the same

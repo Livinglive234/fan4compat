@@ -5,7 +5,7 @@ import net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlockEntit
 
 public final class TardisMapCompatTest {
     static void check(boolean condition,String reason){if(!condition)throw new AssertionError(reason);}
-    public static final class Key {final String name;Key(String name){this.name=name;}}
+    public static final class Key {final String name;Key(String name){this.name=name;}public Object method_29177(){return name;}}
     public static final class Pos {final int x,y,z;Pos(int x,int z){this.x=x;this.y=70;this.z=z;}public int method_10263(){return x;}public int method_10264(){return y;}public int method_10260(){return z;}}
     public static final class Player {public double method_23317(){return 40.5;}public double method_23321(){return -70.2;}}
     public static final class Chunk {final Map<Object,Object> entities=new HashMap<>();public Map<Object,Object> method_12214(){return entities;}}
