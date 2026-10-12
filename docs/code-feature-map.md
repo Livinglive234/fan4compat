@@ -27,14 +27,15 @@ shutdown. These are full-pack user reports, not automated GPU tests.
 The Mac improvement coincides with the DH repair; a causal link to the earlier
 gun-over-portal overlap has not been established. The pack owner also confirmed
 Mac nested portals and reports the discussed restart workflows working. Automatic
-update download/install across a restart has not yet been tested end to end.
+update download/install across a restart was also confirmed working by the pack owner
+(2026-10-11).
 Other shader packs and GPUs are outside this confirmation. Earlier pending rendering notes below record their status at that build.
 Point Blank, Freecam/BSL and Graves were also confirmed working on 2026-10-10.
 
 Render diagnostics can now be disabled: omit or set to false
 `fan4compat.renderDiagnostics` and `fan4compat.dhRenderDiagnostics`. Runtime fixes
-remain active. The separate portal depth observer can be disabled with
-`-Dfan4compat.portalDepthDiagnostics=false`.
+remain active. The separate portal depth observer is off by default (beta 35); enable it with the
+"Portal depth-copy logging" setting or `-Dfan4compat.portalDepthDiagnostics=true`.
 
 ## Why doorway loading remains
 

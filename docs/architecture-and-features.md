@@ -1,6 +1,6 @@
 # Fan4Compat: architecture, features and contributor guide
 
-This document explains the active implementation at **0.1.0-beta.34**, reviewed
+This document explains the active implementation at **0.1.0-beta.35**, reviewed
 2026-10-11 (America/Chicago). It is an onboarding guide for human contributors and
 AI coding assistants. The source and version gates describe what actually runs;
 older release notes describe historical builds and can contain superseded behavior.
@@ -17,14 +17,15 @@ shutdown. These are full-pack user reports, not automated GPU tests.
 The Mac improvement coincides with the DH repair; a causal link to the earlier
 gun-over-portal overlap has not been established. The pack owner also confirmed
 Mac nested portals and reports the discussed restart workflows working. Automatic
-update download/install across a restart has not yet been tested end to end.
+update download/install across a restart was also confirmed working by the pack owner
+(2026-10-11).
 Other shader packs and GPUs are outside this confirmation. Earlier pending rendering notes below record their status at that build.
 Point Blank, Freecam/BSL and Graves were also confirmed working on 2026-10-10.
 
 Render diagnostics can now be disabled: omit or set to false
 `fan4compat.renderDiagnostics` and `fan4compat.dhRenderDiagnostics`. Runtime fixes
-remain active. The separate portal depth observer can be disabled with
-`-Dfan4compat.portalDepthDiagnostics=false`.
+remain active. The separate portal depth observer is off by default (beta 35); enable it with the
+"Portal depth-copy logging" setting or `-Dfan4compat.portalDepthDiagnostics=true`.
 
 ## Contents
 
@@ -763,6 +764,29 @@ publishes a tested draft; the updater cannot obtain drafts or Actions artifacts,
 even with prereleases enabled. Documentation commits at the same version do not
 overwrite an existing release or promote it.
 
+## Settings screen
+
+Sources: [`Features`](../src/main/java/dev/fan4/compat/shared/Features.java),
+[`ConfigScreen`](../src/main/java/dev/fan4/compat/config/ConfigScreen.java),
+[`ModMenuEntry`](../src/main/java/dev/fan4/compat/config/ModMenuEntry.java).
+
+`Features.ALL` is the single list of switches: id, category, label, description, default,
+whether it needs a restart, and the mods it needs. `CompatibilityRules.applies` first applies the
+mod/version gate and then `Features.allows(path, simpleName)`, which maps a generated mixin to its
+switch (`Features.hookedMixins()`, plus the `freecam.` package and `TardisShipModelCache*`). A
+switch that is off simply stops that mixin from being selected, so it behaves as if the hook did
+not exist. `Diagnostics` and `TrinketGraveCompat.enabled` read their switches directly.
+
+The updater's three switches live in `UpdaterSettings` (its own file, read once by
+`UpdateInitializer`) and get a second YACL screen, opened from a button on the first tab.
+
+The screen is built with YACL entirely through `CompatCalls` reflection, so Fan4Compat has no
+compile or runtime dependency on it. `ModMenuEntry` implements Mod Menu's entry API and is compiled
+against stand-ins in `src/stubs` (not packaged); `configNativeCheck` verifies those signatures and
+every YACL member used against the real jars. To add a switch: add it to `Features.ALL`, map its
+mixins (or read it in code), and `FeaturesTest` will check the hooks exist and nothing else is
+affected. Never add a switch for something that protects saves or prevents crashes.
+
 ## Saved data, settings and cleanup
 
 ### Data contracts
@@ -796,10 +820,12 @@ not treat unavailable world context as a deleted ship.
 | --- | --- | --- |
 | `config/fan4compat.properties`: `eurekaDebugLogging` | `false` | Enable the targeted Eureka debug INFO calls after restart. |
 | JVM `fan4compat.shipDebug` | Unset | Overrides Eureka's file value. |
+| `config/fan4compat.properties`: one key per switch in `Features.ALL` | Per switch | Player-facing on/off options edited from the Mod Menu screen. Hook-level switches are read while Mixin selects classes (restart to apply); `trinketGraves` is read live. See [Settings screen](#settings-screen). |
+| JVM `fan4compat.feature.<key>` | Unset | Overrides the file for one launch. |
 | `config/fan4compat-updater.properties`: `enabled` | `true` | Enable background release checks. |
 | Same file: `autoDownload` | `true` | Stage verified updates; false gives availability notices only. |
 | Same file: `allowPrereleases` | `true` | Allow published alpha/beta/rc releases; never drafts/artifacts. |
-| JVM `fan4compat.renderDiagnostics` | `false` | Set true to install temporary Point Blank observation hooks at launch. |
+| JVM `fan4compat.renderDiagnostics` | `false` | Set true to install temporary Point Blank observation hooks at launch (also the `renderDiagnostics` switch). |
 | Graves' `restoreExactInventoryLayout` | Owned by Graves | Determines original equipment-slot recovery. |
 | Graves' `dropOverflowOnQuickRetrieve` | Owned by Graves | Determines retrieval overflow drop behavior. |
 
@@ -963,9 +989,9 @@ or GL binding changes. Read-only attachment queries report object identities,
 depth/stencil bit sizes and component types for the still-bound source and
 destination framebuffers. One success and at most eight failures are logged per
 launch, using `[Fan4Compat PortalDepthDiag]`; snapshot/logging failures disable the
-observer and preserve rendering. The startup flag
-`-Dfan4compat.portalDepthDiagnostics=false` excludes this mixin while retaining
-other fixes. It needs supported IP and Iris, without VS, DH or Point Blank.
+observer and preserve rendering. The mixin is excluded by default since beta 35; the
+"Portal depth-copy logging" setting or `-Dfan4compat.portalDepthDiagnostics=true` installs it, and other
+fixes are unaffected. It needs supported IP and Iris, without VS, DH or Point Blank.
 The beta 24 Mac log reproduced the depth-copy failure and compatibility fallback.
 See the maintained [Mac investigation](mac-nested-portals.md) for evidence and
 beta 25 workaround status. Point Blank, Freecam/BSL and Graves have been confirmed

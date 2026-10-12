@@ -7,11 +7,18 @@ import static dev.fan4.compat.shared.CompatCalls.*;
 /** Shared plumbing for the opt-in, read-only render diagnostics: switches, sampling gate and GL queries. */
 public final class Diagnostics {
     private Diagnostics() {}
-    public static boolean render(){return Boolean.parseBoolean(System.getProperty("fan4compat.renderDiagnostics","false"));}
-    /** DH sampling follows the general switch unless set explicitly. */
-    public static boolean dh(){return Boolean.parseBoolean(System.getProperty("fan4compat.dhRenderDiagnostics",System.getProperty("fan4compat.renderDiagnostics","false")));}
-    /** Unlike the others this one is on by default: it only logs IP's own depth-copy result. */
-    public static boolean portalDepth(){return Boolean.parseBoolean(System.getProperty("fan4compat.portalDepthDiagnostics","true"));}
+    /** A JVM argument wins; otherwise the player's saved setting (config screen or properties file). */
+    private static boolean flag(String property,String feature){
+        String override=System.getProperty(property);
+        return override!=null?Boolean.parseBoolean(override):Features.enabled(feature);
+    }
+    public static boolean render(){return flag("fan4compat.renderDiagnostics","renderDiagnostics");}
+    /** DH sampling also follows the general switch unless its own JVM argument is given. */
+    public static boolean dh(){
+        String override=System.getProperty("fan4compat.dhRenderDiagnostics");
+        return override!=null?Boolean.parseBoolean(override):render()||Features.enabled("dhRenderDiagnostics");
+    }
+    public static boolean portalDepth(){return flag("fan4compat.portalDepthDiagnostics","portalDepthDiagnostics");}
 
     /** Per-stage rate limit, report cap and failure latch; one failure silences the whole probe. */
     public static final class Gate {

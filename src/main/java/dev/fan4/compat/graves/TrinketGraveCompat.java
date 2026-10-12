@@ -3,6 +3,7 @@ package dev.fan4.compat.graves;
 import java.util.*;
 import java.util.function.BiConsumer;
 import net.fabricmc.loader.api.FabricLoader;
+import dev.fan4.compat.shared.Features;
 import static dev.fan4.compat.shared.CompatCalls.*;
 
 /**
@@ -21,7 +22,7 @@ final class TrinketGraveCompat {
     record Entry(Object inventory,int index,Object stack,boolean destroy,String slot) {}
     private TrinketGraveCompat() {}
     static boolean enabled() {
-        if(!present(API))return false;
+        if(!present(API)||!Features.enabled("trinketGraves"))return false;
         try {
             return FabricLoader.getInstance().getModContainer("trinkets")
                 .map(mod->SUPPORTED.equals(mod.getMetadata().getVersion().getFriendlyString())).orElse(true);

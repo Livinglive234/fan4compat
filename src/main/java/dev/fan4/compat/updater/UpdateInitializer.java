@@ -24,7 +24,7 @@ public final class UpdateInitializer implements ModInitializer {
         FabricLoader loader=FabricLoader.getInstance();
         try {
             Path config=loader.getConfigDir().resolve("fan4compat-updater.properties");settings=new Properties();
-            settings.setProperty("enabled","true");settings.setProperty("autoDownload","true");settings.setProperty("allowPrereleases","true");
+            UpdaterSettings.applyDefaults(settings);
             if(Files.exists(config)){try(Reader reader=Files.newBufferedReader(config)){settings.load(reader);}}
             else{Files.createDirectories(config.getParent());try(Writer writer=Files.newBufferedWriter(config)){settings.store(writer,"Fan4Compat release updater; disable enabled to stop checks. Updates apply after exit. Backups are in .fan4compat-update/backups.");}}
             if(!Boolean.parseBoolean(settings.getProperty("enabled")))return;

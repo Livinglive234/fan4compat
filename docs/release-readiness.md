@@ -1,6 +1,6 @@
 # Release readiness and wishlist
 
-Current build: **0.1.0-beta.34**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
+Current build: **0.1.0-beta.35**. Includes an additional Iris DH depth-sampler guard, server save fixes, complete Eureka
 notice filtering and DH/Iris portal-render guards. The pack owner confirmed the BSL_v10.1.5 portal fix working. Initial LOD
 loading can take longer; subsequent loads behave normally. Beta 6 removes
 temporary movement diagnostics and unused collision-query code.
@@ -58,14 +58,15 @@ shutdown. These are full-pack user reports, not automated GPU tests.
 The Mac improvement coincides with the DH repair; a causal link to the earlier
 gun-over-portal overlap has not been established. The pack owner also confirmed
 Mac nested portals and reports the discussed restart workflows working. Automatic
-update download/install across a restart has not yet been tested end to end.
+update download/install across a restart was also confirmed working by the pack owner
+(2026-10-11).
 Other shader packs and GPUs are outside this confirmation. Earlier pending rendering notes below record their status at that build.
 Point Blank, Freecam/BSL and Graves were also confirmed working on 2026-10-10.
 
 Render diagnostics can now be disabled: omit or set to false
 `fan4compat.renderDiagnostics` and `fan4compat.dhRenderDiagnostics`. Runtime fixes
-remain active. The separate portal depth observer can be disabled with
-`-Dfan4compat.portalDepthDiagnostics=false`.
+remain active. The separate portal depth observer is off by default (beta 35); enable it with the
+"Portal depth-copy logging" setting or `-Dfan4compat.portalDepthDiagnostics=true`.
 
 ## Confirmed release checks
 
@@ -83,7 +84,7 @@ On 2026-10-08 the pack owner confirmed all remaining checks proposed for beta:
 | Ship waypoints after travel/world restart; save/reload and inventory preservation | Confirmed by pack owner |
 | Dedicated-server checks | Earlier checks confirmed; owner reports discussed restart workflows working |
 | Mac nested portals with BSL | Confirmed by pack owner on beta 33 |
-| Automatic update download/install across restart | Not yet tested end to end |
+| Automatic update download/install across restart | Confirmed by pack owner (2026-10-11) |
 | Shaders enabled/disabled comparison | Confirmed by pack owner |
 | Alpha 41 portal audio with and without VS | Confirmed by pack owner |
 | Offhand Point Blank gun with main-hand TARDIS key | Confirmed by pack owner |
@@ -96,7 +97,7 @@ changes. Log warning count alone is not a release criterion.
 
 Beta 1 freezes the current supported feature set. Exact supported versions,
 installation instructions and known limitations remain in the README and
-[release notes](releases/0.1.0-beta.34.md).
+[release notes](releases/0.1.0-beta.35.md).
 
 ## Move from beta to stable
 

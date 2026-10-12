@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.34.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.35.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 34 release notes](docs/releases/0.1.0-beta.34.md) ·
+[Beta 35 release notes](docs/releases/0.1.0-beta.35.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -38,14 +38,15 @@ shutdown. These are full-pack user reports, not automated GPU tests.
 The Mac improvement coincides with the DH repair; a causal link to the earlier
 gun-over-portal overlap has not been established. The pack owner also confirmed
 Mac nested portals and reports the discussed restart workflows working. Automatic
-update download/install across a restart has not yet been tested end to end.
+update download/install across a restart was also confirmed working by the pack owner
+(2026-10-11).
 Other shader packs and GPUs are outside this confirmation. Earlier pending rendering notes below record their status at that build.
 Point Blank, Freecam/BSL and Graves were also confirmed working on 2026-10-10.
 
 Render diagnostics can now be disabled: omit or set to false
 `fan4compat.renderDiagnostics` and `fan4compat.dhRenderDiagnostics`. Runtime fixes
-remain active. The separate portal depth observer can be disabled with
-`-Dfan4compat.portalDepthDiagnostics=false`.
+remain active. The separate portal depth observer is off by default (beta 35); enable it with the
+"Portal depth-copy logging" setting or `-Dfan4compat.portalDepthDiagnostics=true`.
 
 ## Aether accessory graves
 
@@ -226,7 +227,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.34.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.35.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -371,16 +372,40 @@ removed), draw the XM3, then switch away and share `latest.log`. Sampling is lim
 to once per second per stage; duplicate reports are suppressed and each launch is
 capped at 96 reports. Diagnostics are off by default; add JVM argument `-Dfan4compat.renderDiagnostics=true` to enable these temporary diagnostic hooks on the next launch. Gun fixes are always on.
 
-## Eureka debug option
+## Settings screen and options
 
-Fan4Compat creates `config/fan4compat.properties` with:
+With **Mod Menu** and **Yet Another Config Lib** (YACL 3) installed, Fan4Compat gets a
+config button in Mod Menu. Without them nothing changes; there is no dependency on either.
+Options for mods you do not have installed are greyed out and name what they need.
+Everything is saved to `config/fan4compat.properties`, which you can also edit by hand.
+An **Updater settings** button on the first tab opens a second screen for the automatic update
+switches (check for updates, download automatically, include beta releases), saved to
+`config/fan4compat-updater.properties`; they apply at the next launch.
 
-```properties
-eurekaDebugLogging=false
-```
+| Option | Key | Default | Applies |
+| --- | --- | --- | --- |
+| Apple GPU portal fixes | `appleGpuFixes` | on | after restart |
+| Point Blank scope stencil fixes | `pointBlankStencilFixes` | on | after restart |
+| Freecam with Distant Horizons | `freecamFixes` | on | after restart |
+| Elytra Contrails wing trails | `wingTrails` | on | after restart |
+| TARDIS model cache | `tardisModelCache` | on | after restart |
+| Block portals on ships | `shipPortalBlocking` | on | after restart |
+| Ship-aware sound occlusion | `shipAcoustics` | on | after restart |
+| Hide Eureka portal warnings | `eurekaWarnings` | on | after restart |
+| Hide Jade while at a helm | `jadeHelm` | on | after restart |
+| Trinkets items in graves | `trinketGraves` | on | immediately |
+| Eureka ship debug logging | `eurekaDebugLogging` | off | after restart |
+| Point Blank render diagnostics | `renderDiagnostics` | off | after restart |
+| Distant Horizons render diagnostics | `dhRenderDiagnostics` | off | after restart |
+| Portal depth-copy logging | `portalDepthDiagnostics` | off | after restart |
 
-Set it to `true` and restart the game to enable Eureka's ship debug INFO messages.
-The optional JVM argument `-Dfan4compat.shipDebug=true` overrides the file setting.
+Only optional behavior and troubleshooting aids are listed. Fixes that protect saves or prevent
+crashes (ship loading, portal transit, grave storage, shader compile repairs) are not switchable.
+A JVM argument `-Dfan4compat.feature.<key>=true|false` overrides the file for one launch, and the
+older `-Dfan4compat.renderDiagnostics`, `-Dfan4compat.dhRenderDiagnostics`,
+`-Dfan4compat.portalDepthDiagnostics` and `-Dfan4compat.shipDebug` arguments still work.
+The render diagnostics switch also turns on the Distant Horizons diagnostics unless those are set
+separately. The Xaero integration proposal, once built, will add its own entry here.
 
 ## Remaining issues and limits
 
@@ -530,8 +555,8 @@ beta 24 logs `[Fan4Compat PortalDepthDiag]` once for a successful depth copy and
 up to eight failed copies per launch. It records the original GL error and both
 framebuffers' depth/stencil representations without changing the native fallback
 or consuming extra errors. Reproduce nested portal rendering with BSL enabled
-and share `latest.log`. Disable this observer with
-`-Dfan4compat.portalDepthDiagnostics=false`; existing fixes stay enabled.
+and share `latest.log`. Beta 35 turns this observer off by default; enable it with the
+"Portal depth-copy logging" setting or `-Dfan4compat.portalDepthDiagnostics=true`. Existing fixes stay enabled.
 Point Blank render diagnostics remain off by default as of beta 23.
 
 ## Mac nested portal depth workaround (beta 25)

@@ -33,6 +33,12 @@ public final class CompatibilityRules {
         return supported(mods,"valkyrienskies")&&supported(mods,"immersive_portals");
     }
     public static boolean applies(Map<String,String> mods,boolean sable,String name) {
+        if(!gate(mods,sable,name))return false;
+        String path=name.substring("dev.fan4.compat.mixin.".length());
+        return Features.allows(path,path.substring(path.lastIndexOf('.')+1));
+    }
+    /** Mod presence and version rules, before the player's own feature switches. */
+    private static boolean gate(Map<String,String> mods,boolean sable,String name) {
         String prefix="dev.fan4.compat.mixin.";
         if(!name.startsWith(prefix))return false;
         String path=name.substring(prefix.length()),simple=path.substring(path.lastIndexOf('.')+1);

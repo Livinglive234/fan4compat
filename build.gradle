@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'dev.fan4'
-version = '0.1.0-beta.34'
+version = '0.1.0-beta.35'
 
 repositories {
     mavenCentral()
@@ -25,6 +25,10 @@ configurations {
 }
 
 sourceSets {
+    // Compile-time stand-ins for Mod Menu and Minecraft's Screen; never packaged.
+    stubs {
+        java.srcDirs = ['src/stubs/java']
+    }
     tools {
         java.srcDirs = ['tools']
         compileClasspath += files(layout.buildDirectory.dir('classes/java/main'))
@@ -35,6 +39,7 @@ tasks.named('compileToolsJava') { dependsOn tasks.named('compileJava') }
 dependencies {
     compileOnly('net.fabricmc:fabric-loader:0.19.5') { transitive = false }
     compileOnly('net.fabricmc:sponge-mixin:0.16.5+mixin.0.8.7') { transitive = false }
+    compileOnly sourceSets.stubs.output
     compileOnly 'org.ow2.asm:asm-tree:9.7.1'
     compileOnly 'com.google.code.gson:gson:2.10.1'
     bundledLibrary('com.github.bawnorton.mixinsquared:mixinsquared-fabric:0.2.0') { transitive = false }
@@ -70,7 +75,7 @@ tasks.named('processResources') {
     filesMatching('fabric.mod.json') { expand version: project.version }
 }
 
-['DimensionQueueTest', 'CompatCancellationTest', 'ShipPoseTest', 'CompatCallsTest', 'OptionalCompatibilityTest', 'PortalDepthTextureTest', 'FreecamTickTest', 'FreecamShaderTest', 'FramebufferCopyTest', 'JadeRaycastTest', 'DepthFormatTest', 'PortalDepthDiagnosticsTest', 'SeparateStencilTest', 'UpdateTest', 'AccessoryGraveTest', 'AccessoryGraveSlotsTest', 'TrinketGraveTest', 'RenderDiagnosticsTest', 'StencilCompatTest', 'GunFramebufferTest'].each { testMain ->
+['DimensionQueueTest', 'CompatCancellationTest', 'ShipPoseTest', 'CompatCallsTest', 'OptionalCompatibilityTest', 'PortalDepthTextureTest', 'FreecamTickTest', 'FreecamShaderTest', 'FramebufferCopyTest', 'JadeRaycastTest', 'DepthFormatTest', 'PortalDepthDiagnosticsTest', 'SeparateStencilTest', 'UpdateTest', 'AccessoryGraveTest', 'AccessoryGraveSlotsTest', 'TrinketGraveTest', 'FeaturesTest', 'ConfigScreenTest', 'RenderDiagnosticsTest', 'StencilCompatTest', 'GunFramebufferTest'].each { testMain ->
     def regression = tasks.register(testMain.uncapitalize(), JavaExec) {
         dependsOn tasks.named('testClasses')
         classpath = sourceSets.test.runtimeClasspath
@@ -311,6 +316,18 @@ tasks.register('gravesNativeCheck', JavaExec) {
     if (project.hasProperty('gravesJar') && project.hasProperty('gravesAccessoriesJar') && project.hasProperty('gravesMinecraftJar')) {
         args project.property('gravesJar'), project.property('gravesAccessoriesJar'), project.property('gravesMinecraftJar')
         if (project.hasProperty('trinketsJar')) args project.property('trinketsJar')
+    } else {
+        onlyIf { false }
+    }
+}
+
+// Real Yet Another Config Lib and Mod Menu jars: every reflective settings-screen call must exist.
+tasks.register('configNativeCheck', JavaExec) {
+    dependsOn tasks.named('classes'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'ConfigNativeCheck'
+    if (project.hasProperty('yaclJar') && project.hasProperty('modMenuJar')) {
+        args project.property('yaclJar'), project.property('modMenuJar'), layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath
     } else {
         onlyIf { false }
     }

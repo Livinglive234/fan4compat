@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.34**.
+Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.35**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
@@ -18,14 +18,15 @@ shutdown. These are full-pack user reports, not automated GPU tests.
 The Mac improvement coincides with the DH repair; a causal link to the earlier
 gun-over-portal overlap has not been established. The pack owner also confirmed
 Mac nested portals and reports the discussed restart workflows working. Automatic
-update download/install across a restart has not yet been tested end to end.
+update download/install across a restart was also confirmed working by the pack owner
+(2026-10-11).
 Other shader packs and GPUs are outside this confirmation. Earlier pending rendering notes below record their status at that build.
 Point Blank, Freecam/BSL and Graves were also confirmed working on 2026-10-10.
 
 Render diagnostics can now be disabled: omit or set to false
 `fan4compat.renderDiagnostics` and `fan4compat.dhRenderDiagnostics`. Runtime fixes
-remain active. The separate portal depth observer can be disabled with
-`-Dfan4compat.portalDepthDiagnostics=false`.
+remain active. The separate portal depth observer is off by default (beta 35); enable it with the
+"Portal depth-copy logging" setting or `-Dfan4compat.portalDepthDiagnostics=true`.
 
 ## Beta 31: neutral stencil state before top-level portal frame clear
 
@@ -157,7 +158,7 @@ Mac nested rendering remains pending; this is a candidate driver workaround.
 
 ## Beta 24: portal depth-copy diagnostics
 
-Adds default-enabled `[Fan4Compat PortalDepthDiag]` observation of the existing
+Adds `[Fan4Compat PortalDepthDiag]` (default-enabled in beta 24-34, off by default from beta 35) observation of the existing
 IrisPortalRenderer depth-copy error result. Logs one successful copy and at most
 eight failures per launch: GL error name/value, Apple/GPU/OpenGL identity, current
 portal layer/max layers, render mode before fallback, separated-stencil choice,
@@ -165,11 +166,18 @@ main dimensions, source/destination framebuffer completeness, depth/stencil
 attachment identities, component types and bit sizes. Attachment queries change
 no GL bindings and no extra glGetError calls are made. Original error values and
 native compatibility-mode fallback remain intact; snapshot failures disable the
-observer without interrupting rendering. Disable with
-`-Dfan4compat.portalDepthDiagnostics=false`. Requires supported IP/Iris only.
+observer without interrupting rendering. Enable with the setting or
+`-Dfan4compat.portalDepthDiagnostics=true`. Requires supported IP/Iris only.
 Beta 23's opt-in Point Blank diagnostics and all existing rendering fixes remain.
 Bounded reporting/error preservation, optional gates and real IP selectors are
 checked; actual Mac reproduction remains pending.
+
+## Beta 35: settings screen
+
+Mod Menu settings screen (YACL, reflective, optional) over `shared/Features`; 14 switches for
+optional fixes and troubleshooting aids, saved to `config/fan4compat.properties`. See the
+[architecture guide](docs/architecture-and-features.md#settings-screen) and beta 35 notes. In-game
+opening of the screen is unverified; `configNativeCheck` pins the YACL/Mod Menu members.
 
 ## Beta 34: maintenance
 
