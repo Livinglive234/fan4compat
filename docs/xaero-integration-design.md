@@ -1,6 +1,6 @@
 # Xaero integration: design proposal
 
-**Status: Feature A (server-stored waypoints) is implemented in beta 36; Features B and C are proposals only.** Written
+**Status: Feature A (server-stored waypoints, beta 36, paused) and the first, landed-exterior version of Feature C (beta 37) are implemented; Feature B, the minimap, the player marker and travel-following are proposals only.** Written
 2026-10-10 against the pack's Xaero versions. Three features are proposed
 (A and B for dedicated servers, C for the TARDIS); each needs the pack owner's
 approval before any code.
@@ -259,6 +259,42 @@ Additional risks: the glide can cross large unexplored or unloaded areas and
 force Xaero to load many saved map regions quickly, so travel speed or load rate
 may need limiting; the shown route is not the TARDIS's real path; and it reveals
 the destination during flight, so the same access rules as the console apply.
+
+### Spike findings for Feature C (2026-10-12, read from source and bytecode, nothing run)
+
+**The client already has the data; no new server packet is needed.** Doctor Who Mod sends each TARDIS interior's
+console block entities a full `TardisConsoleUnitUpdatePacket` (`tardisState` NBT) whenever the server calls
+`TardisStateManager.updateConsoleTiles()`, addressed to every player in that TARDIS dimension. The client console
+entity reads it into its own `tardisStateManager`, which holds `currExteriorDimension`, `currExteriorPosition` and
+`currExteriorFacing` (and the previous and destination values), so a client hook can read the exterior from the nearest
+console entity through DWM's own getters. Separately, DWM's Exterior View monitor button already sends the exterior
+(dimension, position, facing, or the flying flyover entity) when it is opened, so that is a second source. Whether the
+materialization/flight state is also in the synced copy is not yet checked; without it, "in flight" cannot be told from
+"landed" on the client.
+
+**Map pollution is prevented by Xaero's own writer guard (corrected after a closer read).** World Map keeps one
+`MapDimension` per dimension key and maps the TARDIS interior as its own dimension. Setting `customDimensionId` does change
+the map's *current* dimension (`getPotentialDimId` returns it, `switchToFutureUnsynced` applies it), which is what Xaero's
+own dimension button does. `MapWriter.onRender` returns early whenever the client world's dimension is not the map's
+current dimension, so nothing is written while the exterior is shown. The first draft of this note said the current
+dimension is never changed; that was wrong, which is why beta 37 undoes the switch when the screen closes.
+
+**Player position is read in five World Map classes** (`GuiMap`, `MapProcessor`, `EntityUtil`, `MinimapRenderListener`,
+`SyncedTrackedPlayer`). A GUI-only first version needs just `GuiMap`: it holds `cameraX`/`cameraZ`,
+`lastViewedDimensionId`, `dimensionOnInit` and `futureDimensionOnInit`. Region loading in `MapProcessor` already supports
+viewing a saved dimension other than the current one, which is what the in-game dimension switch button uses.
+
+**Proposed first build:** a client-only, gated hook on `GuiMap` initialization. When the player is in a TARDIS dimension and
+the exterior is known (landed), switch the displayed dimension to the exterior's and put the camera on its position;
+leave everything else, including the player marker and the corner minimap, alone. Default on, with a settings switch.
+Still to confirm in `GuiMap`'s initialization: the order in which it picks the viewed dimension and camera, and what the
+dimension toggle button does afterward. Travel-following and the minimap remain later work.
+
+**Built (beta 37): landed-exterior World Map.** Exactly the proposed first build: a client-only hook on `GuiMap`'s
+constructor. Two checks resolved the open questions: the synced TARDIS state includes `step`/`mode`/`isMaterialized`, so
+landed versus in flight is known on the client; and Xaero's own dimension button calls `setCustomDimensionId` followed by
+`checkForWorldUpdate`, which is what the hook does, and a second hook on the screen's `removed()` undoes it on close. See the
+architecture guide for the details and the unverified camera behavior.
 
 ### Limits and risks
 

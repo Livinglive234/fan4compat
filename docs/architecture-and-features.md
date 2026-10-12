@@ -1,6 +1,6 @@
 # Fan4Compat: architecture, features and contributor guide
 
-This document explains the active implementation at **0.1.0-beta.36**, reviewed
+This document explains the active implementation at **0.1.0-beta.37**, reviewed
 2026-10-11 (America/Chicago). It is an onboarding guide for human contributors and
 AI coding assistants. The source and version gates describe what actually runs;
 older release notes describe historical builds and can contain superseded behavior.
@@ -172,6 +172,7 @@ the supplied VS/Eureka files have different marketing and metadata versions.
 | `bclib` | `30.4.0` |
 | `jade` | `15.10.6+fabric` |
 | `xaerominimap` | `26.5.0` |
+| `xaeroworldmap` | `1.46.0` |
 | `elytratrails` | `1.4.7.5-1.21.1` |
 
 Trinkets' grave helper separately checks `3.10.0`. Aether is presence-gated for
@@ -205,6 +206,7 @@ optional-recipe filter checks installed recipe dependencies individually.
 | BCLib stack codec/recipe format | Supported BCLib. |
 | Optional recipe dependency filter | BCLib or one of JEED/Supplementaries/Amendments/Moonlight installed. |
 | Wing-tip fallback | Supported Elytra Contrails. |
+| Xaero map TARDIS exterior | Client only: Xaero World Map `1.46.0` + supported DWM; one hook on `GuiMap`'s constructor. |
 | Xaero waypoint sync | Server: Fabric API and the `xaeroWaypointSync` switch. Client: the same plus Xaero's Minimap `26.5.0` (no mixins; Fabric API networking only). |
 | Updater/settings entrypoints | Always initialized; updater can be disabled and requires an eligible installed jar to operate. |
 
@@ -795,6 +797,28 @@ a "done" message; a timer releases it after 20 seconds. Not covered: Realms and 
 addresses, a deleted waypoint propagating from a file that is not the newest save, and the world map and minimap
 configuration, which are not synced.
 
+## Xaero map: TARDIS exterior
+
+Sources: [`TardisMapCompat`](../src/main/java/dev/fan4/compat/xaero/TardisMapCompat.java),
+[`XaeroMapGenerator`](../tools/xaero/XaeroMapGenerator.java) and design Feature C in
+[xaero-integration-design.md](xaero-integration-design.md).
+
+A generated mixin (`xaero.client.TardisMapMixin`) calls `TardisMapCompat.opened(gui)` at the end of
+`GuiMap`'s constructor. In a TARDIS dimension (`TardisHelper.isTardisDimension`) the helper scans the loaded chunks around
+the player (radius 12) for a Doctor Who Mod console block entity; its client copy of the TARDIS state holds the current
+exterior dimension and position and whether the TARDIS is materialized (landed). If landed it does what Xaero's own
+dimension button does, `MapWorld.setCustomDimensionId(exteriorDimension)` then `MapProcessor.checkForWorldUpdate()`, and
+puts the camera on the exterior. `MapWorld.getPotentialDimId()` returns the custom dimension when set, so Xaero's current
+map dimension does change; the switch is undone by a second hook on `GuiMap.removed()` (`method_25432`), so it lasts only
+while the screen is open. `MapWriter.onRender` returns early whenever the client world's dimension differs from the map's
+current dimension, so no interior chunk is ever written into the exterior's map. When not landed or not in a TARDIS, a view
+we set earlier is cleared, but the player's own dimension choice is never touched. The corner minimap (loaded chunks around
+the player, keyed by the real dimension) is unaffected and does not show the exterior. Everything is wrapped so the map always opens; failure logs one warning.
+
+Unverified in game: the camera is set before Xaero's asynchronous dimension switch finishes, and Xaero rescales the
+camera when the player-to-map dimension scale changes, so an exterior in a differently scaled dimension (the Nether) may
+open off-center. `xaeroMapNativeCheck` pins every member against the real Xaero, DWM (1.0.38.4 and 1.0.39) and Minecraft jars.
+
 ## Settings screen
 
 Sources: [`Features`](../src/main/java/dev/fan4/compat/shared/Features.java),
@@ -907,6 +931,24 @@ Some smoke tasks optionally inspect supplied native jars. Others, such as
 properties are supplied. A normal CI pass does not imply every optional native
 check ran. Use task-specific properties rather than casually adding broad
 `minecraftJar`/`ipJar` flags that also activate unrelated checks.
+
+Native checks added with the settings screen and the Xaero features, each skipped unless its properties are given:
+
+| Task | Properties (jar roles) |
+| --- | --- |
+| `configNativeCheck` | `yaclJar`, `modMenuJar` |
+| `xaeroSyncNativeCheck` | `fabricNetworkingJar` (the networking module nested in Fabric API's `META-INF/jars`), `xaeroMinecraftJar` |
+| `xaeroMapNativeCheck` | `worldMapJar`, `dwmJar` (Fabric build), `xaeroMinecraftJar` |
+
+Jar roles that are easy to get wrong. `xaeroMinecraftJar`, `gravesMinecraftJar`, `pointBlankRenderMinecraftJar` and
+`portalDepthMinecraftJar` are Minecraft 1.21.1 jars **with intermediary class names** (for example Loom's
+`neoforge-21.1.201-minecraft-merged-intermediary` jar under `~/.gradle/caches/fabric-loom/minecraftMaven`). The older
+`minecraftJar` is the **obfuscated** merged jar (`~/.gradle/caches/fabric-loom/1.21.1/minecraft-merged.jar`) and must be
+paired with `intermediaryJar`, a copy of the intermediary mappings jar whose file name ends in `intermediary.jar`.
+`gravesAccessoriesJar` is the Accessories jar itself (nested under the Aether jar's `META-INF/jars`), and
+`accessoriesJar` for `logCompatibilityTest` is the same file. `wingTrailTest` additionally needs a matching
+obfuscated jar; with the Loom merged and client jars it fails with "Unverified mixin target class_922", and does so
+identically on beta 35, so treat it as a jar-setup problem until a working combination is recorded.
 
 Example native Point Blank check (substitute actual jar paths):
 

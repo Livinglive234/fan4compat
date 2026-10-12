@@ -13,6 +13,7 @@ regression fixtures live under tools and are not shipped as gameplay classes.
 | Eureka / Jade | Creative name, supported warning filtering, quiet logging and helm HUD behavior |
 | Aether / Player Graves | Resolved accessory death drops, persistent grave storage, GUI and original functional/cosmetic slot recovery |
 | Point Blank | Offhand and held-item compatibility, shared scope/portal stencil cache and temporary graphics diagnostics |
+| Xaero | Server-stored waypoints (`xaero/`, paused, untested in game) and the World Map showing a landed TARDIS's exterior |
 | Other integrations | Accessories packets, Sound Physics portal behavior, BCLib codecs/recipes, Sable dimensions and Elytra Contrails fallback |
 
 ## Latest gameplay validation (2026-10-11)

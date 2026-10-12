@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.36.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.37.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 36 release notes](docs/releases/0.1.0-beta.36.md) ·
+[Beta 37 release notes](docs/releases/0.1.0-beta.37.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -227,7 +227,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.36.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.37.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -393,6 +393,7 @@ switches (check for updates, download automatically, include beta releases), sav
 | Ship-aware sound occlusion | `shipAcoustics` | on | after restart |
 | Hide Eureka portal warnings | `eurekaWarnings` | on | after restart |
 | Hide Jade while at a helm | `jadeHelm` | on | after restart |
+| Xaero map shows the TARDIS exterior | `xaeroTardisMap` | on | after restart |
 | Xaero waypoint sync | `xaeroWaypointSync` | on | after restart |
 | Trinkets items in graves | `trinketGraves` | on | immediately |
 | Eureka ship debug logging | `eurekaDebugLogging` | off | after restart |
@@ -432,6 +433,18 @@ the server and on your client, and Xaero's Minimap 26.5.0 on the client. It is o
 - **Safe to lose.** If the exchange fails or the player's client lacks the feature, the join continues after at most
   20 seconds and Xaero works from its local files exactly as before. Turning the switch off, or removing Fan4Compat,
   leaves Xaero's own files untouched.
+
+## Xaero map shows the TARDIS exterior
+
+Client only; needs Xaero's World Map 1.46.0 and Doctor Who Mod. Open the World Map while you are inside a TARDIS that
+has landed and it opens on the exterior's dimension, centered on where the TARDIS is, instead of on the interior
+dimension. The client already receives the exterior from Doctor Who Mod, so no server change is needed. While the TARDIS
+is in flight, or if the exterior cannot be found, the map behaves as normal; leaving the TARDIS puts the map back. The
+switch is the same one Xaero's own dimension button makes, and it lasts only while the map screen is open: closing the
+screen puts the map back, so the corner minimap and the rest of Xaero never see it. Xaero's map writer already skips
+recording whenever the map's dimension is not the player's real one, so no interior chunk is saved into the exterior's
+map (and the interior is simply not mapped while the exterior is on screen). Not covered: the corner minimap showing the
+exterior, the player marker, and following the TARDIS during travel. On by default; switch it off in the Fan4Compat settings.
 
 ## Remaining issues and limits
 
