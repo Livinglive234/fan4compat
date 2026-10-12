@@ -21,7 +21,7 @@ public final class ConfigScreen {
         if(!available())return parent;
         try{return call(build(),"generateScreen",parent);}
         catch(RuntimeException|LinkageError failure) {
-            System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"Could not open the Fan4Compat settings screen",failure);
+            dev.fan4.compat.shared.GameLog.warn("Could not open the Fan4Compat settings screen",failure);
             return parent;
         }
     }
@@ -65,7 +65,7 @@ public final class ConfigScreen {
         button=call(button,"text",text("Open"));
         button=call(button,"action",(Consumer<Object>)current->{
             try{call(call(type("net.minecraft.class_310"),"method_1551"),"method_1507",call(buildUpdater(),"generateScreen",current));}
-            catch(RuntimeException|LinkageError failure){System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"Could not open the updater settings screen",failure);}
+            catch(RuntimeException|LinkageError failure){dev.fan4.compat.shared.GameLog.warn("Could not open the updater settings screen",failure);}
         });
         return call(button,"build");
     }

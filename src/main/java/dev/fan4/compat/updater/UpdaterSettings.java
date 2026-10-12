@@ -33,10 +33,9 @@ public final class UpdaterSettings {
                 try(var writer=Files.newBufferedWriter(temp,StandardCharsets.UTF_8)){
                     loaded().store(writer,"Fan4Compat release updater; disable enabled to stop checks. Updates apply after exit. Backups are in .fan4compat-update/backups.");
                 }
-                try{Files.move(temp,file,StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE);}
-                catch(AtomicMoveNotSupportedException unsupported){Files.move(temp,file,StandardCopyOption.REPLACE_EXISTING);}
+                dev.fan4.compat.shared.AtomicFiles.replace(temp,file);
             } catch(IOException e) {
-                System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"Could not save Fan4Compat updater settings",e);
+                dev.fan4.compat.shared.GameLog.warn("Could not save Fan4Compat updater settings",e);
             }
         }
     }
@@ -48,7 +47,7 @@ public final class UpdaterSettings {
             Path file=file();
             if(file!=null&&Files.exists(file))try(var reader=Files.newBufferedReader(file,StandardCharsets.UTF_8)){values.load(reader);}
             catch(IOException|IllegalArgumentException unreadable){
-                System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"Could not read Fan4Compat updater settings; using defaults",unreadable);
+                dev.fan4.compat.shared.GameLog.warn("Could not read Fan4Compat updater settings; using defaults",unreadable);
             }
         }
         return values;

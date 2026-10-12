@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.39**.
+Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.40**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
@@ -171,6 +171,60 @@ observer without interrupting rendering. Enable with the setting or
 Beta 23's opt-in Point Blank diagnostics and all existing rendering fixes remain.
 Bounded reporting/error preservation, optional gates and real IP selectors are
 checked; actual Mac reproduction remains pending.
+
+## Beta 40: compass root cause (reflection)
+
+The owner's Prism log (the compass warning, once logging worked) showed `NoClassDefFoundError: porting_lib ... IPlantable` when reading the interior
+door's facing: `CompatCalls.call` enumerates `getMethods()`, which throws when Porting Lib's mixins add methods naming absent classes to Block/BlockState.
+`call` now falls back to a bytecode-descriptor lookup that links only the wanted method (test: a poisoned class in `CompatCallsTest`). This also
+affected the shared map's block and block-state reads on such a pack.
+
+## Beta 40: logging fix
+
+All addon logging moved from `System.Logger` to `shared/GameLog` (log4j, what reaches latest.log). Found while debugging the compass: no
+Fan4Compat line, not even the updater's, appeared in any of the owner's logs. Use `GameLog` for anything a player may need to send us.
+
+## Beta 40: simplify pass
+
+Four review angles over the uncommitted beta 40 tree. Applied: `TardisLocation` keeps one immutable `Snapshot` (state, exterior, inside, yaw offset)
+instead of four fields; `CompatCalls.call` remembers an owner whose methods cannot be listed (no repeated failing `getMethods()`);
+`shared/AtomicFiles.replace` replaces seven copies of the temp-then-atomic-move idiom; `XaeroPaths` (config file, world folder, client node,
+client data folder) replaces duplicated lookups in the two bridges; the waypoint bridge uses `PayloadChannel.listener`; shared-map reads memoize
+block, fluid and biome lookups per tile/chunk and the uploader skips its per-frame lookups while resting and keys its sent-table by chunk key; the
+client queue settles chunk results in one place and saves progress when a batch is worked off; the generator has one `redirectRead` emitter. Fixed
+a real bug found on the way: `SharedMapStore.regions` compared boxed Integers with `!=`. The compass's debug report became the default-off "Xaero TARDIS diagnostics" switch (also logs the cave start and layer). Not done (behaviour or
+build changes, left for later): moving region reads and flushes off the server tick thread, a compile-time log4j dependency for `GameLog`, deriving the
+cave-start rule from Xaero, one shared ASM scan for `exact`/`call`.
+
+## Beta 40: compass and radar inside the TARDIS
+
+Minimap rotation and the World Map arrow follow the exterior (door facing vs exterior facing offset, landed only); radar entity list is
+empty in any TARDIS dimension. Two new hooks (twelve TARDIS hooks), native-checked against the real jars. Not confirmed in game.
+
+## Known issue (owner's note, 2026-10-12): TARDIS minimap in the Nether
+
+The minimap and coordinates follow the exterior correctly when the TARDIS is parked in the Overworld. In the Nether the minimap is still
+not right in game (it was blank in beta 39; beta 40 fixed the blank, but terrain is missing or on the wrong layer; an exterior on the roof now
+gets the top view, which did not fix it either). Not understood yet: the cave-layer maths and stored layers were checked against Xaero's
+bytecode and the owner's map files without finding a mismatch. The next step would be a log-only diagnostic (cave start, World Map layer,
+loaded regions per second, off by default) read from a Nether session. The owner accepted this for now.
+
+## Beta 40: minimap blank in a Nether-parked TARDIS (fix)
+
+On or above the ceiling (Y >= logical height) the top view is used rather than a cave layer. Follow-ups from the first test of that fix: coordinates display the exterior (landed) or follow the flight (interpolated from DWM's synced
+progress) via a redirect in `MinimapRenderer.renderMinimap`; cave start uses y + 4 like Xaero's open-air scan. Reported against beta 39. Cause read from the Minimap bytecode: `SupportXaeroWorldmap.caveLayersAreUsable()` is false when the World
+Map's dimension differs from the camera entity's world, so in cave mode (our Y + 1 cave start under a ceiling) the minimap refused World Map
+chunks and drew the empty interior. New hook `TardisMinimapLayersMixin` redirects that read (and `shouldPreventAutoCaveMode`'s) to the
+virtual location; native check binds ten TARDIS hooks. Not confirmed in game yet.
+
+## Beta 40: Xaero shared explored map (Feature B)
+
+Server records surface summaries of chunks near players, stores them per dimension, streams newer ones to each client; the client writes
+them into Xaero's own World Map data through a hook on `MapWriter.onRender`, only where Xaero has no tile, leaving them replaceable by the
+real writer. On by default (owner's choice for both the approach and the default). Tests cover the summary format and bounded codec, the
+region store, capture planning, relay, summarizer and the applier/queue against fixtures; `sharedMapNativeCheck` binds the hook and
+checks members against the real jars. Also `sharedMapMode` (`SERVER`/`CLIENT`/`BOTH`/`NORMAL`, default `BOTH`) with client uploads
+(`SharedMapUploader`, `SharedMapReader`, server `SharedMapIntake`), tested against fixtures and checked against the real jars. Not run in game or on a dedicated server; the applier's behavior inside real Xaero is the open risk.
 
 ## Beta 39: cave start for the TARDIS exterior
 

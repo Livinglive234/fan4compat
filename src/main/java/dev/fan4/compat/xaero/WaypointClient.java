@@ -63,11 +63,10 @@ public final class WaypointClient {
             Files.createDirectories(target.getParent());
             Path temp=target.resolveSibling(target.getFileName()+".fan4tmp");
             Files.writeString(temp,apply.text(),StandardCharsets.UTF_8);
-            try{Files.move(temp,target,StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE);}
-            catch(AtomicMoveNotSupportedException unsupported){Files.move(temp,target,StandardCopyOption.REPLACE_EXISTING);}
+            dev.fan4.compat.shared.AtomicFiles.replace(temp,target);
             return true;
         } catch(IOException failure) {
-            System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"Could not write synced Xaero waypoints "+apply.key(),failure);
+            dev.fan4.compat.shared.GameLog.warn("Could not write synced Xaero waypoints "+apply.key(),failure);
             return false;
         }
     }
@@ -78,7 +77,7 @@ public final class WaypointClient {
             Files.createDirectories(stateFile.getParent());
             Path temp=stateFile.resolveSibling(stateFile.getFileName()+".tmp");
             try(var writer=Files.newBufferedWriter(temp,StandardCharsets.UTF_8)){out.store(writer,"Fan4Compat Xaero waypoint sync state");}
-            Files.move(temp,stateFile,StandardCopyOption.REPLACE_EXISTING);
-        } catch(IOException failure){System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"Could not save Xaero sync state",failure);}
+            dev.fan4.compat.shared.AtomicFiles.replace(temp,stateFile);
+        } catch(IOException failure){dev.fan4.compat.shared.GameLog.warn("Could not save Xaero sync state",failure);}
     }
 }

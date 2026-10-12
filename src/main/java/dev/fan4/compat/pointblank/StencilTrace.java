@@ -31,9 +31,8 @@ public final class StencilTrace {
         }
     }
     private static final boolean ENABLED=Diagnostics.render();
-    private static final System.Logger LOGGER=System.getLogger("Fan4Compat StencilTrace");
     private static final Probe PROBE=new Probe(System::nanoTime,StencilTrace::read,StencilTrace::caller,
-        message->LOGGER.log(System.Logger.Level.INFO,"[Fan4Compat StencilTrace] "+message));
+        message->dev.fan4.compat.shared.GameLog.info("[Fan4Compat StencilTrace] "+message));
     private StencilTrace(){}
     public static void arm(){if(ENABLED)PROBE.arm();}
     public static Object begin(String stage,Object ignored){if(!ENABLED)return null;try{return PROBE.begin(stage,String.valueOf(ignored));}catch(RuntimeException|LinkageError e){return null;}}

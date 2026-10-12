@@ -3,27 +3,43 @@ package dev.fan4.compat.xaero;
 import dev.fan4.compat.shared.CompatibilityRules;
 import dev.fan4.compat.shared.Features;
 import java.util.Map;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
- * Starts Xaero waypoint sync. The server side needs only Fabric API; the client side additionally needs the
- * supported Xaero's Minimap, otherwise it stays silent and the server simply skips that player.
+ * Starts the Xaero features that need networking: waypoint sync and the shared explored map. The server side needs only Fabric
+ * API; the client side additionally needs the supported Xaero mod, otherwise it stays silent and the server skips that player.
  */
 public final class XaeroSyncInitializer implements ModInitializer {
+    private static boolean supported(String id) {
+        var container=FabricLoader.getInstance().getModContainer(id);
+        return container.isPresent()&&CompatibilityRules.supported(Map.of(id,container.get().getMetadata().getVersion().getFriendlyString()),id);
+    }
     public void onInitialize() {
-        System.Logger log=System.getLogger("Fan4Compat");
-        if(!Features.enabled("xaeroWaypointSync")||!FabricLoader.getInstance().isModLoaded("fabric-networking-api-v1"))return;
-        try {
-            XaeroSyncBridge.registerPayloads();
-            XaeroSyncBridge.registerServer();
-            var xaero=FabricLoader.getInstance().getModContainer("xaerominimap");
-            if(FabricLoader.getInstance().getEnvironmentType()==net.fabricmc.api.EnvType.CLIENT&&xaero.isPresent()
-                &&CompatibilityRules.supported(Map.of("xaerominimap",xaero.get().getMetadata().getVersion().getFriendlyString()),"xaerominimap"))
-                XaeroSyncBridge.registerClient();
-            log.log(System.Logger.Level.INFO,"Xaero waypoint sync is active");
-        } catch(RuntimeException|LinkageError failure) {
-            log.log(System.Logger.Level.WARNING,"Xaero waypoint sync could not start and is disabled",failure);
+        FabricLoader loader=FabricLoader.getInstance();
+        if(!loader.isModLoaded("fabric-networking-api-v1"))return;
+        boolean client=loader.getEnvironmentType()==EnvType.CLIENT;
+        if(Features.enabled("xaeroWaypointSync")) {
+            try {
+                XaeroSyncBridge.registerPayloads();
+                XaeroSyncBridge.registerServer();
+                if(client&&supported("xaerominimap"))XaeroSyncBridge.registerClient();
+                dev.fan4.compat.shared.GameLog.info("Xaero waypoint sync is active");
+            } catch(RuntimeException|LinkageError failure) {
+                dev.fan4.compat.shared.GameLog.warn("Xaero waypoint sync could not start and is disabled",failure);
+            }
+        }
+        if(Features.enabled("xaeroSharedMap")) {
+            try {
+                SharedMapBridge.registerPayloads();
+                // A dedicated server records and relays; a client install (including its own single-player world) only receives.
+                if(!client&&loader.isModLoaded("fabric-lifecycle-events-v1"))SharedMapBridge.registerServer();
+                if(client&&supported("xaeroworldmap"))SharedMapBridge.registerClient();
+                dev.fan4.compat.shared.GameLog.info("Xaero shared map is active");
+            } catch(RuntimeException|LinkageError failure) {
+                dev.fan4.compat.shared.GameLog.warn("Xaero shared map could not start and is disabled",failure);
+            }
         }
     }
 }

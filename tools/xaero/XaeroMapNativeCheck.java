@@ -37,16 +37,16 @@ public final class XaeroMapNativeCheck implements Opcodes {
         String mc="net/minecraft/",guiMap="xaero/map/gui/GuiMap",key="Lnet/minecraft/class_5321;";
         // Every generated hook must bind to the real classes (constructors, methods, redirected call sites).
         ClassNode gui=find(guiMap);
-        int hooks=0;
+        int hooks=0,tardis=0;
         try(var files=Files.list(Path.of(args[4],"dev/fan4/compat/mixin/xaero/client"))) {
             for(Path file:files.filter(f->f.toString().endsWith(".class")).toList()) {
                 ClassNode mixin=new ClassNode();new ClassReader(Files.readAllBytes(file)).accept(mixin,0);
                 @SuppressWarnings("unchecked") List<String> targets=(List<String>)mixin.invisibleAnnotations.stream().filter(n->n.desc.equals("Lorg/spongepowered/asm/mixin/Mixin;")).findFirst().orElseThrow().values.get(1);
                 String target=targets.get(0).replace('.','/');
-                VerifyAddon.classes.put(target,find(target));VerifyAddon.injectionTargets(mixin);hooks++;
+                VerifyAddon.classes.put(target,find(target));VerifyAddon.injectionTargets(mixin);hooks++;if(mixin.name.contains("/Tardis"))tardis++;
             }
         }
-        if(hooks!=9)throw new AssertionError("Expected nine generated Xaero hooks, found "+hooks);
+        if(tardis!=12||hooks!=13)throw new AssertionError("Expected twelve TARDIS hooks and thirteen Xaero hooks in all, found "+tardis+" and "+hooks);
         method(guiMap,"getMapProcessor","()",false);
         field(guiMap,"cameraX","D",false);field(guiMap,"cameraZ","D",false);field(guiMap,"shouldResetCameraPos","Z",false);
         method("xaero/map/MapProcessor","getMapWorld","()",false);method("xaero/map/MapProcessor","checkForWorldUpdate","()",false);
@@ -70,12 +70,21 @@ public final class XaeroMapNativeCheck implements Opcodes {
         String state="net/drgmes/dwm/common/tardis/TardisStateManager";
         method(state,"getSystem","(Ljava/lang/Class;)",false);method(state,"getCurrentExteriorDimension","()",false);method(state,"getCurrentExteriorPosition","()",false);
         method("net/drgmes/dwm/common/tardis/systems/TardisSystemMaterialization","isMaterialized","()",false);
+        // Flight: the destination, and the synced progress the coordinate display follows while travelling.
+        String flight="net/drgmes/dwm/common/tardis/systems/TardisSystemFlight";
+        method(state,"getDestinationExteriorPosition","()",false);
+        for(String name:new String[]{"inProgress","isInFlight","getProgressPercent"})method(flight,name,"()",false);
+        field(flight,"step",null,false);
+        // Compass: the exterior's facing, the main interior door, and the door block's facing property.
+        method(state,"getCurrentExteriorFacing","()",false);method(state,"getInteriorDoorsTiles","()",false);
+        method(mc+"class_2350","method_10144","()",false);method(mc+"class_1937","method_8320","(L"+mc+"class_2338;)",false);
+        method(mc+"class_2688","method_28501","()",false);method(mc+"class_2688","method_11654","(L"+mc+"class_2769;)",false);method(mc+"class_2769","method_11899","()",false);
         // Minecraft: the client world, its loaded chunks and block entities, and positions.
         method(mc+"class_310","method_1551","()",true);field(mc+"class_310","field_1687",null,false);field(mc+"class_310","field_1724",null,false);
         method(mc+"class_1937","method_27983","()",false);method(mc+"class_638","method_2935","()",false);
         method(mc+"class_631","method_2857","(IIL"+mc+"class_2806;Z)",false);field(mc+"class_2806","field_12803",null,true);
         method(mc+"class_2818","method_12214","()",false);method(mc+"class_1297","method_23317","()",false);method(mc+"class_1297","method_23321","()",false);
         method(mc+"class_2382","method_10263","()",false);method(mc+"class_2382","method_10260","()",false);
-        System.out.println("PASS: all nine Xaero TARDIS hooks bind to the real Minimap and World Map classes; every Xaero, Doctor Who Mod and Minecraft member used by the helpers exists");
+        System.out.println("PASS: all twelve Xaero TARDIS hooks bind to the real Minimap and World Map classes; every Xaero, Doctor Who Mod and Minecraft member used by the helpers exists");
     }
 }

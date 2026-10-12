@@ -25,7 +25,11 @@ public final class CompatCalls {
     public static Object call(Object receiver, String name, Object... args) {
         Class<?> owner = receiver instanceof Class<?> c ? c : receiver.getClass();
         Key key = new Key(name, Arrays.stream(args).map(a -> a == null ? Void.class : a.getClass()).toList());
-        Method method = METHODS.get(owner).computeIfAbsent(key, unused -> {
+        Method method;
+        // A class whose methods cannot be listed stays on the linked path without trying (and failing) again each call.
+        if (!(receiver instanceof Class<?>) && UNLISTABLE.get(owner)[0]) return linked(receiver, owner, key, name, args, null);
+        try {
+        method = METHODS.get(owner).computeIfAbsent(key, unused -> {
             // Overloaded Kotlin world helpers are selected explicitly where necessary.
             List<Method> candidates = Arrays.stream(owner.getMethods()).filter(m -> m.getName().equals(name) && matches(m.getParameterTypes(), args)).toList();
             // VS's obfuscated core may expose only bridge methods under the API name.
@@ -40,9 +44,57 @@ public final class CompatCalls {
             if (candidates.size() != 1) throw new IllegalStateException("Ambiguous or missing compatibility call " + owner.getName()+"."+name+" "+key.parameters);
             Method m = candidates.get(0); m.setAccessible(true); return m;
         });
+        } catch (LinkageError unlinkable) {
+            // Another mod added methods whose signatures name classes that are not present (Porting Lib's plant and
+            // block-state extensions, for one), so listing the class fails as a whole. Link only the method we want.
+            if (receiver instanceof Class<?>) throw unlinkable;
+            UNLISTABLE.get(owner)[0] = true;
+            return linked(receiver, owner, key, name, args, unlinkable);
+        }
         try { return method.invoke(receiver instanceof Class<?> ? null : receiver, args); }
         catch (InvocationTargetException e) { throw failure(e.getCause()); }
         catch (ReflectiveOperationException e) { throw failure(e); }
+    }
+    /** Owners whose {@code getMethods()} failed once; {@link ClassValue} offers no setter, so this holds a flag per class. */
+    private static final ClassValue<boolean[]> UNLISTABLE = new ClassValue<>() {
+        protected boolean[] computeValue(Class<?> owner) { return new boolean[1]; }
+    };
+    private static final ClassValue<Map<Key, MethodHandle>> LINKED = new ClassValue<>() {
+        protected Map<Key, MethodHandle> computeValue(Class<?> owner) { return new ConcurrentHashMap<>(); }
+    };
+    /** Public instance methods of this one class with this name and argument count, read from its bytecode without linking any types. */
+    private static List<String> descriptors(Class<?> declaring, String name, int count) {
+        List<String> found = new ArrayList<>();
+        try (java.io.InputStream input = declaring.getResourceAsStream("/" + declaring.getName().replace('.', '/') + ".class")) {
+            if (input == null) return found;
+            new org.objectweb.asm.ClassReader(input).accept(new org.objectweb.asm.ClassVisitor(org.objectweb.asm.Opcodes.ASM9) {
+                @Override public org.objectweb.asm.MethodVisitor visitMethod(int access, String methodName, String descriptor, String signature, String[] exceptions) {
+                    if ((access & org.objectweb.asm.Opcodes.ACC_PUBLIC) != 0 && (access & org.objectweb.asm.Opcodes.ACC_STATIC) == 0 && methodName.equals(name)
+                        && org.objectweb.asm.Type.getArgumentTypes(descriptor).length == count) found.add(descriptor);
+                    return null;
+                }
+            }, org.objectweb.asm.ClassReader.SKIP_CODE | org.objectweb.asm.ClassReader.SKIP_DEBUG | org.objectweb.asm.ClassReader.SKIP_FRAMES);
+        } catch (java.io.IOException e) { throw failure(e); }
+        return found;
+    }
+    private static Object linked(Object receiver, Class<?> owner, Key key, String name, Object[] args, LinkageError reason) {
+        MethodHandle handle = LINKED.get(owner).computeIfAbsent(key, unused -> {
+            for (Class<?> declaring = owner; declaring != null; declaring = declaring.getSuperclass()) {
+                List<MethodHandle> found = new ArrayList<>();
+                for (String descriptor : descriptors(declaring, name, args.length)) {
+                    try {
+                        MethodType signature = MethodType.fromMethodDescriptorString(descriptor, declaring.getClassLoader());
+                        if (matches(signature.parameterArray(), args)) found.add(MethodHandles.publicLookup().findVirtual(declaring, name, signature));
+                    } catch (ReflectiveOperationException | LinkageError skipped) { }
+                }
+                if (found.size() > 1) throw new IllegalStateException("Ambiguous compatibility call " + owner.getName() + "." + name);
+                if (found.size() == 1) return found.get(0);
+            }
+            throw new IllegalStateException("Missing compatibility call " + owner.getName() + "." + name + " (listing the class failed" + (reason == null ? "" : ": " + reason) + ")");
+        });
+        List<Object> arguments = new ArrayList<>(); arguments.add(receiver); Collections.addAll(arguments, args);
+        try { return handle.invokeWithArguments(arguments); }
+        catch (Throwable e) { throw failure(e); }
     }
     public static Object exact(String owner, String name, String[] parameterNames, Object... args) {
         Class<?> c = type(owner);
@@ -135,7 +187,7 @@ public final class CompatCalls {
         if (parameters.length!=args.length) return false;
         for(int i=0;i<args.length;i++) {
             Class<?> p=parameters[i];
-            if(p.isPrimitive()) p=switch(p.getName()) { case "boolean" -> Boolean.class; case "int" -> Integer.class; case "long" -> Long.class; case "double" -> Double.class; case "float" -> Float.class; default -> p; };
+            if(p.isPrimitive()) p=switch(p.getName()) { case "boolean" -> Boolean.class; case "int" -> Integer.class; case "long" -> Long.class; case "double" -> Double.class; case "float" -> Float.class; case "byte" -> Byte.class; case "short" -> Short.class; case "char" -> Character.class; default -> p; };
             if(args[i]==null ? parameters[i].isPrimitive() : !p.isInstance(args[i])) return false;
         }
         return true;

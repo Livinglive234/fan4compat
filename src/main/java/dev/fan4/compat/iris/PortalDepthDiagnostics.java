@@ -20,8 +20,7 @@ public final class PortalDepthDiagnostics {
             return error;
         }
     }
-    private static final System.Logger LOGGER=System.getLogger("Fan4Compat PortalDepthDiag");
-    private static final Probe PROBE=new Probe(PortalDepthDiagnostics::snapshot,m->LOGGER.log(System.Logger.Level.INFO,"[Fan4Compat PortalDepthDiag] "+m));
+    private static final Probe PROBE=new Probe(PortalDepthDiagnostics::snapshot,m->dev.fan4.compat.shared.GameLog.info("[Fan4Compat PortalDepthDiag] "+m));
     private PortalDepthDiagnostics() {}
     public static int observe(int error){return PROBE.observe(error);}
     public static String errorName(int error){return switch(error){case 0->"GL_NO_ERROR(0)";case 1280->"GL_INVALID_ENUM(1280)";case 1281->"GL_INVALID_VALUE(1281)";case 1282->"GL_INVALID_OPERATION(1282)";case 1285->"GL_OUT_OF_MEMORY(1285)";case 1286->"GL_INVALID_FRAMEBUFFER_OPERATION(1286)";default->"UNKNOWN("+error+")";};}

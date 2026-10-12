@@ -74,7 +74,7 @@ public final class WaypointStore {
         try{save(id,player);}
         catch(IOException failure) {
             player.files.clear();player.files.putAll(filesBefore);player.backups.clear();player.backups.putAll(backupsBefore);
-            System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"Could not store Xaero waypoints for "+id,failure);
+            dev.fan4.compat.shared.GameLog.warn("Could not store Xaero waypoints for "+id,failure);
             return new Result.Rejected("server could not save the file");
         }
         return new Result.Accepted(created,displaced);
@@ -103,7 +103,7 @@ public final class WaypointStore {
             }
         } catch(IOException|RuntimeException damaged) {
             // Keep the unreadable file for inspection rather than overwriting it silently.
-            System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"Xaero waypoint store for "+id+" is unreadable; starting empty and keeping a copy",damaged);
+            dev.fan4.compat.shared.GameLog.warn("Xaero waypoint store for "+id+" is unreadable; starting empty and keeping a copy",damaged);
             try{Files.move(file,file.resolveSibling(id+".json.damaged-"+System.currentTimeMillis()),StandardCopyOption.REPLACE_EXISTING);}catch(IOException ignored){}
             return new Player();
         }
@@ -124,7 +124,6 @@ public final class WaypointStore {
         Files.createDirectories(root);
         Path temp=file(id).resolveSibling(id+".json.tmp");
         Files.writeString(temp,json.toString(),StandardCharsets.UTF_8);
-        try{Files.move(temp,file(id),StandardCopyOption.REPLACE_EXISTING,StandardCopyOption.ATOMIC_MOVE);}
-        catch(AtomicMoveNotSupportedException unsupported){Files.move(temp,file(id),StandardCopyOption.REPLACE_EXISTING);}
+        dev.fan4.compat.shared.AtomicFiles.replace(temp,file(id));
     }
 }

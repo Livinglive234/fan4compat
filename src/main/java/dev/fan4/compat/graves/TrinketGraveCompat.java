@@ -56,7 +56,7 @@ final class TrinketGraveCompat {
         } catch(RuntimeException|LinkageError failure) {
             if(!warned) {
                 warned=true;
-                System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"Trinkets grave capture disabled: "+failure);
+                dev.fan4.compat.shared.GameLog.warn("Trinkets grave capture disabled: "+failure);
             }
             return List.of();
         }
@@ -72,7 +72,7 @@ final class TrinketGraveCompat {
                 if(call(entry.inventory,"method_5438",entry.index)==entry.stack)
                     call(entry.inventory,"method_5447",entry.index,field(type(STACK),"field_8037"));
             } catch(RuntimeException|LinkageError failure) {
-                System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"Trinkets slot not cleared after grave capture: "+failure);
+                dev.fan4.compat.shared.GameLog.warn("Trinkets slot not cleared after grave capture: "+failure);
             }
         }
     }
@@ -96,7 +96,7 @@ final class TrinketGraveCompat {
             call(inventory,"method_5447",index,stack);
             return true;
         } catch(RuntimeException|LinkageError failure) {
-            System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"Trinkets slot recovery skipped: "+failure);
+            dev.fan4.compat.shared.GameLog.warn("Trinkets slot recovery skipped: "+failure);
             return false;
         }
     }

@@ -22,8 +22,7 @@ public final class CompatPlugin implements IMixinConfigPlugin, MixinCanceller {
         Map<String,String> mods=installedMods();
         for (var entry : CompatibilityRules.VERSIONS.entrySet()) {
             if (mods.containsKey(entry.getKey()) && !CompatibilityRules.supported(mods,entry.getKey()))
-                System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,
-                    "Skipping compatibility hooks for " + entry.getKey() + ": supported " + CompatibilityRules.requirement(entry.getKey()) + ", installed " + mods.get(entry.getKey()));
+                dev.fan4.compat.shared.GameLog.warn("Skipping compatibility hooks for " + entry.getKey() + ": supported " + CompatibilityRules.requirement(entry.getKey()) + ", installed " + mods.get(entry.getKey()));
         }
         MixinSquaredBootstrap.init();
         if (!registered) { MixinCancellerRegistrar.register(this); registered = true; }

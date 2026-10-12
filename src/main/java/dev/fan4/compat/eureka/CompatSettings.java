@@ -26,7 +26,7 @@ public final class CompatSettings implements ModInitializer {
             eurekaDebugLogging = Boolean.parseBoolean(properties.getProperty("eurekaDebugLogging", "false"));
         } catch (IOException | IllegalArgumentException e) {
             eurekaDebugLogging = false;
-            System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING, "Could not load Fan4Compat settings; Eureka debug logging remains disabled", e);
+            dev.fan4.compat.shared.GameLog.warn("Could not load Fan4Compat settings; Eureka debug logging remains disabled", e);
         }
     }
     public static boolean eurekaDebugEnabled() {

@@ -1,6 +1,6 @@
 # Fan4Compat: architecture, features and contributor guide
 
-This document explains the active implementation at **0.1.0-beta.39**, reviewed
+This document explains the active implementation at **0.1.0-beta.40**, reviewed
 2026-10-11 (America/Chicago). It is an onboarding guide for human contributors and
 AI coding assistants. The source and version gates describe what actually runs;
 older release notes describe historical builds and can contain superseded behavior.
@@ -206,6 +206,7 @@ optional-recipe filter checks installed recipe dependencies individually.
 | BCLib stack codec/recipe format | Supported BCLib. |
 | Optional recipe dependency filter | BCLib or one of JEED/Supplementaries/Amendments/Moonlight installed. |
 | Wing-tip fallback | Supported Elytra Contrails. |
+| Xaero shared explored map | Server: dedicated server with Fabric API networking and lifecycle events. Client: supported Xaero World Map `1.46.0`; one hook on `MapWriter.onRender`. No DWM needed. |
 | Xaero minimap/waypoints follow the TARDIS exterior | Client only: Xaero Minimap `26.5.0` + World Map `1.46.0` + supported DWM; six more hooks (see below). |
 | Xaero map TARDIS exterior | Client only: Xaero World Map `1.46.0` + supported DWM; one hook on `GuiMap`'s constructor. |
 | Xaero waypoint sync | Server: Fabric API and the `xaeroWaypointSync` switch. Client: the same plus Xaero's Minimap `26.5.0` (no mixins; Fabric API networking only). |
@@ -798,6 +799,56 @@ a "done" message; a timer releases it after 20 seconds. Not covered: Realms and 
 addresses, a deleted waypoint propagating from a file that is not the newest save, and the world map and minimap
 configuration, which are not synced.
 
+## Xaero shared explored map
+
+Sources: [`SharedMapChunk`](../src/main/java/dev/fan4/compat/xaero/SharedMapChunk.java), `SharedMapCodec`, `SharedMapStore`,
+`SharedMapCapturePlan`, `SharedMapRelay`, `SharedMapSummarizer`, `SharedMapBridge` (server and client Fabric glue),
+`SharedMapClient` and `SharedMapApplier`; design Feature B in [xaero-integration-design.md](xaero-integration-design.md).
+
+**Modes.** `sharedMapMode` in the server's `fan4compat-xaero.properties` is a `SharedMapMode`: `SERVER` (capture, no uploads), `CLIENT`
+(uploads, no capture), `BOTH` (default; capture, and uploads only fill gaps via `SharedMapStore.putIfAbsent`) or `NORMAL` (the tick
+hook is not registered, no relay is made, uploads are ignored). The server answers every hello with the mode (`fan4compat:shared_map_mode`)
+so the client knows whether to upload; a server without Fan4Compat never answers and the client stays idle.
+
+**Uploads.** `SharedMapUploader` (client, from the same `onRender` hook) sweeps the surface-layer regions within 6 regions of the player
+that Xaero has loaded (`getLeafMapRegion(MAX_VALUE, x, z, false)`, state 2, normal map data), up to 128 positions and 4 tiles per frame,
+resting about ten seconds between passes. `SharedMapReader` turns a loaded `MapTile` into a `SharedMapChunk` (block id through the registry,
+biome key, `getHeight`/`getTopHeight`), refusing tiles with a missing column. A fingerprint (`SharedMapChunk.contentHash`) keeps tiles
+already sent, or supplied by the server, from being sent again. Nothing is read while the map's dimension differs from the world's
+(TARDIS exterior). Batches of up to 64 go every 40 frames in `fan4compat:shared_map_upload`. On the server `SharedMapIntake` takes a chunk
+only if the mode accepts uploads, the player's dimension is shared and equals the chunk's, it passes `valid()` and the world-border test,
+and the player is within 1200 chunks per 10 seconds; it replaces the client's stamp with the server's. Uploads are unverified.
+
+**Server.** `SharedMapBridge.registerServer` (dedicated servers only) ticks every second tick. `SharedMapCapturePlan` picks up to
+`sharedMapCaptureChunksPerTick` (default 2) chunks around players in allowed dimensions, round-robin and nearest first, each again
+only after a minute. A chunk is taken only if it is loaded (`getChunk(..., FULL, false)`, never generated) and inside the world border
+(Valkyrien Skies shipyard chunks lie outside it). `SharedMapSummarizer` reads each column's top block, the terrain height under fluid
+(bounded scan), and one biome per 4x4 columns into a `SharedMapChunk` with per-chunk palettes. `SharedMapStore` keeps them per dimension
+in 16x16-chunk region files (a deflated `SharedMapCodec` batch, written atomically, damaged files set aside) behind an LRU of loaded
+regions, and only replaces a chunk when its terrain differs and its stamp is not older. Each Fan4Compat client that sent a hello gets a
+`SharedMapRelay`: chunks newer than the per-dimension stamp the client reported, nearest region and chunk first, then live changes, in
+batches of 100 every half second. The batch is a single byte-array payload (`fan4compat:shared_map`); the hello
+(`fan4compat:shared_map_hello`) is the client's newest applied stamp per dimension. Decoding is bounded (512 chunks per batch, 4 MiB
+inflated, validated ids, heights and palette indexes).
+
+**Client.** `SharedMapClient` queues received chunks (4096 at most) and a hook on `MapWriter.onRender` (`SharedMapTickMixin`) applies
+three per frame on Xaero's own writer thread. `SharedMapApplier` follows `MapWriter.writeChunk` as read from the bytecode: get the
+surface-layer region (`Integer.MAX_VALUE`, never created), take `writerThreadPauseSync` and the region's lock, require it not paused,
+loaded (state 2), at rest and normal map data, create the `MapTileChunk` if needed (`setLoadState(2)`, `setAllCachePrepared(false)`),
+require the tile chunk loaded and its texture not downloading, skip if a tile exists, take a tile from the pool, `prepareForWriting` and
+`write` 256 `MapBlock`s (state from the block registry's default state, height and top height, biome key, full light, slopes left
+unknown), set the interpretation version and cave start, `setTile`, `setLoaded`, `setHasHadTerrain` for a new tile chunk, and
+`updateBuffers` with the processor's tint provider, overlay manager and a fresh `MapUpdateFastConfig`. Tiles stay "not written once", so
+Xaero's real writer rewrites them when the chunk is loaded. Chunks whose region is not yet loaded wait (retried about once a second as
+the player pans the map); a chunk for another dimension than the one shown is dropped without recording progress. Progress is the newest
+stamp applied per dimension, saved under `.fan4compat-xaero/shared-map/`. Any unexpected exception empties the queue and switches the
+shared map off for that connection.
+
+Not covered: caves and cave layers (surface only), overlay detail such as stained glass or transparent blocks (a fluid is shown as the
+fluid), block properties (default state colors), slopes between neighbouring shared chunks, and the corner minimap when it does not draw
+from the World Map. `sharedMapNativeCheck` binds the hook and checks every member against the real jars; the applier is exercised against
+fixtures that mirror Xaero's classes, not against Xaero itself, so the first real run is the real test.
+
 ## Xaero map: TARDIS exterior
 
 Sources: [`TardisMapCompat`](../src/main/java/dev/fan4/compat/xaero/TardisMapCompat.java),
@@ -843,11 +894,39 @@ TARDIS those scans see the interior (above the Nether's roof, with the exterior'
 bedrock ceiling. Three more hooks fix it: `TardisMapProcessorMixin` redirects the dimension read in `updateCaveStart` so the
 view is not treated as "elsewhere", and `TardisMapCaveMixin` / `TardisMinimapCaveMixin` cancel the two `getCaving` methods with
 `TardisLocation.caving()`: the exterior's Y + 1 when its dimension type has a ceiling (`DimensionType.hasCeiling`, read from
-Xaero's recorded dimension types, falling back to the key `minecraft:the_nether`), otherwise Integer.MAX_VALUE (top view). The
+Xaero's recorded dimension types, falling back to the key `minecraft:the_nether`), otherwise Integer.MAX_VALUE (top view).
+Fix after beta 39 testing: the minimap goes blank in cave mode unless `SupportXaeroWorldmap.caveLayersAreUsable()` is true, and that
+method returns false whenever the World Map's dimension differs from the dimension of the camera entity's world, which is always
+true inside a TARDIS. `TardisMinimapLayersMixin` redirects the dimension read in it and in `shouldPreventAutoCaveMode` to the virtual
+location (the top view never needed this check, which is why beta 38 drew the roof). The
 layer shown is only what the World Map stored at that cave start, and the exact layer index Xaero used while you explored may
 differ from our Y + 1, so a layer you mapped at a different cave start can look blank.
 
-Not handled: the radar (it still draws interior entities relative to an exterior centre), scaled exterior dimensions (the
+Minimap coordinates (after beta 39 testing). The information display (coordinates, chunk coordinates, Overworld coordinates, biome) reads
+the player's block position in `MinimapRenderer.renderMinimap`, directly from the entity, not through the position helper the other
+hooks use. `TardisMinimapRenderMixin` redirects those three reads to `TardisLocation.displayX/Y/Z`: the exterior while landed; while
+the TARDIS travels, a point worked out every frame from the departure (DWM keeps it as the current position until landing), the
+destination, and the flight system's synced progress (`TardisSystemFlight.getProgressPercent`, client-safe in DWM), clamped; before
+takeoff the departure, and while materializing at the destination the destination. The map, waypoints and cave layer still treat a
+travelling TARDIS as having no outside. The biome and light entries of that display read the interior world at the exterior's
+coordinates, so they are not meaningful inside a TARDIS. A TARDIS on or above the ceiling (exterior Y at or above the dimension's logical height, 128 in the Nether) gets the plain top view
+(`Integer.MAX_VALUE`), because nothing is overhead and that terrain is stored in the top layer, not a per-height cave layer; the ceiling
+height is `DimensionType.logicalHeight` (`comp_653`) when Xaero has recorded the type, else 128 for the Nether. The cave start now uses `y + 4`, which is what Xaero's own scan returns in open
+air, so a layer explored in person keeps the same stored cave start.
+
+Compass and radar (after beta 40 testing). The minimap turns with the camera's yaw (`getActualAngle` reads `Camera.getYaw`), which
+inside a TARDIS is the interior's. While the TARDIS is landed `TardisMinimapRenderMixin` adds the rotation between the two: DWM puts
+a player leaving through the main interior door at the exterior's facing, and one entering at the door block's facing, so
+`exteriorFacing - doorFacing - 180` degrees (`TardisMapCompat.yawOffset`; the door's position is in the synced state, its facing is read
+from the client's copy of the interior) turns the interior's compass into the outside's. `TardisMapYawMixin` does the same for the
+World Map's player arrow (three yaw reads in `GuiMap.render`), and the minimap's own player arrow (what turns when the minimap is
+locked to north: `Entity.getYaw(float)` in `renderMinimap`) gets the same offset. If the door's facing cannot be read, one warning in the
+log says why and the compass stays the interior's. In flight there is no outside, so the interior's compass is kept. The radar
+(`RadarStateUpdater.update`, which rebuilds its lists every frame from the client world's entity list) is given an empty list through
+`TardisMinimapRadarMixin` in any TARDIS dimension, landed or flying, so interior entities never show up on the exterior's map; this
+also empties the radar the World Map borrows. Twelve TARDIS hooks in all.
+
+Not handled: scaled exterior dimensions (the
 division between the real and the displayed dimension is applied to our already-exterior coordinates), and any other Xaero code
 that reads the player's position or dimension directly (the death-point handler, the in-world waypoint renderer).
 `xaeroMapNativeCheck` binds every hook to the real classes (it caught a wrong redirect selector while this was written).
@@ -975,6 +1054,7 @@ Native checks added with the settings screen and the Xaero features, each skippe
 | --- | --- |
 | `configNativeCheck` | `yaclJar`, `modMenuJar` |
 | `xaeroSyncNativeCheck` | `fabricNetworkingJar` (the networking module nested in Fabric API's `META-INF/jars`), `xaeroMinecraftJar` |
+| `sharedMapNativeCheck` | `worldMapJar`, `fabricNetworkingJar`, `fabricLifecycleJar` (nested in Fabric API), `xaeroMinecraftJar` |
 | `xaeroMapNativeCheck` | `worldMapJar`, `minimapJar`, `dwmJar` (Fabric build), `xaeroMinecraftJar` |
 
 Jar roles that are easy to get wrong. `xaeroMinecraftJar`, `gravesMinecraftJar`, `pointBlankRenderMinecraftJar` and
@@ -1016,6 +1096,8 @@ regression check was accepted as unverified. See [release readiness](release-rea
 
 0. Every feature ships enabled by default, including a new one. Add it to `Features.ALL` with default `true` so the
    owner can turn it off; only troubleshooting aids (diagnostics, debug logging) default to off.
+0b. Log through `shared/GameLog`, never `System.Logger`: the latter goes to Java's default logging and does not reach `latest.log`, so the
+   owner could never send us the message.
 1. Identify the exact installed metadata versions, concrete trigger and owning
    mod's native path. Logs can contain optional-class warnings without a fault;
    a generic compatibility warning does not reproduce invisible contraptions.

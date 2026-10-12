@@ -192,6 +192,28 @@ reach several MB, hence throttling.
 - A shared map reveals terrain players have not explored personally. Provide
   config switches (see below); consider defaulting to off.
 
+### Spike findings for Feature B (2026-10-12, read from World Map 1.46.0 bytecode, nothing run)
+
+The two open questions in the design both come out against inserting shared terrain into Xaero's own map data.
+
+- **Building `MapTile`s directly means reimplementing the writer.** `MapWriter.writeChunk` is what turns terrain into tiles. For each
+  column it takes the region's lock and checks the region's load state, takes tiles from a pool, calls `loadPixel` (block state, light,
+  biome, glow, overlays such as water), computes slopes against the four neighbouring tile chunks (`fixHeightType`,
+  `updateBottomRightTile`, `setSlopeUnknown`), sets the world-interpretation version, and marks chunks changed so textures rebuild. A
+  copy of that for synthetic data would be a large, version-locked piece of code whose mistakes show up as crashes on Xaero's map
+  thread or as corrupt saved regions, and it cannot be exercised without a running client.
+- **A stand-in chunk does not help.** `writeChunk` fetches the chunk itself from the live client world (`World.getChunk`), so the
+  only way to use it is to put a synthetic chunk into the client world, which would affect rendering and physics.
+- **Saved regions are the risk.** Anything inserted could be written into the player's region cache files. Xaero has a per-chunk
+  "include in save" flag, but depending on it is another internal assumption.
+
+Safer shape, not yet built: leave Xaero's data alone and draw the shared terrain as a separate, read-only layer under the markers on
+the World Map screen, from the server's column summaries, using our own colors (vanilla map colors with height shading), only for
+chunks the player has no real tile for. That needs one render hook on `GuiMap` (reading its camera and scale) and our own textures,
+and cannot corrupt Xaero's files; it would look approximate and would not appear on the corner minimap. The server half (capturing
+summaries from chunks sent to players, storing them per dimension, relaying them) is the same regardless and can be tested without
+Minecraft.
+
 ## Feature C: exterior dimension on the map inside a TARDIS
 
 Goal (as understood; confirm with the pack owner): while a player is inside the
@@ -289,6 +311,17 @@ the exterior is known (landed), switch the displayed dimension to the exterior's
 leave everything else, including the player marker and the corner minimap, alone. Default on, with a settings switch.
 Still to confirm in `GuiMap`'s initialization: the order in which it picks the viewed dimension and camera, and what the
 dimension toggle button does afterward. Travel-following and the minimap remain later work.
+
+**Built (beta 40): Feature B, shared explored map, inserted into Xaero's own data** (the pack owner chose this over a separate overlay,
+and chose default on). It follows the writer's sequence from the spike above and leaves tiles "not written once" so Xaero's real writer
+supersedes them. See the architecture guide. Differences from the proposal: summaries carry top block, biome, terrain height and top
+height (fluids are shown as the fluid, no overlays), capture is "chunks near players" rather than a chunk-send hook, the relay is
+incremental by stamp, and the client applier is verified only against fixtures and real-jar member checks, not run.
+
+**Built (beta 40, later): shared map modes and client uploads.** The pack owner asked for the shared map's source to be configurable:
+`sharedMapMode` = `SERVER`, `CLIENT`, `BOTH` (default) or `NORMAL` (Xaero default, no server involvement). Client uploads are read from
+Xaero's loaded surface tiles (so they also seed from older map data as Xaero loads it), validated and rate limited on the server, and in
+`BOTH` only fill gaps; they are not verified against the world, which is the trust cost of `CLIENT` mode.
 
 **Built (beta 39): cave start.** Under a ceiling dimension the minimap and World Map now use the exterior's height as the cave start (see the architecture guide).
 

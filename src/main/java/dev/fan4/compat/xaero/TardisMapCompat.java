@@ -15,7 +15,8 @@ import static dev.fan4.compat.shared.CompatCalls.*;
 public final class TardisMapCompat {
     private static final String CLIENT="net.minecraft.class_310",HELPER="net.drgmes.dwm.utils.helpers.TardisHelper",
         CONSOLE="net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlockEntity",
-        MATERIALIZATION="net.drgmes.dwm.common.tardis.systems.TardisSystemMaterialization",STATUS="net.minecraft.class_2806";
+        MATERIALIZATION="net.drgmes.dwm.common.tardis.systems.TardisSystemMaterialization",STATUS="net.minecraft.class_2806",
+        FLIGHT="net.drgmes.dwm.common.tardis.systems.TardisSystemFlight";
     /** Chunks around the player searched for the console; every console of one TARDIS holds the same state. */
     private static final int RADIUS=12;
     private static boolean warned;
@@ -44,7 +45,7 @@ public final class TardisMapCompat {
             writeField(gui,"cameraX",exterior.x()+0.5);writeField(gui,"cameraZ",exterior.z()+0.5);
             writeField(gui,"shouldResetCameraPos",false);
         } catch(RuntimeException|LinkageError failure) {
-            if(!warned){warned=true;System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"TARDIS exterior on the Xaero map is unavailable: "+failure);}
+            if(!warned){warned=true;dev.fan4.compat.shared.GameLog.warn("TARDIS exterior on the Xaero map is unavailable: "+failure);}
         }
     }
 
@@ -77,7 +78,7 @@ public final class TardisMapCompat {
             if(applied.equals(call(mapWorld,"getCustomDimensionId"))){call(mapWorld,"setCustomDimensionId",(Object)null);call(processor,"checkForWorldUpdate");}
             applied=null;
         } catch(RuntimeException|LinkageError failure) {
-            if(!warned){warned=true;System.getLogger("Fan4Compat").log(System.Logger.Level.WARNING,"TARDIS exterior on the Xaero map could not be undone: "+failure);}
+            if(!warned){warned=true;dev.fan4.compat.shared.GameLog.warn("TARDIS exterior on the Xaero map could not be undone: "+failure);}
         }
     }
 
@@ -95,7 +96,62 @@ public final class TardisMapCompat {
     }
 
     /** The landed exterior of the TARDIS the player is inside, or null when unknown or in flight. */
-    static Exterior exterior(Object world,Object player) {
+    static Exterior exterior(Object world,Object player){Object state=state(world,player);return state==null?null:landed(state);}
+    /** The landed exterior of a TARDIS state, or null while it is not materialized. */
+    static Exterior landed(Object state) {
+        if(!(Boolean)call(call(state,"getSystem",type(MATERIALIZATION)),"isMaterialized"))return null;
+        Object position=exteriorPosition(state);
+        return new Exterior(call(state,"getCurrentExteriorDimension"),(Integer)call(position,"method_10263"),(Integer)call(position,"method_10264"),(Integer)call(position,"method_10260"));
+    }
+    /**
+     * How far the exterior's compass is turned from the interior's, in degrees, or NaN when it cannot be told. DWM puts a player who walks
+     * out of the main interior door at the exterior's facing, and one who walks in at the interior door's facing, so what is straight ahead
+     * when leaving (the door's facing turned half a circle) becomes the exterior's facing. The door positions are synced with the state;
+     * the door's facing is read from the client's own copy of the interior.
+     */
+    static float yawOffset(Object world,Object state) {
+        try {
+            Object position=null;
+            for(Object key:((Map<?,?>)call(state,"getInteriorDoorsTiles")).keySet())position=key;   // the last door is the main one
+            if(position==null)return noOffset("the synced state lists no interior door");
+            Object block=call(world,"method_8320",position),facing=facingOf(block);
+            if(facing==null)return noOffset("the interior door block has no facing: "+block);
+            float turn=((Float)call(call(state,"getCurrentExteriorFacing"),"method_10144")-(Float)call(facing,"method_10144")-180)%360;
+            return turn<-180?turn+360:turn>180?turn-360:turn;
+        } catch(RuntimeException|LinkageError unavailable){return noOffset(String.valueOf(unavailable));}
+    }
+    /** The value of a block state's "facing" property, or null when it has none. */
+    private static Object facingOf(Object block) {
+        for(Object property:(java.util.Collection<?>)call(block,"method_28501"))
+            if("facing".equals(call(property,"method_11899")))return call(block,"method_11654",property);
+        return null;
+    }
+    private static boolean warnedOffset;
+    /** The compass stays as Xaero has it; say why once, since it is otherwise invisible. */
+    private static float noOffset(String reason) {
+        if(!warnedOffset){warnedOffset=true;dev.fan4.compat.shared.GameLog.warn("Xaero compass keeps the interior's orientation: "+reason);}
+        return Float.NaN;
+    }
+    /**
+     * Where the TARDIS is while it is not landed, for a coordinate display: x, y, z (block centre, as for a landed one), or null when
+     * it is landed. DWM keeps the departure as the current position until it lands and sets the destination at the end, so in flight
+     * the position is worked out from the departure, the destination and the flight's synced progress; before takeoff it is the
+     * departure, and while materializing at the destination it is the destination.
+     */
+    static double[] travelling(Object state) {
+        if((Boolean)call(call(state,"getSystem",type(MATERIALIZATION)),"isMaterialized"))return null;
+        Object from=exteriorPosition(state),to=call(state,"getDestinationExteriorPosition"),flight=call(state,"getSystem",type(FLIGHT));
+        double fraction=0;
+        if((Boolean)call(flight,"inProgress")) {
+            if((Boolean)call(flight,"isInFlight"))fraction=Math.max(0,Math.min(1,((Integer)call(flight,"getProgressPercent"))/100.0));
+            else if("PROCESSING".equals(String.valueOf(field(flight,"step"))))fraction=1;
+        }
+        double x=(Integer)call(from,"method_10263"),y=(Integer)call(from,"method_10264"),z=(Integer)call(from,"method_10260");
+        double dx=(Integer)call(to,"method_10263"),dy=(Integer)call(to,"method_10264"),dz=(Integer)call(to,"method_10260");
+        return new double[]{x+(dx-x)*fraction+0.5,y+(dy-y)*fraction,z+(dz-z)*fraction+0.5};
+    }
+    /** The console's TARDIS state for the TARDIS the player is inside, or null when none is loaded nearby. */
+    static Object state(Object world,Object player) {
         int centerX=(int)Math.floor((Double)call(player,"method_23317"))>>4,centerZ=(int)Math.floor((Double)call(player,"method_23321"))>>4;
         Object chunks=call(world,"method_2935"),full=field(type(STATUS),"field_12803");
         Class<?> console=type(CONSOLE);
@@ -107,10 +163,7 @@ public final class TardisMapCompat {
                     if(chunk==null)continue;
                     for(Object entity:((Map<?,?>)call(chunk,"method_12214")).values()) {
                         if(!console.isInstance(entity))continue;
-                        Object state=field(entity,"tardisStateManager");
-                        if(!(Boolean)call(call(state,"getSystem",type(MATERIALIZATION)),"isMaterialized"))return null;
-                        Object position=exteriorPosition(state);
-                        return new Exterior(call(state,"getCurrentExteriorDimension"),(Integer)call(position,"method_10263"),(Integer)call(position,"method_10264"),(Integer)call(position,"method_10260"));
+                        return field(entity,"tardisStateManager");
                     }
                 }
         return null;

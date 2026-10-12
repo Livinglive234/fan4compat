@@ -18,6 +18,7 @@ public final class Diagnostics {
         String override=System.getProperty("fan4compat.dhRenderDiagnostics");
         return override!=null?Boolean.parseBoolean(override):render()||Features.enabled("dhRenderDiagnostics");
     }
+    public static boolean xaeroTardis(){return flag("fan4compat.xaeroTardisDiagnostics","xaeroTardisDiagnostics");}
     public static boolean portalDepth(){return flag("fan4compat.portalDepthDiagnostics","portalDepthDiagnostics");}
 
     /** Per-stage rate limit, report cap and failure latch; one failure silences the whole probe. */

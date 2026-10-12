@@ -15,7 +15,8 @@ public class CompatCallsTest implements Opcodes {
         MethodVisitor m=w.visitMethod(ACC_PUBLIC,"<init>","()V",null,null);m.visitCode();m.visitVarInsn(ALOAD,0);m.visitMethodInsn(INVOKESPECIAL,"CompatCallsTest$TypedBase","<init>","()V",false);m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();
         m=w.visitMethod(ACC_PUBLIC,"unrelated","(Lmissing/OptionalPlantable;)V",null,null);m.visitCode();m.visitInsn(RETURN);m.visitMaxs(0,0);m.visitEnd();
         m=w.visitMethod(ACC_PUBLIC,"property","(Ljava/lang/Object;)Ljava/lang/Comparable;",null,null);m.visitCode();m.visitInsn(ICONST_0);m.visitMethodInsn(INVOKESTATIC,"java/lang/Boolean","valueOf","(Z)Ljava/lang/Boolean;",false);m.visitInsn(ARETURN);m.visitMaxs(0,0);m.visitEnd();
-        w.visitEnd();byte[] bytes=w.toByteArray();Class<?> c=new ClassLoader(CompatCallsTest.class.getClassLoader()){Class<?> define(){return defineClass("PoisonedState",bytes,0,bytes.length);}}.define();return c.getConstructor().newInstance();
+        w.visitEnd();byte[] bytes=w.toByteArray();Class<?> c=new ClassLoader(CompatCallsTest.class.getClassLoader()){Class<?> define(){return defineClass("PoisonedState",bytes,0,bytes.length);}
+            @Override public java.io.InputStream getResourceAsStream(String resource){return resource.equals("PoisonedState.class")?new java.io.ByteArrayInputStream(bytes):super.getResourceAsStream(resource);}}.define();return c.getConstructor().newInstance();
     }
     static void check(boolean ok){if(!ok)throw new AssertionError("Reflection resolution regression");}
     static Object fixture(String name,String[] returns,boolean bridge)throws Exception {
@@ -64,6 +65,13 @@ public class CompatCallsTest implements Opcodes {
         dedicatedServerStatics();
         Object poisoned=poisonedState();
         try{poisoned.getClass().getMethods();throw new AssertionError("missing optional signature did not reproduce");}catch(NoClassDefFoundError expected){}
+        // A plain call on the same object: listing its methods fails, so only the wanted method is linked, from its own bytecode.
+        boolean listingFails=false;try{poisoned.getClass().getMethods();}catch(LinkageError expected){listingFails=true;}
+        check(listingFails);
+        check(Boolean.FALSE.equals(CompatCalls.call(poisoned,"property",new Object())));
+        check(Boolean.FALSE.equals(CompatCalls.call(poisoned,"property",new Object())));
+        boolean missing=false;try{CompatCalls.call(poisoned,"nonexistent");}catch(IllegalStateException expected){missing=true;}
+        check(missing);
         check(Boolean.FALSE.equals(CompatCalls.callTyped(TypedBase.class.getName(),"property","java.lang.Comparable",poisoned,new String[]{"java.lang.Object"},new Object())));
         check(Boolean.FALSE.equals(CompatCalls.callTyped(TypedBase.class.getName(),"property","java.lang.Comparable",poisoned,new String[]{"java.lang.Object"},new Object())));
         Constructors selected=(Constructors)CompatCalls.createExact(Constructors.class.getName(),new String[]{"java.lang.String"},(Object)null);

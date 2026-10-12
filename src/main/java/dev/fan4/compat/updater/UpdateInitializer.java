@@ -12,7 +12,6 @@ import static dev.fan4.compat.shared.CompatCalls.*;
 
 /** Background release checks and staged installation after the current JVM exits. */
 public final class UpdateInitializer implements ModInitializer {
-    private static final System.Logger LOG=System.getLogger("Fan4Compat Updater");
     private final Object lock=new Object();
     private final ScheduledExecutorService executor=Executors.newSingleThreadScheduledExecutor(r->{Thread t=new Thread(r,"Fan4Compat update check");t.setDaemon(true);return t;});
     private volatile String notice;
@@ -33,7 +32,7 @@ public final class UpdateInitializer implements ModInitializer {
             if(loader.isDevelopmentEnvironment()||origins.size()!=1||!Files.isRegularFile(origins.get(0),LinkOption.NOFOLLOW_LINKS))return;
             target=origins.get(0).toAbsolutePath().normalize();
             if(!target.getParent().toRealPath().equals(mods)||Files.isSymbolicLink(target)){
-                LOG.log(System.Logger.Level.INFO,"Automatic updates require Fan4Compat to be a regular jar directly in mods");return;
+                dev.fan4.compat.shared.GameLog.info("Automatic updates require Fan4Compat to be a regular jar directly in mods");return;
             }
             target=target.getParent().toRealPath().resolve(target.getFileName());
             previous=UpdateInstaller.digest(target);root=loader.getGameDir().resolve(".fan4compat-update").toAbsolutePath();Files.createDirectories(root);
@@ -41,7 +40,7 @@ public final class UpdateInitializer implements ModInitializer {
             Runtime.getRuntime().addShutdownHook(new Thread(this::afterExit,"Fan4Compat update install launcher"));
             executor.scheduleWithFixedDelay(this::check,0,30,TimeUnit.MINUTES);
             if(loader.getEnvironmentType()==EnvType.CLIENT)executor.scheduleWithFixedDelay(this::notifyPlayer,5,10,TimeUnit.SECONDS);
-        }catch(Exception error){LOG.log(System.Logger.Level.WARNING,"Updater unavailable; current mod remains installed: "+error.getMessage());executor.shutdownNow();}
+        }catch(Exception error){dev.fan4.compat.shared.GameLog.warn("Updater unavailable; current mod remains installed: "+error.getMessage());executor.shutdownNow();}
     }
     private void prepareHelper()throws IOException {
         Path part=Files.createTempFile(root,"installer-",".part");
@@ -83,9 +82,9 @@ public final class UpdateInitializer implements ModInitializer {
                 announce("Fan4Compat "+release.version()+" downloaded. Restart to apply the update.");
             }finally{Files.deleteIfExists(downloaded);}
         }catch(InterruptedException stop){Thread.currentThread().interrupt();}
-        catch(Exception error){if(!stopping)LOG.log(System.Logger.Level.WARNING,"Update check failed; current mod remains installed: "+error.getMessage());}
+        catch(Exception error){if(!stopping)dev.fan4.compat.shared.GameLog.warn("Update check failed; current mod remains installed: "+error.getMessage());}
     }
-    private void announce(String message){LOG.log(System.Logger.Level.INFO,message);notice=message;}
+    private void announce(String message){dev.fan4.compat.shared.GameLog.info(message);notice=message;}
     private void notifyPlayer() {
         String message=notice;if(message==null||stopping)return;
         try {
@@ -93,7 +92,7 @@ public final class UpdateInitializer implements ModInitializer {
             ((Executor)client).execute(()->{
                 try{Object player=field(client,"field_1724");if(player==null||!message.equals(notice))return;
                     call(player,"method_7353",call(type("net.minecraft.class_2561"),"method_43470",message),false);notice=null;
-                }catch(RuntimeException|LinkageError failure){notice=null;LOG.log(System.Logger.Level.DEBUG,"Update chat notice unavailable",failure);}
+                }catch(RuntimeException|LinkageError failure){notice=null;dev.fan4.compat.shared.GameLog.debug("Update chat notice unavailable",failure);}
             });
         }catch(RuntimeException|LinkageError failure){notice=null;}
     }
@@ -104,6 +103,6 @@ public final class UpdateInitializer implements ModInitializer {
             Path java=Path.of(System.getProperty("java.home"),"bin",executable);
             new ProcessBuilder(java.toString(),"-cp",root.resolve("installer.jar").toString(),UpdateInstaller.class.getName(),Long.toString(ProcessHandle.current().pid()),root.resolve("pending.properties").toString())
                 .redirectErrorStream(true).redirectOutput(ProcessBuilder.Redirect.appendTo(root.resolve("installer.log").toFile())).start();
-        }catch(IOException error){LOG.log(System.Logger.Level.WARNING,"Could not launch update installer; update remains pending: "+error.getMessage());}
+        }catch(IOException error){dev.fan4.compat.shared.GameLog.warn("Could not launch update installer; update remains pending: "+error.getMessage());}
     }
 }

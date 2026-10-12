@@ -46,7 +46,7 @@ public final class CompatibilityRules {
         boolean iris=supported(mods,"iris"),dh=supported(mods,"distanthorizons"),spr=supported(mods,"sound_physics_remastered"),eureka=supported(mods,"vs_eureka");
         boolean bclib=supported(mods,"bclib"),accessories=supported(mods,"accessories");
         if(path.startsWith("graves."))return supported(mods,"graves")&&accessories&&mods.containsKey("aether");
-        if(path.startsWith("xaero."))return supported(mods,simple.startsWith("TardisMinimap")?"xaerominimap":"xaeroworldmap")&&supported(mods,"dwm");
+        if(path.startsWith("xaero."))return supported(mods,simple.startsWith("TardisMinimap")?"xaerominimap":"xaeroworldmap")&&(simple.startsWith("SharedMap")||supported(mods,"dwm"));
         if(path.startsWith("freecam."))return supported(mods,"freecam")&&dh&&(!simple.startsWith("FreecamBsl")||iris);
         if(path.startsWith("valkyrienskies."))return vs;
         if(path.startsWith("sable."))return vs&&sable;

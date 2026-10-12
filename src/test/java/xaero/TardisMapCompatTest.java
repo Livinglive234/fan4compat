@@ -6,14 +6,18 @@ import net.drgmes.dwm.blocks.tardis.consoleunits.BaseTardisConsoleUnitBlockEntit
 public final class TardisMapCompatTest {
     static void check(boolean condition,String reason){if(!condition)throw new AssertionError(reason);}
     public static final class Key {final String name;Key(String name){this.name=name;}public Object method_29177(){return name;}}
-    public static final class Pos {final int x,y,z;Pos(int x,int z){this.x=x;this.y=70;this.z=z;}public int method_10263(){return x;}public int method_10264(){return y;}public int method_10260(){return z;}}
+    public static final class Pos {final int x,y,z;Pos(int x,int z){this(x,70,z);}Pos(int x,int y,int z){this.x=x;this.y=y;this.z=z;}public int method_10263(){return x;}public int method_10264(){return y;}public int method_10260(){return z;}}
     public static final class Player {public double method_23317(){return 40.5;}public double method_23321(){return -70.2;}}
     public static final class Chunk {final Map<Object,Object> entities=new HashMap<>();public Map<Object,Object> method_12214(){return entities;}}
     public static final class Chunks {
         final Map<List<Integer>,Chunk> loaded=new HashMap<>();
         public Chunk method_2857(int x,int z,Object status,boolean create){check(!create&&status==net.minecraft.class_2806.field_12803,"loaded chunks only, never created");return loaded.get(List.of(x,z));}
     }
-    public static final class World {final Key key=new Key("dwm:tardis_a");final Chunks chunks=new Chunks();public Object method_27983(){return key;}public Chunks method_2935(){return chunks;}}
+    public static final class Dir {final float rotation;public Dir(float rotation){this.rotation=rotation;}public float method_10144(){return rotation;}}
+    public static final class Prop {final String name;Prop(String name){this.name=name;}public String method_11899(){return name;}}
+    public static final class BlockStateFixture {final Prop facing=new Prop("facing");Dir direction;public java.util.Collection<Object> method_28501(){return List.of(new Prop("open"),facing);}
+        public Object method_11654(Object property){return property==facing?direction:null;}}
+    public static final class World {final Key key=new Key("dwm:tardis_a");final Chunks chunks=new Chunks();final BlockStateFixture doorState=new BlockStateFixture();public Object method_8320(Object pos){return doorState;}public Object method_27983(){return key;}public Chunks method_2935(){return chunks;}}
     public static final class MapWorld {Object custom;public void setCustomDimensionId(Object key){custom=key;}public Object getCustomDimensionId(){return custom;}}
     public static final class Processor {final MapWorld world=new MapWorld();int updates;public MapWorld getMapWorld(){return world;}public void checkForWorldUpdate(){updates++;}}
     public static final class Gui {private double cameraX,cameraZ;private boolean shouldResetCameraPos=true;final Processor processor=new Processor();public Processor getMapProcessor(){return processor;}}

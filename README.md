@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.39.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.40.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 39 release notes](docs/releases/0.1.0-beta.39.md) ·
+[Beta 40 release notes](docs/releases/0.1.0-beta.40.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -227,7 +227,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.39.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.40.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -395,20 +395,23 @@ switches (check for updates, download automatically, include beta releases), sav
 | Hide Jade while at a helm | `jadeHelm` | on | after restart |
 | Xaero map shows the TARDIS exterior | `xaeroTardisMap` | on | after restart |
 | Xaero minimap and waypoints follow the TARDIS exterior | `xaeroTardisMinimap` | on | after restart |
+| Shared explored map | `xaeroSharedMap` | on | after restart |
 | Xaero waypoint sync | `xaeroWaypointSync` | on | after restart |
 | Trinkets items in graves | `trinketGraves` | on | immediately |
 | Eureka ship debug logging | `eurekaDebugLogging` | off | after restart |
 | Point Blank render diagnostics | `renderDiagnostics` | off | after restart |
 | Distant Horizons render diagnostics | `dhRenderDiagnostics` | off | after restart |
 | Portal depth-copy logging | `portalDepthDiagnostics` | off | after restart |
+| Xaero TARDIS diagnostics | `xaeroTardisDiagnostics` | off | immediately |
 
-**Default-on rule.** Every feature ships enabled by default, including each new one. A settings switch exists so the pack owner or a player can turn a feature off, never so they have to turn it on. Troubleshooting aids (render and Distant Horizons diagnostics, portal depth-copy logging, Eureka debug logging) are not features: they stay off unless the pack owner decides otherwise.
+**Default-on rule.** Every feature ships enabled by default, including each new one. A settings switch exists so the pack owner or a player can turn a feature off, never so they have to turn it on. Troubleshooting aids (render and Distant Horizons diagnostics, portal depth-copy logging, Xaero TARDIS diagnostics, Eureka debug logging) are not features: they stay off unless the pack owner decides otherwise.
 
 Only optional behavior and troubleshooting aids are listed. Fixes that protect saves or prevent
 crashes (ship loading, portal transit, grave storage, shader compile repairs) are not switchable.
 A JVM argument `-Dfan4compat.feature.<key>=true|false` overrides the file for one launch, and the
 older `-Dfan4compat.renderDiagnostics`, `-Dfan4compat.dhRenderDiagnostics`,
-`-Dfan4compat.portalDepthDiagnostics` and `-Dfan4compat.shipDebug` arguments still work.
+`-Dfan4compat.portalDepthDiagnostics`, `-Dfan4compat.xaeroTardisDiagnostics` and `-Dfan4compat.shipDebug` arguments still work.
+The Xaero TARDIS diagnostics write `[Fan4Compat TardisDiag]` lines to `latest.log`, only when something changes: the exterior and compass turn, and the cave start and layer.
 The render diagnostics switch also turns on the Distant Horizons diagnostics unless those are set
 separately. Xaero waypoint sync has its entry above.
 
@@ -429,11 +432,44 @@ has landed, Xaero treats you as standing at the exterior:
   normal top view.
 - **The World Map** keeps viewing the exterior's dimension while you are inside, loads regions around the exterior, and puts
   your marker there.
+- **Compass, coordinates and radar.** While the TARDIS is landed the minimap's compass and the World Map arrow are turned to the
+  exterior's orientation (not the interior's), the coordinates show the exterior's (following the flight while it travels), and
+  Xaero's entity radar shows nothing inside a TARDIS so interior entities do not appear on the outside map.
 
 In flight, outside a TARDIS, or when the exterior cannot be found, everything is normal, and anything it changed is put back
 (a waypoint world or map dimension you chose yourself is never touched). While the exterior is shown, Xaero does not record the
-interior's chunks (Xaero's own rule whenever the map shows another dimension). Not covered: the radar, an exterior in a
+interior's chunks (Xaero's own rule whenever the map shows another dimension). Not covered: an exterior in a
 differently scaled dimension such as the Nether (coordinates may be scaled wrongly), and live terrain. On by default.
+
+## Shared explored map
+
+Needs Fan4Compat on the **server and on each client**, and Xaero's World Map 1.46.0 on the client. Terrain that any player has explored shows
+up on everyone's World Map, including areas you have never visited. On by default.
+
+- **Where the terrain comes from (`sharedMapMode`, set by the server operator in `config/fan4compat-xaero.properties`).**
+  `SERVER` records the chunks the server has loaded around players. `CLIENT` records what clients upload from their own Xaero map data
+  (the server captures nothing itself). `BOTH`, the default, does both: uploads only fill places the server has not captured, so a client
+  can never overwrite what the server saw. `NORMAL` turns it off: Xaero behaves as normal, the server shares and stores nothing and
+  clients upload nothing. The server tells each client its mode at join.
+- **Server.** In `SERVER` and `BOTH` modes, a few times a second the dedicated server looks at some chunks around each player (the chunks their client holds, nearest
+  first), writes a small surface summary of each (top block, biome, terrain height and top height per column), and stores it under the
+  world folder in `fan4compat/shared-map/`. Chunks it has not seen before, or that changed, are streamed to every Fan4Compat client in the
+  same dimension. Only the Overworld, Nether, End and the Aether are shared by default (`sharedMapDimensions` in
+  `config/fan4compat-xaero.properties`); TARDIS interiors and Valkyrien Skies ship chunks are not.
+- **Client.** The summaries are written into Xaero's own map data a few per frame, the way Xaero's writer writes a chunk it has just read, and
+  only where Xaero has no tile of its own. Xaero replaces a shared tile with real data the first time you load that chunk. Your client tells
+  the server at join what it already has, so each join sends only what is new.
+- **What it looks like.** Surface terrain only (no caves), with the top block, biome and height; water shows as water. Because the tiles are
+  in Xaero's data, the corner minimap (when it draws from the World Map) can show them too.
+- **Uploads (`CLIENT` and `BOTH`).** Your client reads the surface tiles Xaero has loaded around you (including old map data Xaero loads from
+  its files as you get near), a few per frame, and sends the ones the server has not been given in that form, in small batches. It never
+  uploads while the map shows a different dimension than your world (inside a TARDIS), and does not send back chunks the server gave it.
+  The server accepts an upload only for a shared dimension you are standing in, inside the world border, within a rate limit, and stamps
+  it itself. Uploads are not verified against the world, so `CLIENT` mode trusts every player with the mod; use `SERVER` or `BOTH` on
+  a server where that matters (in `BOTH` a client can only fill gaps).
+- **Privacy.** Everyone sees terrain other players explored, and server admins can read the stored data.
+- **Safe to lose.** If Xaero changes its internals the shared map switches itself off for that session with one log warning and the map
+  carries on; the server and every other feature are unaffected. Removing Fan4Compat leaves Xaero's own files working.
 
 ## Xaero waypoint sync
 

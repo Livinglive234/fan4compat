@@ -44,7 +44,6 @@ public final class SeparateStencilCompat {
     }
     private static final Resources RESOURCES=new Resources();
     private static final NativeBackend GL=new NativeBackend();
-    private static final System.Logger LOGGER=System.getLogger("Fan4Compat PortalDepth");
     private static boolean reported;
     private SeparateStencilCompat() {}
     public static void enable(Object target,boolean enabled) {
@@ -66,7 +65,7 @@ public final class SeparateStencilCompat {
         int original=textureFormat(texture);
         if(original!=36013&&original!=35056)return;
         boolean ready=RESOURCES.prepare(GL,target,(Integer)field(target,"field_1476"),texture,width,height,original);
-        if(!reported){reported=true;LOGGER.log(System.Logger.Level.INFO,"[Fan4Compat PortalDepth] Separate float-depth texture and stencil renderbuffer "+(ready?"enabled":"rejected; restored native packed attachment"));}
+        if(!reported){reported=true;dev.fan4.compat.shared.GameLog.info("[Fan4Compat PortalDepth] Separate float-depth texture and stencil renderbuffer "+(ready?"enabled":"rejected; restored native packed attachment"));}
     }
     public static void release(Object target){RESOURCES.release(GL,target);}
     private static int textureFormat(int texture) {

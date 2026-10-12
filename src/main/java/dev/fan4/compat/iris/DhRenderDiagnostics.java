@@ -22,8 +22,7 @@ public final class DhRenderDiagnostics {
         }
     }
     private static final boolean ENABLED=Diagnostics.dh();
-    private static final System.Logger LOGGER=System.getLogger("Fan4Compat DHRenderDiag");
-    private static final Probe PROBE=new Probe(System::nanoTime,DhRenderDiagnostics::snapshot,m->LOGGER.log(System.Logger.Level.INFO,"[Fan4Compat DHRenderDiag] "+m));
+    private static final Probe PROBE=new Probe(System::nanoTime,DhRenderDiagnostics::snapshot,m->dev.fan4.compat.shared.GameLog.info("[Fan4Compat DHRenderDiag] "+m));
     private DhRenderDiagnostics(){}
     public static Object begin(String stage,Object ignored){if(!ENABLED)return null;try{return PROBE.begin(stage);}catch(RuntimeException|LinkageError e){return null;}}
     public static void end(Object token,boolean exception){try{if(token instanceof Sample s)PROBE.end(s,exception);}catch(RuntimeException|LinkageError ignored){}}

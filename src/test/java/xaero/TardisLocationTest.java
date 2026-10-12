@@ -14,7 +14,7 @@ public final class TardisLocationTest {
     public static final class Support {public boolean worldmap(){return true;}}
     public static final class Mod {public Support getSupportMods(){return new Support();}}
     public static final class Updater {public Object modMain=new Mod();public String getPotentialWorldNode(Object key,boolean worldMap){return worldMap?"mw$default":"null";}}
-    public static final class DimType {final boolean ceiling;DimType(boolean ceiling){this.ceiling=ceiling;}public boolean comp_643(){return ceiling;}}
+    public static final class DimType {final boolean ceiling;DimType(boolean ceiling){this.ceiling=ceiling;}public boolean comp_643(){return ceiling;}public int comp_653(){return 128;}}
     public static final class Container {Object type;public Object getDimensionType(Object key){return type;}}
     public static final class Manager {final Container container=new Container();public Object getAutoRootContainer(){return container;}
         final Set<XPath> worlds=new HashSet<>();final List<XPath> added=new ArrayList<>();
@@ -55,17 +55,80 @@ public final class TardisLocationTest {
         session.manager.container.type=new DimType(false);
         check(TardisLocation.caving()==Integer.MAX_VALUE,"an open-sky exterior keeps the top view");
         session.manager.container.type=new DimType(true);
-        check(TardisLocation.caving()==71,"a ceiling exterior shows the layer at the TARDIS's height (y 70 + 1)");
+        check(TardisLocation.caving()==74,"a ceiling exterior shows the layer at the TARDIS's height as Xaero finds it in open air (y 70 + 4)");
         session.manager.container.type=null;
         check(TardisLocation.caving()==Integer.MAX_VALUE,"unknown type, not the Nether: top view");
         console.tardisStateManager.dimension=new TardisMapCompatTest.Key("minecraft:the_nether");TardisLocation.refresh();
-        check(TardisLocation.caving()==71,"unknown type but the Nether: still a ceiling dimension");
+        check(TardisLocation.caving()==74,"unknown type but the Nether: still a ceiling dimension");
         console.tardisStateManager.dimension=overworld;TardisLocation.refresh();
+        // On top of the ceiling there is nothing overhead: the top view, where that terrain was mapped.
+        session.manager.container.type=new DimType(true);
+        console.tardisStateManager.position=new TardisMapCompatTest.Pos(1200,127,-340);TardisLocation.refresh();
+        check(TardisLocation.caving()==131,"just under the ceiling (y 127): the layer at that height");
+        console.tardisStateManager.position=new TardisMapCompatTest.Pos(1200,128,-340);TardisLocation.refresh();
+        check(TardisLocation.caving()==Integer.MAX_VALUE,"on the roof (y 128): the top view");
+        console.tardisStateManager.position=new TardisMapCompatTest.Pos(1200,150,-340);TardisLocation.refresh();
+        check(TardisLocation.caving()==Integer.MAX_VALUE,"above the roof: the top view");
+        session.manager.container.type=null;console.tardisStateManager.dimension=new TardisMapCompatTest.Key("minecraft:the_nether");TardisLocation.refresh();
+        check(TardisLocation.caving()==Integer.MAX_VALUE,"unknown type, the Nether, on the roof: the top view");
+        console.tardisStateManager.position=new TardisMapCompatTest.Pos(1200,70,-340);TardisLocation.refresh();
+        check(TardisLocation.caving()==74,"unknown type, the Nether, under the roof: the layer");
+        console.tardisStateManager.dimension=overworld;TardisLocation.refresh();
+        console.tardisStateManager.position=new TardisMapCompatTest.Pos(1200,-340);TardisLocation.refresh();
 
         // Landing state, switch and leaving all undo exactly what we did.
         console.tardisStateManager.materialization.landed=false;TardisLocation.refresh();
         TardisLocation.frame(session);
         check(session.state.custom==null&&processor.world.custom==null&&TardisLocation.x(player,5.5)==5.5&&TardisLocation.caving()==null,"in flight everything returns to normal, Xaero works out its own cave start");
+        // The diagnostics switch only adds log lines: nothing else changes with it on.
+        Features.set("xaeroTardisDiagnostics",true);console.tardisStateManager.materialization.landed=true;TardisLocation.refresh();
+        check(TardisLocation.caving()!=null&&TardisLocation.x(player,5.5)==1200.5,"with the Xaero TARDIS diagnostics on, behavior is unchanged");
+        Features.set("xaeroTardisDiagnostics",false);
+        // Compass: the exterior's orientation while landed; the radar is empty anywhere inside a TARDIS.
+        console.tardisStateManager.materialization.landed=true;TardisLocation.refresh();
+        check(TardisLocation.cameraYaw(null,30f)==30f&&TardisLocation.yaw(player,30f)==30f,"no door or facing known: yaw unchanged");
+        console.tardisStateManager.doors.put(new TardisMapCompatTest.Pos(1,2),null);console.tardisStateManager.doors.put(new TardisMapCompatTest.Pos(5,6),null);
+        world.doorState.direction=new TardisMapCompatTest.Dir(180);console.tardisStateManager.facing=new TardisMapCompatTest.Dir(0);TardisLocation.refresh();
+        check(TardisLocation.cameraYaw(null,30f)==30f,"exterior south, interior door facing north (walking out is south): the same compass");
+        console.tardisStateManager.facing=new TardisMapCompatTest.Dir(270);TardisLocation.refresh();
+        check(TardisLocation.cameraYaw(null,30f)==-60f&&TardisLocation.yaw(player,30f)==-60f&&TardisLocation.yaw(stranger,30f)==30f,"exterior east: leaving south (0) comes out facing east (270), so the interior yaw is turned by -90; other entities untouched");
+        world.doorState.direction=new TardisMapCompatTest.Dir(90);console.tardisStateManager.facing=new TardisMapCompatTest.Dir(0);TardisLocation.refresh();
+        check(TardisLocation.cameraYaw(null,0f)==90f,"door facing west (walking out is east, 270): coming out facing south (0) is a quarter turn on (+90)");
+        console.tardisStateManager.materialization.landed=false;TardisLocation.refresh();
+        check(TardisLocation.cameraYaw(null,30f)==30f&&TardisLocation.yaw(player,30f)==30f,"in flight there is no outside: the interior's compass and arrow");
+        List<Object> entities=List.of("zombie");
+        check(TardisLocation.entities(world,entities)!=entities&&((Iterable<?>)TardisLocation.entities(world,entities)).iterator().hasNext()==false,"radar: no entities while inside a TARDIS, landed or not");
+        check(TardisLocation.entities(new Object(),entities)==entities,"another world's entities untouched");
+        net.drgmes.dwm.utils.helpers.TardisHelper.tardis=false;TardisLocation.refresh();
+        check(TardisLocation.entities(world,entities)==entities&&TardisLocation.cameraYaw(null,30f)==30f,"outside a TARDIS: radar and compass are Xaero's own");
+        net.drgmes.dwm.utils.helpers.TardisHelper.tardis=true;console.tardisStateManager.doors.clear();console.tardisStateManager.facing=null;
+        console.tardisStateManager.materialization.landed=false;TardisLocation.refresh();
+
+        // The coordinate display: the exterior while landed, and a point between departure and destination while travelling.
+        console.tardisStateManager.materialization.landed=true;TardisLocation.refresh();
+        check(TardisLocation.displayX(player,5.5)==1200.5&&TardisLocation.displayY(player,6)==70.0&&TardisLocation.displayZ(player,7.5)==-339.5&&TardisLocation.displayX(stranger,5.5)==5.5,"landed: the display shows the exterior, other entities untouched");
+        console.tardisStateManager.destination=new TardisMapCompatTest.Pos(1400,-140);
+        console.tardisStateManager.materialization.landed=false;TardisLocation.refresh();
+        console.tardisStateManager.flight.set("NONE",false,0);
+        check(TardisLocation.displayX(player,5.5)==1200.5&&TardisLocation.displayZ(player,7.5)==-339.5,"not landed, no flight: still at the departure point");
+        console.tardisStateManager.flight.set("WAIT_FOR_DEMAT",false,100);
+        check(TardisLocation.displayX(player,5.5)==1200.5,"taking off: still at the departure, whatever the progress says");
+        console.tardisStateManager.flight.set("PROCESSING",true,0);
+        check(TardisLocation.displayX(player,5.5)==1200.5&&TardisLocation.displayZ(player,7.5)==-339.5,"flight just begun: departure");
+        console.tardisStateManager.flight.set("PROCESSING",true,50);
+        check(TardisLocation.displayX(player,5.5)==1300.5&&TardisLocation.displayZ(player,7.5)==-239.5&&TardisLocation.displayY(player,6)==70.0,"half way: the midpoint, updated live without waiting for a lookup");
+        console.tardisStateManager.flight.set("PROCESSING",true,100);
+        check(TardisLocation.displayX(player,5.5)==1400.5&&TardisLocation.displayZ(player,7.5)==-139.5,"flight complete: the destination");
+        console.tardisStateManager.flight.set("PROCESSING",true,250);
+        check(TardisLocation.displayX(player,5.5)==1400.5,"progress is clamped to the destination");
+        console.tardisStateManager.flight.set("PROCESSING",false,100);
+        check(TardisLocation.displayX(player,5.5)==1400.5,"landing: the destination");
+        check(TardisLocation.x(player,5.5)==5.5&&TardisLocation.caving()==null,"the map and waypoints still treat a travelling TARDIS as having no outside");
+        console.tardisStateManager.flight.set("NONE",false,0);
+        net.drgmes.dwm.utils.helpers.TardisHelper.tardis=false;TardisLocation.refresh();
+        check(TardisLocation.displayX(player,5.5)==5.5,"outside a TARDIS the display is the player's own");
+        net.drgmes.dwm.utils.helpers.TardisHelper.tardis=true;
+        console.tardisStateManager.materialization.landed=false;TardisLocation.refresh();
         console.tardisStateManager.materialization.landed=true;TardisLocation.refresh();TardisLocation.frame(session);
         check(expected.equals(session.state.custom),"landing again restores the exterior");
         Features.set("xaeroTardisMinimap",false);TardisLocation.refresh();TardisLocation.frame(session);

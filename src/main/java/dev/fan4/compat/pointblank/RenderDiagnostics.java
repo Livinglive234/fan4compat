@@ -43,8 +43,7 @@ public final class RenderDiagnostics {
         }
         return result;
     }
-    private static final System.Logger LOGGER=System.getLogger("Fan4Compat RenderDiag");
-    private static final Probe PROBE=new Probe(System::nanoTime,RenderDiagnostics::snapshot,message->LOGGER.log(System.Logger.Level.INFO,"[Fan4Compat RenderDiag] "+message));
+    private static final Probe PROBE=new Probe(System::nanoTime,RenderDiagnostics::snapshot,message->dev.fan4.compat.shared.GameLog.info("[Fan4Compat RenderDiag] "+message));
     private RenderDiagnostics() {}
     public static Object begin(String stage,Object item) {
         if(!ENABLED)return null;
