@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.33**.
+Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.34**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
@@ -170,6 +170,10 @@ observer without interrupting rendering. Disable with
 Beta 23's opt-in Point Blank diagnostics and all existing rendering fixes remain.
 Bounded reporting/error preservation, optional gates and real IP selectors are
 checked; actual Mac reproduction remains pending.
+
+## Beta 34: maintenance
+
+Shared diagnostics plumbing and small cleanups; no behavior changes to fixes. See below.
 
 ## Maintenance: shared diagnostics plumbing
 
