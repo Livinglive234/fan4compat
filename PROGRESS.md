@@ -184,6 +184,12 @@ affected the shared map's block and block-state reads on such a pack.
 All addon logging moved from `System.Logger` to `shared/GameLog` (log4j, what reaches latest.log). Found while debugging the compass: no
 Fan4Compat line, not even the updater's, appeared in any of the owner's logs. Use `GameLog` for anything a player may need to send us.
 
+## After beta 40: shared bytecode scan in CompatCalls (tried, reverted)
+
+Merging the two ASM class-file scans (`exact` and the unlisted-class fallback of `call`) into one `scan` was built and tested, then reverted at the
+owner's request because the gain (about 15 lines) was not worth any risk to calls the pack depends on. Nothing from it is kept, including its tests.
+For the record: `exact` matches the exact parameter list (the prefix it compares includes the closing parenthesis), with any return type.
+
 ## Beta 40: simplify pass
 
 Four review angles over the uncommitted beta 40 tree. Applied: `TardisLocation` keeps one immutable `Snapshot` (state, exterior, inside, yaw offset)
