@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.35**.
+Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.36**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
@@ -171,6 +171,19 @@ observer without interrupting rendering. Enable with the setting or
 Beta 23's opt-in Point Blank diagnostics and all existing rendering fixes remain.
 Bounded reporting/error preservation, optional gates and real IP selectors are
 checked; actual Mac reproduction remains pending.
+
+## Beta 36: Xaero waypoint sync (Feature A) — paused after build, untested in game
+
+Server-stored Xaero waypoints, applied while the join is held in the configuration phase so Xaero reads current
+files; last-writer-wins with backups; on by default. **Policy recorded: every feature ships enabled by default**; only
+troubleshooting aids default off. See the [architecture guide](docs/architecture-and-features.md#xaero-waypoint-sync)
+and the design doc's decision section. The reflective Fabric bridge is checked against real jars but unrun in game.
+
+**Status (2026-10-12): paused by the pack owner.** The code is committed locally and not pushed or deployed. To resume:
+install the build on the server and a client, join, and check the log for "Xaero waypoint sync is active" and that
+waypoints saved on one PC appear on another; failures are logged as warnings and never block a join. Xaero Features B
+(shared explored map) and C (TARDIS exterior on the map) are not started; the pack owner is looking at what else could
+be client-side first.
 
 ## Beta 35: settings screen
 

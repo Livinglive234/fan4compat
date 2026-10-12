@@ -1,6 +1,6 @@
 # Xaero integration: design proposal
 
-**Status: proposal. Nothing here is implemented, gated or shipped.** Written
+**Status: Feature A (server-stored waypoints) is implemented in beta 36; Features B and C are proposals only.** Written
 2026-10-10 against the pack's Xaero versions. Three features are proposed
 (A and B for dedicated servers, C for the TARDIS); each needs the pack owner's
 approval before any code.
@@ -107,6 +107,52 @@ loses a waypoint but cannot propagate deletions, so deleted waypoints return.
 - No-code alternative: syncing Xaero's waypoint folder between PCs (Dropbox,
   Syncthing, or a symlink) gives the same effect without the mod, at the cost of
   per-PC setup.
+
+### Spike findings and decisions (2026-10-12)
+
+Read from Xaero Minimap 26.5.0's bytecode; not yet observed on a running client.
+
+- **Decision:** Feature A is first, with last-writer-wins per file and a bounded timestamped backup of whatever an
+  upload displaces (the pack owner's choice over a union merge).
+- **Save hook:** `MinimapWorldManagerIO.saveWorld(MinimapWorld, boolean)` writes a temporary file with
+  `WaypointIO.saveWaypoints`, then `IOUtils.safeMoveAndReplace`. Reading `getWorldFile(world)` after it returns gives
+  exactly the text to upload. `saveAllWorlds`/`saveWorlds` route through it.
+- **File name:** `getWorldFile` joins `container.getDirectoryPath()` with `<node>_<name>.txt`, escaping `_` as `%us%`
+  and `:` as `§§`. Under `<minimap folder>/<server folder>/<dimension folder>/`. A sync key is the path below the
+  server folder, such as `dim%minecraft$overworld/mw$default_1.txt` (see `WaypointKeys`).
+- **Timing problem (changes the design):** Xaero reads the folder in `loadWorldsFromAllSources` /
+  `loadAllWorlds` when the session starts, before the server's copy can arrive in play. "Write before Xaero
+  reads" is therefore not possible. Options: write the files and let them take effect on the next join, or write them
+  and reload the affected worlds in the running session.
+- **Reload risk:** `loadWorld(world, path)` feeds lines to `checkWorldFileLine` against the existing in-memory
+  world, and nothing in it visibly clears the world's waypoint sets first, so reloading over a populated world may
+  duplicate waypoints. A hot reload would need to remove the existing sets before calling it. Not verified.
+- **Waypoint file format** includes a trailing slime-chunk-seed line written by `saveWorld`; the server treats files as
+  opaque text (size, UTF-8 and key checks only).
+
+### Decision: default on, applied in the configuration phase (2026-10-12)
+
+The pack owner decided that every feature ships enabled by default, and asked that Xaero's loading of the waypoint
+files be held until the server's copy has been downloaded. Hooking or deferring `loadWorldsFromAllSources` would leave
+Xaero's session half-built (it is called inside the `MinimapSession` constructor), so Feature A instead runs in the
+**configuration phase**: the server adds a Fabric API configuration task that holds the join until the client has
+written the newer files and sent back its own, then lets the join continue. Xaero builds its session afterward and
+reads current files. No Xaero class is hooked, so Feature A has no Xaero version coupling beyond the folder layout
+(`xaero/minimap/Multiplayer_<address>/<dimension>/<world>.txt`, root `config.txt` skipped) and the
+`differentiate_by_server_address` option in `config/xaero/minimap/client.cfg`. Uploads of edits made while playing
+are found by a 30-second scan of that folder rather than by a save hook.
+
+### Feature A status (superseded by the entry above for what is built)
+
+**Paused 2026-10-12** after the first full build (beta 36): committed, not pushed, not run in game or on a dedicated
+server. Features B and C are not started.
+
+Built and tested without Minecraft: `WaypointKeys` (file-name/text validation), `WaypointStore` (per-player server
+store with size/file-count/rate limits, last-writer-wins, bounded backups, atomic JSON files, damaged-file quarantine)
+and `WaypointSyncPlan` (client decisions from the server list, local files and last-synced state), with
+`WaypointSyncTest`. Not yet built: the network channel, the server join/upload handlers, the client hooks and the
+settings entry. These classes are not linked from any entrypoint yet, so `featureLinkAudit` rejects the build until
+they are wired.
 
 ## Feature B: shared explored map
 
@@ -250,13 +296,13 @@ the destination during flight, so the same access rules as the console apply.
 
 ## Configuration
 
-Proposed, not implemented. Server config file `config/fan4compat-xaero.properties`:
+Feature A uses the settings switch and the one property in the first two rows; the rest is proposed and not implemented. Server config file `config/fan4compat-xaero.properties`:
 
 | Setting | Proposed default | Purpose |
 | --- | --- | --- |
-| `waypointSync` | `true` | Enable Feature A. |
-| `waypointMaxBytesPerPlayer` | e.g. 256 KB | Storage cap. |
-| `sharedMap` | `false` | Enable Feature B. |
+| `xaeroWaypointSync` (Fan4Compat settings switch, default **on**) | `true` | Enable Feature A. |
+| `waypointMaxBytesPerPlayer` (`config/fan4compat-xaero.properties`) | 262144 | Storage cap, clamped to 700000. |
+| `sharedMap` | `true` once built | Enable Feature B. Default-on rule applies; see the privacy note below. |
 | `sharedMapDimensions` | overworld, nether, end, Aether | Allowlist; excludes dynamic and TARDIS dimensions. |
 | `sharedMapCatchUpRate` | low | Throttle for join catch-up. |
 

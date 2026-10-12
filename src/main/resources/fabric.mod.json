@@ -16,7 +16,8 @@
   "entrypoints": {
     "main": [
       "dev.fan4.compat.eureka.CompatSettings",
-      "dev.fan4.compat.updater.UpdateInitializer"
+      "dev.fan4.compat.updater.UpdateInitializer",
+      "dev.fan4.compat.xaero.XaeroSyncInitializer"
     ],
     "modmenu": [
       "dev.fan4.compat.config.ModMenuEntry"

@@ -1,6 +1,6 @@
 # Fan4Compat: architecture, features and contributor guide
 
-This document explains the active implementation at **0.1.0-beta.35**, reviewed
+This document explains the active implementation at **0.1.0-beta.36**, reviewed
 2026-10-11 (America/Chicago). It is an onboarding guide for human contributors and
 AI coding assistants. The source and version gates describe what actually runs;
 older release notes describe historical builds and can contain superseded behavior.
@@ -171,6 +171,7 @@ the supplied VS/Eureka files have different marketing and metadata versions.
 | `sound_physics_remastered` | `1.21.1-1.5.1` |
 | `bclib` | `30.4.0` |
 | `jade` | `15.10.6+fabric` |
+| `xaerominimap` | `26.5.0` |
 | `elytratrails` | `1.4.7.5-1.21.1` |
 
 Trinkets' grave helper separately checks `3.10.0`. Aether is presence-gated for
@@ -204,6 +205,7 @@ optional-recipe filter checks installed recipe dependencies individually.
 | BCLib stack codec/recipe format | Supported BCLib. |
 | Optional recipe dependency filter | BCLib or one of JEED/Supplementaries/Amendments/Moonlight installed. |
 | Wing-tip fallback | Supported Elytra Contrails. |
+| Xaero waypoint sync | Server: Fabric API and the `xaeroWaypointSync` switch. Client: the same plus Xaero's Minimap `26.5.0` (no mixins; Fabric API networking only). |
 | Updater/settings entrypoints | Always initialized; updater can be disabled and requires an eligible installed jar to operate. |
 
 Treat this table as an explanation of the gate code, not an invitation to enable
@@ -764,6 +766,35 @@ publishes a tested draft; the updater cannot obtain drafts or Actions artifacts,
 even with prereleases enabled. Documentation commits at the same version do not
 overwrite an existing release or promote it.
 
+## Xaero waypoint sync
+
+Sources: [`xaero`](../src/main/java/dev/fan4/compat/xaero) and the design in
+[xaero-integration-design.md](xaero-integration-design.md). This is Feature A of that design; B and C are not built.
+
+**Why the configuration phase.** Xaero builds its `MinimapSession` (and reads its waypoint files inside that
+constructor) when the player joins, so nothing can be written "before Xaero loads" once play has started, and
+deferring or re-running Xaero's loader risks half-initialized state and duplicated waypoints. The server therefore
+adds a Fabric API configuration task for each joining player: the join is held until the client has exchanged files
+(or 20 seconds pass), so Xaero later reads files that are already current. No Xaero class is hooked or mixed in.
+
+Pieces. `WaypointKeys` validates file names (`<dimension>/<file>.txt`, at most three segments) and text.
+`WaypointStore` is the per-player server copy: last-writer-wins, a bounded timestamped backup of whatever an upload
+displaces, size/file-count/rate limits, atomic JSON files, damaged files set aside. `WaypointProtocol` is the wire
+format (one byte-array payload; files travel as at most 24000-byte chunks because client-to-server payloads are
+limited to about 32 KiB) with a bounded `Assembler`. `WaypointSyncPlan` decides apply/upload/adopt per file from the
+server list, local files and last-synced version+hash. `WaypointServer` and `WaypointClient` are the Minecraft-free
+server and client behavior; `XaeroFolders` maps a typed server address to Xaero's `Multiplayer_<host>` folder
+(honoring `differentiate_by_server_address` from Xaero's client config) and lists syncable files.
+`XaeroSyncBridge` is the only Minecraft/Fabric-facing class, entirely by reflection (`Proxy` listeners, one
+byte-array payload type registered for configuration S2C/C2S and play C2S); `XaeroSyncNativeCheck` verifies every
+member it reaches against the real Fabric networking and Minecraft jars. `XaeroSyncInitializer` starts it when the
+`xaeroWaypointSync` switch is on.
+
+Failure behavior: every handler catches and still lets the join continue; the client always answers the held join with
+a "done" message; a timer releases it after 20 seconds. Not covered: Realms and singleplayer (no mapped folder), IPv6
+addresses, a deleted waypoint propagating from a file that is not the newest save, and the world map and minimap
+configuration, which are not synced.
+
 ## Settings screen
 
 Sources: [`Features`](../src/main/java/dev/fan4/compat/shared/Features.java),
@@ -904,6 +935,8 @@ regression check was accepted as unverified. See [release readiness](release-rea
 
 ## How to change this mod safely
 
+0. Every feature ships enabled by default, including a new one. Add it to `Features.ALL` with default `true` so the
+   owner can turn it off; only troubleshooting aids (diagnostics, debug logging) default to off.
 1. Identify the exact installed metadata versions, concrete trigger and owning
    mod's native path. Logs can contain optional-class warnings without a fault;
    a generic compatibility warning does not reproduce invisible contraptions.

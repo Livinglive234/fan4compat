@@ -7,7 +7,8 @@ import java.util.*;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
- * Player-facing on/off switches stored in {@code config/fan4compat.properties}.
+ * Every feature ships enabled; a switch exists to turn one off, never to opt in. Troubleshooting aids
+ * (diagnostics, debug logging) are not features and default to off. Player-facing on/off switches stored in {@code config/fan4compat.properties}.
  * Only optional or troubleshooting behavior is listed here: fixes that protect saves or
  * prevent crashes stay unconditional. Hook-level switches are read while Mixin selects its
  * classes, so they take effect at the next launch; a few are read live.
@@ -29,6 +30,7 @@ public final class Features {
         of("shipAcoustics",SHIPS,"Ship-aware sound occlusion","Makes Sound Physics Remastered trace sound through ship blocks in their own frame. Costs some CPU on busy ships.",true,true,"valkyrienskies","sound_physics_remastered"),
         of("eurekaWarnings",PACK,"Hide Eureka portal warnings","Removes Eureka from Immersive Portals' incompatibility notices; other warnings are not touched.",true,true,"vs_eureka","immersive_portals"),
         of("jadeHelm",PACK,"Hide Jade while at a helm","Hides the Jade overlay while you steer a ship from a helm, and brings it back when you dismount.",true,true,"jade","vs_eureka"),
+        of("xaeroWaypointSync",PACK,"Xaero waypoint sync","Keeps your Xaero's Minimap waypoints on the server so they follow you between PCs. The join is held briefly while the files are exchanged, so Xaero loads the up-to-date copy. Needs Fan4Compat on the server and Xaero's Minimap 26.5.0 on your client; when both sides changed a file, the newer save wins and the other copy is backed up.",true,true,"xaerominimap"),
         of("trinketGraves",PACK,"Trinkets items in graves","Puts equipped Trinkets items into Player Graves graves and restores them to their slot on quick retrieve.",true,false,"trinkets","graves"),
         of("eurekaDebugLogging",TROUBLESHOOTING,"Eureka ship debug logging","Shows Eureka's ship debug messages in the log.",false,true,"vs_eureka"),
         of("renderDiagnostics",TROUBLESHOOTING,"Point Blank render diagnostics","Logs OpenGL state around gun and scope drawing. Turning this on also turns on the Distant Horizons diagnostics unless those are set separately.",false,true,"pointblank"),
