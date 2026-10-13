@@ -50,7 +50,7 @@ public final class FeaturesTest {
                 if(off)check(!applies(name),feature.id()+" off removes "+name);
                 else if(!name.endsWith("DiagnosticMixin")&&!name.endsWith("PortalSoundRayMixin"))check(applies(name),feature.id()+" off must not touch "+name);
             }
-            check(feature.id().equals("trinketGraves")||feature.id().equals("xaeroWaypointSync")||feature.id().equals("eurekaDebugLogging")||feature.id().endsWith("iagnostics")||!controlled.isEmpty(),feature.id()+" controls at least one hook");
+            check(feature.id().equals("trinketGraves")||feature.id().equals("xaeroWaypointSync")||feature.id().equals("eurekaDebugLogging")||feature.id().equals("shipSaveLogging")||feature.id().endsWith("iagnostics")||!controlled.isEmpty(),feature.id()+" controls at least one hook");
         }
         Features.reset(dir.resolve("clean.properties"));
 

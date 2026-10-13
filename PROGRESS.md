@@ -1990,3 +1990,6 @@ Regression checks cover identity and repeated refresh; native selectors checked
 against Iris 1.8.1. The pack owner confirmed Windows DH recovery and normal Mac
 rendering on beta 33 (2026-10-11). Existing beta 32 diagnostics remain available;
 the causal link to Mac gun/portal overlap remains unproven.
+
+## Beta 43: Valkyrien Skies save-message filter
+`shipSaveLogging` (Troubleshooting list, off by default, worded like the Eureka logging switch: off hides VS's message): `valkyrienskies.SaveLogFilter` adds a reflective log4j Filter to the root `LoggerConfig` that denies only "ShipSavedData.save(): pipeline bytes" (VS logs it at INFO through slf4j logger `VS2` on every save). `SaveLogFilterTest` runs it against real log4j 2.22.1, added as a test-only dependency with its checksums in `gradle/verification-metadata.xml` (compared with Maven Central); the jar bundles no log4j. Not seen on a real server yet.

@@ -1,6 +1,6 @@
 # Fan4Compat: architecture, features and contributor guide
 
-This document explains the active implementation at **0.1.0-beta.42**, reviewed
+This document explains the active implementation at **0.1.0-beta.43**, reviewed
 2026-10-11 (America/Chicago). It is an onboarding guide for human contributors and
 AI coding assistants. The source and version gates describe what actually runs;
 older release notes describe historical builds and can contain superseded behavior.
@@ -993,6 +993,7 @@ not treat unavailable world context as a deleted ship.
 | --- | --- | --- |
 | `config/fan4compat.properties`: `eurekaDebugLogging` | `false` | Enable the targeted Eureka debug INFO calls after restart. |
 | JVM `fan4compat.shipDebug` | Unset | Overrides Eureka's file value. |
+| `config/fan4compat.properties`: `shipSaveLogging` | `false` | While off, hides Valkyrien Skies' "ShipSavedData.save(): pipeline bytes" INFO line with a log4j filter on the root logger config (reflection; `valkyrienskies.SaveLogFilter`, installed at startup, restart to change). Nothing else is filtered. |
 | `config/fan4compat.properties`: one key per switch in `Features.ALL` | Per switch | Player-facing on/off options edited from the Mod Menu screen. Hook-level switches are read while Mixin selects classes (restart to apply); `trinketGraves` is read live. See [Settings screen](#settings-screen). |
 | JVM `fan4compat.feature.<key>` | Unset | Overrides the file for one launch. |
 | `config/fan4compat-updater.properties`: `enabled` | `true` | Enable background release checks. |
