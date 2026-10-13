@@ -1993,3 +1993,9 @@ the causal link to Mac gun/portal overlap remains unproven.
 
 ## Beta 43: Valkyrien Skies save-message filter
 `shipSaveLogging` (Troubleshooting list, off by default, worded like the Eureka logging switch: off hides VS's message): `valkyrienskies.SaveLogFilter` adds a reflective log4j Filter to the root `LoggerConfig` that denies only "ShipSavedData.save(): pipeline bytes" (VS logs it at INFO through slf4j logger `VS2` on every save). `SaveLogFilterTest` runs it against real log4j 2.22.1, added as a test-only dependency with its checksums in `gradle/verification-metadata.xml` (compared with Maven Central); the jar bundles no log4j. Not seen on a real server yet.
+
+## Beta 44: Bumblezone shader switch
+`bumblezoneShaders` (Pack integrations, on by default, needs `iris` and `the_bumblezone`): `bumblezone.BumblezoneShaders` is the pure state machine (enter `the_bumblezone:the_bumblezone` -> shaders off once + chat message "The Bumblezone is best experienced without shaders";
+a different dimension -> back on, only if we turned them off and they are still off; TARDIS dimensions, found with DWM's `TardisHelper.isTardisDimension`, are ignored in both directions; leaving the world restores them).
+`BumblezoneInitializer` polls the dimension on `ClientTickEvents.END_CLIENT_TICK` and uses Iris's public API (`IrisApi.getInstance().getConfig().setShadersEnabledAndApply`), which saves Iris's setting, so a crash inside the Bumblezone leaves shaders off until turned on again.
+`BumblezoneShadersTest` covers the logic; `bumblezoneNativeCheck` (args: irisJar, fabricNetworkingJar, fabricLifecycleJar, xaeroMinecraftJar) checks every member against real jars (Iris 1.8.14). The dimension id is not checked against a Bumblezone jar (none available locally); not run in game.

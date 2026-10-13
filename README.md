@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.43.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.44.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 43 release notes](docs/releases/0.1.0-beta.43.md) ·
+[Beta 44 release notes](docs/releases/0.1.0-beta.44.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -227,7 +227,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.43.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.44.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -397,6 +397,7 @@ switches (check for updates, download automatically, include beta releases), sav
 | Xaero minimap and waypoints follow the TARDIS exterior | `xaeroTardisMinimap` | on | after restart |
 | Shared explored map | `xaeroSharedMap` | on | after restart |
 | Xaero waypoint sync | `xaeroWaypointSync` | on | after restart |
+| Bumblezone turns shaders off | `bumblezoneShaders` | on | after restart |
 | Trinkets items in graves | `trinketGraves` | on | immediately |
 | Valkyrien Skies save logging | `shipSaveLogging` | off | after restart |
 | Eureka ship debug logging | `eurekaDebugLogging` | off | after restart |

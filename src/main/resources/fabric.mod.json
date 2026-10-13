@@ -17,6 +17,7 @@
     "main": [
       "dev.fan4.compat.eureka.CompatSettings",
       "dev.fan4.compat.updater.UpdateInitializer",
+      "dev.fan4.compat.bumblezone.BumblezoneInitializer",
       "dev.fan4.compat.valkyrienskies.SaveLogFilter",
       "dev.fan4.compat.xaero.XaeroSyncInitializer"
     ],
