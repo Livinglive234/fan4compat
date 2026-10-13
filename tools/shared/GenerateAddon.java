@@ -8,13 +8,15 @@ public class GenerateAddon implements Opcodes {
     static final String CI = "org/spongepowered/asm/mixin/injection/callback/CallbackInfo";
     static final String QUEUE = ROOT+"valkyrienskies/DimensionQueue";
     static final Path OUT = Path.of(System.getProperty("fan4compat.generatedClasses", "build/generated/classes"));
-    static ClassWriter writer(String name, String target, String... interfaces) {
+    static ClassWriter writer(String name, String target, String... interfaces) {return writer(name,target,1000,interfaces);}
+    /** A mixin with an explicit priority: lower numbers are applied (and their handlers run) first. */
+    static ClassWriter writer(String name, String target, int priority, String... interfaces) {
         ClassWriter w = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES) {
             protected String getCommonSuperClass(String a,String b) {return "java/lang/Object";}
         };
         w.visit(V17,ACC_PUBLIC | ACC_SUPER,name,null,"java/lang/Object",interfaces);
         AnnotationVisitor a=w.visitAnnotation("Lorg/spongepowered/asm/mixin/Mixin;",false);
-        AnnotationVisitor arr=a.visitArray("targets");arr.visit(null,target.replace('/','.'));arr.visitEnd();a.visit("remap",false);a.visitEnd();return w;
+        AnnotationVisitor arr=a.visitArray("targets");arr.visit(null,target.replace('/','.'));arr.visitEnd();a.visit("remap",false);if(priority!=1000)a.visit("priority",priority);a.visitEnd();return w;
     }
     static void save(String name,ClassWriter w)throws Exception {
         w.visitEnd();Path p=OUT.resolve(name+".class");Files.createDirectories(p.getParent());Files.write(p,w.toByteArray());
@@ -31,6 +33,7 @@ public class GenerateAddon implements Opcodes {
         SableGenerator.sableMixin();
         EurekaGenerator.debugMixin();
         EurekaGenerator.warningMixin();
+        AetherCapeGenerator.skinLayersMixin();
         EurekaGenerator.severeWarningMixin();
         PointBlankGenerator.generate();
         StencilGenerator.generate();

@@ -2002,3 +2002,10 @@ a different dimension -> back on, only if we turned them off and they are still 
 
 ## Beta 45: save-message filter stack overflow
 The beta 43 filter recursed forever on log4j's reusable events (`MutableLogEvent.getMessage()` returns the event itself), logging a `StackOverflowError` from `SaveLogFilter.noisy` for messages such as "Thread {} stopped". The filter now reads an event's message once, never follows it, and resolves the log4j classes and methods once. `SaveLogFilterTest` now covers a reusable event that is its own message (it overflows on the beta 43 code).
+
+## Beta 46: Aether cape slot turned skin layers back on
+Cause (found by reading the Aether 1.5.11 Fabric jar): its `common.PlayerMixin.isModelPartShown` injects at HEAD of `Player.isModelPartShown(PlayerModelPart)` and, whenever the cape slot holds an item, sets the return value to `true` without looking at which part was asked,
+so jacket, sleeves, pants and hat show again regardless of the player's Skin Customization (the cape texture itself is applied by `AbstractClientPlayerMixin.getSkin`, which is fine).
+`aetherCapeSkinLayers` (Pack integrations, on by default, needs `aether`): generated mixin `aether.common.AetherCapeSkinLayersMixin` (`tools/aether/AetherCapeGenerator.java`, `@Mixin(priority=500)` so it runs before the Aether's handler) answers for every part except the cape exactly as vanilla does
+(`(entityData.get(field_7518) & part.getMask()) == part.getMask()`); the cape part is left to the Aether. `AetherCapeSmokeTest` runs the handler against stand-ins (all parts, several customisation values, cape untouched, priority below 1000);
+`aetherCapeNativeCheck` (arg: the intermediary Minecraft jar) checks every member. `GenerateAddon.writer` gained a priority overload. Not run in game: the ordering relies on Mixin applying the lower priority number first.

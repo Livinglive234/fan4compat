@@ -35,6 +35,7 @@ public final class Features {
         of("xaeroSharedMap",PACK,"Shared explored map","Terrain that any player has explored shows up on everyone's Xaero World Map, including areas you have not visited. The server records what players around it have loaded and streams it to clients; Xaero replaces it with its own data the moment you load that chunk. Needs Fan4Compat on the server, whose operator picks the source (sharedMapMode: SERVER, CLIENT, BOTH or NORMAL) in fan4compat-xaero.properties. Server admins can read the stored map data.",true,true,"xaeroworldmap"),
         of("xaeroWaypointSync",PACK,"Xaero waypoint sync","Keeps your Xaero's Minimap waypoints on the server so they follow you between PCs. The join is held briefly while the files are exchanged, so Xaero loads the up-to-date copy. Needs Fan4Compat on the server and Xaero's Minimap 26.5.0 on your client; when both sides changed a file, the newer save wins and the other copy is backed up.",true,true,"xaerominimap"),
         of("bumblezoneShaders",PACK,"Bumblezone turns shaders off","Entering the Bumblezone switches your Iris shader pack off and tells you in chat; the shaders come back when you go to another dimension (a TARDIS does not count), or when you leave the world. Shaders you turn back on yourself while inside stay on until your next visit.",true,true,"iris","the_bumblezone"),
+        of("aetherCapeSkinLayers",PACK,"Aether capes keep your skin layers","Stops wearing a cape in the Aether's cape slot from turning your skin's jacket, sleeves, pants and hat layers back on. The Aether reports every skin layer as shown whenever a cape is equipped, ignoring your Skin Customization settings; with this on, only the cape itself is left to the Aether.",true,true,"aether"),
         of("trinketGraves",PACK,"Trinkets items in graves","Puts equipped Trinkets items into Player Graves graves and restores them to their slot on quick retrieve.",true,false,"trinkets","graves"),
         of("shipSaveLogging",TROUBLESHOOTING,"Valkyrien Skies save logging","Shows Valkyrien Skies' \"ShipSavedData.save(): pipeline bytes\" message in the log at every world save. Off hides that one message.",false,true,"valkyrienskies"),
         of("eurekaDebugLogging",TROUBLESHOOTING,"Eureka ship debug logging","Shows Eureka's ship debug messages in the log.",false,true,"vs_eureka"),
@@ -56,6 +57,7 @@ public final class Features {
         hooks("shipAcoustics","ShipAcousticRaycastMixin","ShipAcousticSnapshotMixin");
         hooks("eurekaWarnings","EurekaPortalWarningMixin","EurekaPortalWarningInfoMixin");
         hooks("jadeHelm","JadeHelmMixin");
+        hooks("aetherCapeSkinLayers","AetherCapeSkinLayersMixin");
         hooks("xaeroTardisMap","TardisMapMixin");
         hooks("xaeroSharedMap","SharedMapTickMixin");
         hooks("xaeroTardisMinimap","TardisMapEntityMixin","TardisMapProcessorMixin","TardisMapCaveMixin","TardisMapYawMixin");

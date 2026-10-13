@@ -10,6 +10,7 @@
     "graves.common.AccessoryGraveSpawnMixin",
     "graves.common.AccessoryGraveEmptyMixin",
     "eureka.common.EurekaPortalWarningMixin",
+    "aether.common.AetherCapeSkinLayersMixin",
     "valkyrienskies.common.DynamicDimensionMixin",
     "sable.common.SableCompatMixin",
     "distanthorizons.common.DhDynamicDimensionMixin",
