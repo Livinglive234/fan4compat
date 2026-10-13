@@ -14,7 +14,7 @@ final class SharedMapSummarizer {
         Map<String,Integer> blockPalette=new LinkedHashMap<>(),biomePalette=new LinkedHashMap<>();
         byte[] block=new byte[SharedMapChunk.COLUMNS],biome=new byte[SharedMapChunk.COLUMNS];
         short[] height=new short[SharedMapChunk.COLUMNS],top=new short[SharedMapChunk.COLUMNS];
-        byte[] cellBiome=new byte[16];
+        byte[] cellBiome=new byte[16],bed=new byte[SharedMapChunk.COLUMNS];
         // Columns mostly share block states: resolve each state's block id and whether it holds fluid once per chunk.
         Map<Object,String> ids=new IdentityHashMap<>();Map<Object,Boolean> dry=new IdentityHashMap<>();
         for(int z=0;z<16;z++)
@@ -22,32 +22,37 @@ final class SharedMapSummarizer {
                 int topY=(Integer)call(chunk,"method_12005",surface,x,z)-1;
                 Object state=call(chunk,"method_8320",create(POS,chunkX*16+x,topY,chunkZ*16+z));
                 String id=ids.computeIfAbsent(state,t->String.valueOf(call(blocks,"method_10221",call(t,"method_26204"))));
-                int terrainY=topY;
-                // Under fluid, the terrain is the first non-fluid block below (bounded so a deep ocean costs little).
+                int terrainY=topY;Object bedState=null;
+                // Under fluid, the terrain is the first non-fluid block below (bounded so a deep ocean costs little); that block is the bed.
                 if(!dry.computeIfAbsent(state,t->(Boolean)call(call(t,"method_26227"),"method_15769")))
                     for(int depth=1;depth<=64;depth++) {
                         Object below=call(chunk,"method_8320",create(POS,chunkX*16+x,topY-depth,chunkZ*16+z));
                         terrainY=topY-depth;
-                        if(dry.computeIfAbsent(below,t->(Boolean)call(call(t,"method_26227"),"method_15769")))break;
+                        if(dry.computeIfAbsent(below,t->(Boolean)call(call(t,"method_26227"),"method_15769"))){bedState=below;break;}
                     }
                 int column=z*16+x;
-                Integer blockIndex=blockPalette.computeIfAbsent(id,key->blockPalette.size());
-                if(blockIndex>SharedMapChunk.MAX_PALETTE-1)return null;
-                block[column]=(byte)(int)blockIndex;
+                int blockIndex=SharedMapChunk.paletteIndex(blockPalette,id);
+                if(blockIndex<0)return null;
+                block[column]=(byte)blockIndex;
+                if(bedState!=null) {
+                    int bedIndex=SharedMapChunk.paletteIndex(blockPalette,ids.computeIfAbsent(bedState,t->String.valueOf(call(blocks,"method_10221",call(t,"method_26204")))));
+                    if(bedIndex<0)return null;
+                    bed[column]=(byte)(bedIndex+1);
+                }
                 // Biomes change slowly: read one per 4x4 cell of columns.
                 int cell=(z>>2)*4+(x>>2);
                 if((x&3)==0&&(z&3)==0) {
                     Object entry=call(world,"method_23753",create(POS,chunkX*16+x,topY,chunkZ*16+z));
                     Optional<?> key=(Optional<?>)call(entry,"method_40230");
                     String biomeId=key.isPresent()?String.valueOf(call(key.get(),"method_29177")):"minecraft:plains";
-                    Integer biomeIndex=biomePalette.computeIfAbsent(biomeId,k->biomePalette.size());
-                    if(biomeIndex>SharedMapChunk.MAX_PALETTE-1)return null;
-                    cellBiome[cell]=(byte)(int)biomeIndex;
+                    int biomeIndex=SharedMapChunk.paletteIndex(biomePalette,biomeId);
+                    if(biomeIndex<0)return null;
+                    cellBiome[cell]=(byte)biomeIndex;
                 }
                 biome[column]=cellBiome[cell];
                 top[column]=(short)topY;height[column]=(short)Math.min(terrainY,topY);
             }
-        SharedMapChunk summary=new SharedMapChunk(dimension,chunkX,chunkZ,stamp,blockPalette.keySet().toArray(String[]::new),biomePalette.keySet().toArray(String[]::new),block,biome,height,top);
+        SharedMapChunk summary=new SharedMapChunk(dimension,chunkX,chunkZ,stamp,blockPalette.keySet().toArray(String[]::new),biomePalette.keySet().toArray(String[]::new),block,biome,bed,height,top);
         return summary.valid()?summary:null;
     }
 }

@@ -55,7 +55,7 @@ public final class FeaturesTest {
         Features.reset(dir.resolve("clean.properties"));
 
         // Diagnostics read the switches, with JVM arguments still winning.
-        check(!Diagnostics.render()&&!Diagnostics.dh()&&!Diagnostics.portalDepth()&&!Diagnostics.xaeroTardis(),"diagnostics are off by default");
+        check(!Diagnostics.render()&&!Diagnostics.dh()&&!Diagnostics.portalDepth()&&!Diagnostics.xaero(),"diagnostics are off by default");
         Features.set("renderDiagnostics",true);
         check(Diagnostics.render()&&Diagnostics.dh(),"render switch also drives DH diagnostics");
         System.setProperty("fan4compat.dhRenderDiagnostics","false");

@@ -5,6 +5,9 @@ import java.nio.file.*;
 import java.util.*;
 
 public final class XaeroSyncFlowTest {
+    public static final class Info {public final String field_3761;Info(String ip){field_3761=ip;}}
+    public static final class Connection {final java.net.SocketAddress address;Connection(java.net.SocketAddress address){this.address=address;}public java.net.SocketAddress method_10755(){return address;}}
+    public static final class Handler {public final Object field_45590;public final Object field_45589;Handler(Object info,java.net.SocketAddress address){field_45590=info;field_45589=new Connection(address);}}
     static void check(boolean condition,String reason){if(!condition)throw new AssertionError(reason);}
     static final String KEY="dim%minecraft$overworld/mw$default_1.txt";
     static String file(String name){return "sets:gui.xaero_default\nwaypoint:"+name+":H:1:64:1:0:false:0:gui.xaero_default:false:0:0:false\n";}
@@ -125,6 +128,31 @@ public final class XaeroSyncFlowTest {
         check(waypoints.receive(player,new byte[]{1,2,3},0)!=null,"garbage refused");
         check(WaypointServer.isDone(WaypointProtocol.encode(new WaypointProtocol.Done()))&&!WaypointServer.isDone(good)&&!WaypointServer.isDone(new byte[]{9}),"done detection");
         check(XaeroFolders.waypointFiles(base.resolve("missing"),1000).isEmpty(),"missing folder yields no files");
+        // Fan4Compat's own client data lives in a visible folder; one saved by earlier builds in the hidden one is moved, never lost.
+        var dataFolder=Class.forName("dev.fan4.compat.xaero.XaeroPaths").getDeclaredMethod("clientData",Path.class);dataFolder.setAccessible(true);
+        Path game=Files.createTempDirectory("fan4game");
+        check(dataFolder.invoke(null,game).equals(game.resolve("fan4compat"))&&!Files.exists(game.resolve("fan4compat")),"a fresh game folder: the new folder name, nothing created yet");
+        Files.createDirectories(game.resolve(".fan4compat-xaero/shared-map"));Files.writeString(game.resolve(".fan4compat-xaero/shared-map/s.properties"),"x=1");
+        check(dataFolder.invoke(null,game).equals(game.resolve("fan4compat"))&&Files.readString(game.resolve("fan4compat/shared-map/s.properties")).equals("x=1")&&!Files.exists(game.resolve(".fan4compat-xaero")),"the hidden folder from earlier builds is renamed, contents intact");
+        check(dataFolder.invoke(null,game).equals(game.resolve("fan4compat"))&&Files.exists(game.resolve("fan4compat/shared-map/s.properties")),"asking again changes nothing");
+        Files.createDirectories(game.resolve(".fan4compat-xaero"));Files.writeString(game.resolve(".fan4compat-xaero/keep.txt"),"old");
+        dataFolder.invoke(null,game);
+        check(Files.exists(game.resolve(".fan4compat-xaero/keep.txt"))&&Files.exists(game.resolve("fan4compat/shared-map/s.properties")),"if both exist, neither is touched");
+        // During the join the game has no "current server" yet: the address comes from the network handler.
+        var addressOf=Class.forName("dev.fan4.compat.xaero.XaeroSyncBridge").getDeclaredMethod("address",Object.class);addressOf.setAccessible(true);
+        check("example.org:25565".equals(addressOf.invoke(null,new Handler(new Info("example.org:25565"),null))),"the typed server address comes from the handler's server entry");
+        check("play.test".equals(addressOf.invoke(null,new Handler(null,java.net.InetSocketAddress.createUnresolved("play.test",25565)))),"without a server entry, the connection's host");
+        // Joining a server hands the sync client from the configuration phase to play: the upload timer must start with it (it once reset it first).
+        Class<?> bridge=Class.forName("dev.fan4.compat.xaero.XaeroSyncBridge");
+        var clientField=bridge.getDeclaredField("client");clientField.setAccessible(true);var periodicField=bridge.getDeclaredField("periodic");periodicField.setAccessible(true);
+        var start=bridge.getDeclaredMethod("startUploads",Object.class);start.setAccessible(true);var stop=bridge.getDeclaredMethod("stopUploads");stop.setAccessible(true);
+        clientField.set(null,one.client());
+        start.invoke(null,new Object());
+        check(clientField.get(null)==one.client()&&periodicField.get(null)!=null,"starting play keeps the sync client and schedules its uploads");
+        stop.invoke(null);
+        check(clientField.get(null)==null&&periodicField.get(null)==null,"leaving the server stops the uploads and forgets the client");
+        clientField.set(null,null);start.invoke(null,new Object());
+        check(periodicField.get(null)==null,"with no sync client (no folder found during the join) there are no uploads");
         System.out.println("PASS: Xaero sync wire format, chunk reassembly, folder rules and two-PC join/edit/conflict flow with backups");
     }
 }

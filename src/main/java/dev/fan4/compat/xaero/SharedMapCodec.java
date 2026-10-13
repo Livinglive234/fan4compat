@@ -6,14 +6,15 @@ import java.util.zip.*;
 
 /** Batches of chunk summaries as a deflated stream, used on the wire and for the server's region files. Decoding is bounded. */
 public final class SharedMapCodec {
-    public static final int VERSION=1,MAX_CHUNKS=512,MAX_INFLATED_BYTES=4*1024*1024,MAX_HELLO_DIMENSIONS=16;
+    /** VERSION: the small messages (hello, mode). BATCH_VERSION: chunk batches, which also carry the block under water (version 1 batches, written by older builds, are still read). */
+    public static final int VERSION=1,LEGACY_BATCH_VERSION=1,BATCH_VERSION=2,MAX_CHUNKS=512,MAX_INFLATED_BYTES=4*1024*1024,MAX_HELLO_DIMENSIONS=16;
     private SharedMapCodec() {}
 
     public static byte[] encode(List<SharedMapChunk> chunks)throws IOException {
         if(chunks.size()>MAX_CHUNKS)throw new IOException("too many chunks in one batch");
         ByteArrayOutputStream bytes=new ByteArrayOutputStream();
         try(DataOutputStream out=new DataOutputStream(new DeflaterOutputStream(bytes,new Deflater(Deflater.BEST_SPEED)))) {
-            out.writeByte(VERSION);out.writeShort(chunks.size());
+            out.writeByte(BATCH_VERSION);out.writeShort(chunks.size());
             for(SharedMapChunk chunk:chunks)write(out,chunk);
         }
         return bytes.toByteArray();
@@ -23,31 +24,32 @@ public final class SharedMapCodec {
         out.writeUTF(chunk.dimension);out.writeInt(chunk.x);out.writeInt(chunk.z);out.writeLong(chunk.stamp);
         out.writeByte(chunk.blocks.length);for(String id:chunk.blocks)out.writeUTF(id);
         out.writeByte(chunk.biomes.length);for(String id:chunk.biomes)out.writeUTF(id);
-        out.write(chunk.block);out.write(chunk.biome);
+        out.write(chunk.block);out.write(chunk.biome);out.write(chunk.bed);
         for(short h:chunk.height)out.writeShort(h);
         for(short t:chunk.top)out.writeShort(t);
     }
     /** Throws IOException for anything malformed, oversized once inflated, or from another version. */
     public static List<SharedMapChunk> decode(byte[] data)throws IOException {
         try(DataInputStream in=new DataInputStream(new BoundedInputStream(new InflaterInputStream(new ByteArrayInputStream(data)),MAX_INFLATED_BYTES))) {
-            if(in.readUnsignedByte()!=VERSION)throw new IOException("unsupported version");
+            int version=in.readUnsignedByte();
+            if(version<LEGACY_BATCH_VERSION||version>BATCH_VERSION)throw new IOException("unsupported version");
             int count=in.readUnsignedShort();
             if(count>MAX_CHUNKS)throw new IOException("too many chunks");
             List<SharedMapChunk> chunks=new ArrayList<>(count);
-            for(int i=0;i<count;i++)chunks.add(read(in));
+            for(int i=0;i<count;i++)chunks.add(read(in,version));
             if(in.read()!=-1)throw new IOException("trailing bytes");
             return chunks;
         } catch(ZipException|EOFException broken){throw new IOException("damaged batch: "+broken.getMessage(),broken);}
     }
-    private static SharedMapChunk read(DataInputStream in)throws IOException {
+    private static SharedMapChunk read(DataInputStream in,int version)throws IOException {
         String dimension=in.readUTF();int x=in.readInt(),z=in.readInt();long stamp=in.readLong();
         String[] blocks=new String[in.readUnsignedByte()];for(int i=0;i<blocks.length;i++)blocks[i]=in.readUTF();
         String[] biomes=new String[in.readUnsignedByte()];for(int i=0;i<biomes.length;i++)biomes[i]=in.readUTF();
-        byte[] block=new byte[SharedMapChunk.COLUMNS],biome=new byte[SharedMapChunk.COLUMNS];in.readFully(block);in.readFully(biome);
+        byte[] block=new byte[SharedMapChunk.COLUMNS],biome=new byte[SharedMapChunk.COLUMNS],bed=new byte[SharedMapChunk.COLUMNS];in.readFully(block);in.readFully(biome);if(version>=BATCH_VERSION)in.readFully(bed);
         short[] height=new short[SharedMapChunk.COLUMNS],top=new short[SharedMapChunk.COLUMNS];
         for(int i=0;i<height.length;i++)height[i]=in.readShort();
         for(int i=0;i<top.length;i++)top[i]=in.readShort();
-        SharedMapChunk chunk=new SharedMapChunk(dimension,x,z,stamp,blocks,biomes,block,biome,height,top);
+        SharedMapChunk chunk=new SharedMapChunk(dimension,x,z,stamp,blocks,biomes,block,biome,bed,height,top);
         if(!chunk.valid())throw new IOException("invalid chunk data");
         return chunk;
     }

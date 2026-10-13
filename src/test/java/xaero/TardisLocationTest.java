@@ -81,9 +81,9 @@ public final class TardisLocationTest {
         TardisLocation.frame(session);
         check(session.state.custom==null&&processor.world.custom==null&&TardisLocation.x(player,5.5)==5.5&&TardisLocation.caving()==null,"in flight everything returns to normal, Xaero works out its own cave start");
         // The diagnostics switch only adds log lines: nothing else changes with it on.
-        Features.set("xaeroTardisDiagnostics",true);console.tardisStateManager.materialization.landed=true;TardisLocation.refresh();
-        check(TardisLocation.caving()!=null&&TardisLocation.x(player,5.5)==1200.5,"with the Xaero TARDIS diagnostics on, behavior is unchanged");
-        Features.set("xaeroTardisDiagnostics",false);
+        Features.set("xaeroDiagnostics",true);console.tardisStateManager.materialization.landed=true;TardisLocation.refresh();
+        check(TardisLocation.caving()!=null&&TardisLocation.x(player,5.5)==1200.5,"with the Xaero diagnostics on, behavior is unchanged");
+        Features.set("xaeroDiagnostics",false);
         // Compass: the exterior's orientation while landed; the radar is empty anywhere inside a TARDIS.
         console.tardisStateManager.materialization.landed=true;TardisLocation.refresh();
         check(TardisLocation.cameraYaw(null,30f)==30f&&TardisLocation.yaw(player,30f)==30f,"no door or facing known: yaw unchanged");

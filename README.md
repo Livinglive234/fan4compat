@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.40.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.41.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 40 release notes](docs/releases/0.1.0-beta.40.md) ·
+[Beta 40 release notes](docs/releases/0.1.0-beta.41.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -227,7 +227,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.40.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.41.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -402,16 +402,16 @@ switches (check for updates, download automatically, include beta releases), sav
 | Point Blank render diagnostics | `renderDiagnostics` | off | after restart |
 | Distant Horizons render diagnostics | `dhRenderDiagnostics` | off | after restart |
 | Portal depth-copy logging | `portalDepthDiagnostics` | off | after restart |
-| Xaero TARDIS diagnostics | `xaeroTardisDiagnostics` | off | immediately |
+| Xaero diagnostics | `xaeroDiagnostics` | off | immediately |
 
-**Default-on rule.** Every feature ships enabled by default, including each new one. A settings switch exists so the pack owner or a player can turn a feature off, never so they have to turn it on. Troubleshooting aids (render and Distant Horizons diagnostics, portal depth-copy logging, Xaero TARDIS diagnostics, Eureka debug logging) are not features: they stay off unless the pack owner decides otherwise.
+**Default-on rule.** Every feature ships enabled by default, including each new one. A settings switch exists so the pack owner or a player can turn a feature off, never so they have to turn it on. Troubleshooting aids (render and Distant Horizons diagnostics, portal depth-copy logging, Xaero diagnostics, Eureka debug logging) are not features: they stay off unless the pack owner decides otherwise.
 
 Only optional behavior and troubleshooting aids are listed. Fixes that protect saves or prevent
 crashes (ship loading, portal transit, grave storage, shader compile repairs) are not switchable.
 A JVM argument `-Dfan4compat.feature.<key>=true|false` overrides the file for one launch, and the
 older `-Dfan4compat.renderDiagnostics`, `-Dfan4compat.dhRenderDiagnostics`,
-`-Dfan4compat.portalDepthDiagnostics`, `-Dfan4compat.xaeroTardisDiagnostics` and `-Dfan4compat.shipDebug` arguments still work.
-The Xaero TARDIS diagnostics write `[Fan4Compat TardisDiag]` lines to `latest.log`, only when something changes: the exterior and compass turn, and the cave start and layer.
+`-Dfan4compat.portalDepthDiagnostics`, `-Dfan4compat.xaeroDiagnostics` and `-Dfan4compat.shipDebug` arguments still work.
+The Xaero diagnostics write `[Fan4Compat XaeroDiag]` lines to `latest.log`: inside a TARDIS the exterior, compass turn, cave start and layer (when they change); the shared map's queue and progress every few seconds; and each step of the waypoint exchange on the server and the client.
 The render diagnostics switch also turns on the Distant Horizons diagnostics unless those are set
 separately. Xaero waypoint sync has its entry above.
 
@@ -482,7 +482,7 @@ the server and on your client, and Xaero's Minimap 26.5.0 on the client. It is o
   the already-updated files, so nothing needs reloading. Edits you make while playing are uploaded within about
   30 seconds.
 - **Conflicts.** The newest save wins. When both PCs changed the same file, the loser is kept: on the server as a
-  bounded set of timestamped backups, and on the PC under `.fan4compat-xaero/backups/`. A waypoint you delete stays
+  bounded set of timestamped backups, and on the PC under `fan4compat/backups/` in the game folder. A waypoint you delete stays
   deleted only if that file is the newest save.
 - **Files.** Only waypoint files are synced (`xaero/minimap/Multiplayer_<address>/<dimension>/<world>.txt`), not
   Xaero's `config.txt` files or the world map. Different PCs may use different server addresses; each uses its own

@@ -27,7 +27,14 @@ public final class SharedMapNativeCheck {
         method(processor,"getCurrentDimension","()",false);method(processor,"getWorldBlockTintProvider","()",false);method(processor,"getOverlayManager","()",false);
         String r=region+"MapRegion",chunk=region+"MapTileChunk",tile=region+"MapTile",block=region+"MapBlock";
         field(r,"writerThreadPauseSync",null,false);
-        for(String name:new String[]{"isWritingPaused","getLoadState","registerVisit","isResting","isNormalMapData"})method(r,name,"()",false);
+        for(String name:new String[]{"isWritingPaused","getLoadState","registerVisit","isResting","isNormalMapData","canRequestReload_unsynced"})method(r,name,"()",false);
+        // Water as Xaero stores it: an overlay built on the bed block, and read back through the block's overlay list.
+        String builder=region+"OverlayBuilder";
+        method(builder,"<init>","(L"+region+"OverlayManager;)",false);method(builder,"startBuilding","()",false);
+        method(builder,"build","(L"+mc+"class_2680;IBL"+processor+";"+key+")",false);method(builder,"finishBuilding","(L"+region+"MapBlock;)",false);
+        method(region+"MapBlock","getOverlays","()",false);
+        // Asking Xaero to load a region the way its own writer does.
+        method(processor,"getMapSaveLoad","()",false);method(map+"file/MapSaveLoad","requestLoad","(L"+r+";Ljava/lang/String;)",false);
         method(r,"setBeingWritten","(Z)",false);method(r,"getChunk","(II)",false);method(r,"setChunk","(IIL"+chunk+";)",false);method(r,"setAllCachePrepared","(Z)",false);
         if(XaeroMapNativeCheck.find(chunk).methods.stream().noneMatch(m->m.name.equals("<init>")&&m.desc.equals("(L"+r+";II)V")&&(m.access&Opcodes.ACC_PUBLIC)!=0))throw new AssertionError("MapTileChunk constructor changed");
         method(chunk,"setLoadState","(B)",false);method(chunk,"getLoadState","()",false);method(chunk,"getLeafTexture","()",false);method(region+"texture/LeafRegionTexture","shouldDownloadFromPBO","()",false);

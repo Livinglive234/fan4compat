@@ -17,7 +17,7 @@ final class SharedMapReader {
         // Most columns share their block and biome objects: resolve each to its id once per tile.
         Map<Object,String> blockIds=new IdentityHashMap<>(),biomeIds=new IdentityHashMap<>();
         Map<String,Integer> blockPalette=new LinkedHashMap<>(),biomePalette=new LinkedHashMap<>();
-        byte[] block=new byte[SharedMapChunk.COLUMNS],biome=new byte[SharedMapChunk.COLUMNS];
+        byte[] block=new byte[SharedMapChunk.COLUMNS],biome=new byte[SharedMapChunk.COLUMNS],bed=new byte[SharedMapChunk.COLUMNS];
         short[] height=new short[SharedMapChunk.COLUMNS],top=new short[SharedMapChunk.COLUMNS];
         for(int z=0;z<16;z++)
             for(int x=0;x<16;x++) {
@@ -27,14 +27,17 @@ final class SharedMapReader {
                 if(state==null||biomeKey==null)return null;
                 int column=z*16+x,terrain=(Integer)call(pixel,"getHeight"),surface=(Integer)call(pixel,"getTopHeight");
                 if(terrain<SharedMapChunk.MIN_Y||surface>SharedMapChunk.MAX_Y||surface<terrain)return null;
-                String id=blockIds.computeIfAbsent(state,s->String.valueOf(call(registry,"method_10221",call(s,"method_26204"))));
-                Integer blockIndex=blockPalette.computeIfAbsent(id,key->blockPalette.size());
-                String biomeId=biomeIds.computeIfAbsent(biomeKey,k->String.valueOf(call(k,"method_29177")));
-                Integer biomeIndex=biomePalette.computeIfAbsent(biomeId,key->biomePalette.size());
-                if(blockIndex>=SharedMapChunk.MAX_PALETTE||biomeIndex>=SharedMapChunk.MAX_PALETTE)return null;
-                block[column]=(byte)(int)blockIndex;biome[column]=(byte)(int)biomeIndex;height[column]=(short)terrain;top[column]=(short)surface;
+                // Xaero draws water as an overlay on the bed: what is seen from above is the (first) overlay, and the block under it is the bed.
+                List<?> overlays=(List<?>)call(pixel,"getOverlays");
+                boolean covered=overlays!=null&&!overlays.isEmpty();
+                Object shown=covered?call(overlays.get(0),"getState"):state;
+                int blockIndex=SharedMapChunk.paletteIndex(blockPalette,blockIds.computeIfAbsent(shown,s->String.valueOf(call(registry,"method_10221",call(s,"method_26204"))))),
+                    bedIndex=covered?SharedMapChunk.paletteIndex(blockPalette,blockIds.computeIfAbsent(state,s->String.valueOf(call(registry,"method_10221",call(s,"method_26204"))))):-2,
+                    biomeIndex=SharedMapChunk.paletteIndex(biomePalette,biomeIds.computeIfAbsent(biomeKey,k->String.valueOf(call(k,"method_29177"))));
+                if(blockIndex<0||bedIndex==-1||biomeIndex<0)return null;
+                block[column]=(byte)blockIndex;biome[column]=(byte)biomeIndex;if(covered)bed[column]=(byte)(bedIndex+1);height[column]=(short)terrain;top[column]=(short)surface;
             }
-        SharedMapChunk summary=new SharedMapChunk(dimension,chunkX,chunkZ,0,blockPalette.keySet().toArray(String[]::new),biomePalette.keySet().toArray(String[]::new),block,biome,height,top);
+        SharedMapChunk summary=new SharedMapChunk(dimension,chunkX,chunkZ,0,blockPalette.keySet().toArray(String[]::new),biomePalette.keySet().toArray(String[]::new),block,biome,bed,height,top);
         return summary.valid()?summary:null;
     }
 }

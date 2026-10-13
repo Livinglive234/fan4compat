@@ -45,7 +45,7 @@ public final class TardisLocation {
                         TardisMapCompat.Exterior exterior=state==null?null:TardisMapCompat.landed(state);
                         found=new Snapshot(state,exterior,true,exterior==null?Float.NaN:TardisMapCompat.yawOffset(world,state));
                         Snapshot seen=found;
-                        trace("location",()->seen.exterior()==null?"inside a TARDIS that is not landed (state "+(seen.state()!=null)+")"
+                        XaeroTrace.changed("location",()->seen.exterior()==null?"inside a TARDIS that is not landed (state "+(seen.state()!=null)+")"
                             :"exterior "+call(seen.exterior().dimension(),"method_29177")+" at "+seen.exterior().x()+" "+seen.exterior().y()+" "+seen.exterior().z()+", compass turned by "+seen.yawOffset()+" degrees");
                     }
                 }
@@ -57,13 +57,6 @@ public final class TardisLocation {
     public static TardisMapCompat.Exterior current(){return snapshot().exterior();}
     /** Forget the cached location so the next call looks again (a world change, or a test). */
     public static void refresh(){snapshot=null;}
-    private static final java.util.Map<String,String> LAST=new java.util.concurrent.ConcurrentHashMap<>();
-    /** Troubleshooting log line (the "Xaero TARDIS diagnostics" switch, off by default), written only when it differs from the last one for its key. */
-    private static void trace(String key,java.util.function.Supplier<String> message) {
-        if(!dev.fan4.compat.shared.Diagnostics.xaeroTardis())return;
-        String text=message.get();
-        if(!text.equals(LAST.put(key,text)))dev.fan4.compat.shared.GameLog.info("[Fan4Compat TardisDiag] "+text);
-    }
     private static void warn(Throwable failure){if(!warned){warned=true;dev.fan4.compat.shared.GameLog.warn("Xaero TARDIS location unavailable: "+failure);}}
     private static boolean isPlayer(Object entity) {
         try{return entity!=null&&entity==field(client(),"field_1724");}
@@ -141,7 +134,7 @@ public final class TardisLocation {
         try {
             int ceiling=ceilingTop(exterior.dimension());
             int start=ceiling>=0&&exterior.y()<ceiling?exterior.y()+OPEN_AIR_ABOVE:Integer.MAX_VALUE;
-            trace("cave",()->"cave start "+(start==Integer.MAX_VALUE?"top view":start+" (layer "+(start>>4)+")")+" for exterior y "+exterior.y()+", ceiling "+ceiling);
+            XaeroTrace.changed("cave",()->"cave start "+(start==Integer.MAX_VALUE?"top view":start+" (layer "+(start>>4)+")")+" for exterior y "+exterior.y()+", ceiling "+ceiling);
             if(start!=Integer.MAX_VALUE)return start;
         } catch(RuntimeException|LinkageError failure){warn(failure);}
         return Integer.MAX_VALUE;

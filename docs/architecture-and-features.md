@@ -1,6 +1,6 @@
 # Fan4Compat: architecture, features and contributor guide
 
-This document explains the active implementation at **0.1.0-beta.40**, reviewed
+This document explains the active implementation at **0.1.0-beta.41**, reviewed
 2026-10-11 (America/Chicago). It is an onboarding guide for human contributors and
 AI coding assistants. The source and version gates describe what actually runs;
 older release notes describe historical builds and can contain superseded behavior.
@@ -841,7 +841,7 @@ unknown), set the interpretation version and cave start, `setTile`, `setLoaded`,
 `updateBuffers` with the processor's tint provider, overlay manager and a fresh `MapUpdateFastConfig`. Tiles stay "not written once", so
 Xaero's real writer rewrites them when the chunk is loaded. Chunks whose region is not yet loaded wait (retried about once a second as
 the player pans the map); a chunk for another dimension than the one shown is dropped without recording progress. Progress is the newest
-stamp applied per dimension, saved under `.fan4compat-xaero/shared-map/`. Any unexpected exception empties the queue and switches the
+stamp applied per dimension, saved under `fan4compat/shared-map/` in the game folder (builds before 41 used a hidden `.fan4compat-xaero`; it is renamed on first use). Any unexpected exception empties the queue and switches the
 shared map off for that connection.
 
 Not covered: caves and cave layers (surface only), overlay detail such as stained glass or transparent blocks (a fluid is shown as the

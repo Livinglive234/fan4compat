@@ -25,6 +25,24 @@ public final class SharedMapTest {
         check(a.sameTerrain(chunk(overworld,3,-5,999,"minecraft:grass_block",64))&&!a.sameTerrain(chunk(overworld,3,-5,100,"minecraft:sand",64))&&!a.sameTerrain(chunk(overworld,3,-5,100,"minecraft:grass_block",65)),"terrain comparison ignores the stamp only");
         check(SharedMapChunk.key(-1,-1)!=SharedMapChunk.key(-1,0)&&SharedMapChunk.key(1,2)!=SharedMapChunk.key(2,1),"chunk keys are distinct");
 
+        // Water: the block under it travels with the chunk, in the wire format and in region files; batches from before it was recorded are still read.
+        byte[] bedColumns=new byte[256];bedColumns[5]=2;   // 1 + palette index 1 (stone)
+        SharedMapChunk lake=new SharedMapChunk(overworld,1,1,7,new String[]{"minecraft:water","minecraft:stone"},new String[]{"minecraft:plains"},new byte[256],new byte[256],bedColumns,a.height,a.top);
+        check(lake.valid()&&lake.bedAt(5,0).equals("minecraft:stone")&&lake.bedAt(6,0)==null,"a chunk with a bed is valid and readable");
+        SharedMapChunk lakeBack=SharedMapCodec.decode(SharedMapCodec.encode(List.of(lake))).get(0);
+        check(lakeBack.bedAt(5,0).equals("minecraft:stone")&&lakeBack.sameTerrain(lake)&&lakeBack.contentHash()==lake.contentHash(),"the bed survives the wire format");
+        check(!lake.sameTerrain(a)&&lake.contentHash()!=a.contentHash(),"a different bed is different terrain");
+        byte[] outOfPalette=new byte[256];outOfPalette[0]=9;
+        check(!new SharedMapChunk(overworld,1,1,7,lake.blocks,lake.biomes,lake.block,lake.biome,outOfPalette,lake.height,lake.top).valid(),"a bed index beyond the palette is rejected");
+        ByteArrayOutputStream oldBatch=new ByteArrayOutputStream();
+        try(DataOutputStream out=new DataOutputStream(new DeflaterOutputStream(oldBatch))) {
+            out.writeByte(1);out.writeShort(1);out.writeUTF(overworld);out.writeInt(4);out.writeInt(5);out.writeLong(99);
+            out.writeByte(1);out.writeUTF("minecraft:grass_block");out.writeByte(1);out.writeUTF("minecraft:plains");
+            out.write(new byte[256]);out.write(new byte[256]);for(int i=0;i<256;i++)out.writeShort(64);for(int i=0;i<256;i++)out.writeShort(64);
+        }
+        SharedMapChunk legacy=SharedMapCodec.decode(oldBatch.toByteArray()).get(0);
+        check(legacy.valid()&&legacy.x==4&&legacy.z==5&&legacy.bedAt(0,0)==null,"a version 1 batch (no beds) is still read");
+
         // Codec: round trip, and every malformed shape refused.
         List<SharedMapChunk> batch=List.of(a,chunk(overworld,4,-5,101,"minecraft:sand",70));
         byte[] encoded=SharedMapCodec.encode(batch);

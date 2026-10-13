@@ -74,6 +74,9 @@ public final class XaeroSyncNativeCheck implements Opcodes {
         method(client+"ClientPlayConnectionEvents$Disconnect","onPlayDisconnect","(L"+mc+"class_634;L"+mc+"class_310;)",false);
         method(mc+"class_310","method_1551","()",true);method(mc+"class_310","method_1558","()",false);method(mc+"class_310","execute","(Ljava/lang/Runnable;)",false);
         field(mc+"class_642","field_3761",false);
+        // The address during the join: the configuration handler's server entry and connection.
+        method(client+"ClientConfigurationNetworking$Context","networkHandler","()",false);
+        field(mc+"class_8673","field_45590",false);field(mc+"class_8673","field_45589",false);method(mc+"class_2535","method_10755","()",false);
         System.out.println("PASS: every Minecraft and Fabric networking member used by the Xaero sync bridge exists in the real jars");
     }
     private static boolean interfacesViaMixin(){return true;}

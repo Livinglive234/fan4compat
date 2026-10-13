@@ -1,6 +1,6 @@
 # Fan4Compat progress
 
-Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.40**.
+Updated: 2026-10-11 (America/Chicago). Current build: **0.1.0-beta.41**.
 
 Fan4Compat is a standalone Fabric 1.21.1 compatibility addon. Original mod jars
 remain unchanged. The project is in beta; build checks and pack-owner gameplay confirmations
@@ -183,6 +183,27 @@ affected the shared map's block and block-state reads on such a pack.
 
 All addon logging moved from `System.Logger` to `shared/GameLog` (log4j, what reaches latest.log). Found while debugging the compass: no
 Fan4Compat line, not even the updater's, appeared in any of the owner's logs. Use `GameLog` for anything a player may need to send us.
+
+## Beta 41: first dedicated-server run (shared map and waypoint sync)
+
+Run with a real server and two clients (owner's test, 2026-10-12). Server and both clients started both features with no warnings. The server stored 4,022
+chunks in 31 Overworld regions, but both clients' saved progress sat at the newest stamp, so a rejoin would have been sent only 3 and 24 chunks: the client
+reported "newest stamp applied", which skipped older chunks that were still waiting or had been dropped. Also, only chunks in regions Xaero already had in
+memory could be written (the applier never created or loaded regions, unlike Xaero's own writer), waiting chunks were retried about twelve times a second,
+and the waypoint sync client was reset by `startUploads` (via `stopUploads`) so edits made while playing were never uploaded. The server never created a
+waypoint folder: the join-time exchange did not deliver the existing waypoint file and nothing was logged (refusals are debug level). Fixed the first
+three and the upload bug; added the "Xaero diagnostics" switch (renamed from the TARDIS one) tracing the whole waypoint exchange and the shared map queue.
+The diagnostics then found why the join-time waypoint exchange delivered nothing: at that point the client has no "current server" yet, so its address was null and it did
+nothing silently; it now reads the address from the configuration network handler's server entry (fallback: the connection's host).
+
+Water (owner report: uploaded water showed as bare lake bed): chunk summaries now include the bed block (`SharedMapChunk.bed`, batch version 2, readable alongside
+version 1), the upload reader maps Xaero's water overlay to water over its bed, and the applier writes water through Xaero's `OverlayBuilder` with opacity = depth.
+Tests and real-jar member checks pass; not run in real Xaero yet.
+
+Beta 41 simplify pass: one `SharedMapChunk.paletteIndex` for the reader and summarizer's palette limits, one `bedAt`/`bedOf`, codec version constants, overlay builder resolved once per
+chunk, one load-request throttle check with a reset between connections, retries of unwritable chunks every fourth frame when nothing new arrives, a trace helper
+for the waypoint exchange, one `addressOf`. Not done (larger redesigns, left for later): a per-chunk (not per-stream) delivery protocol for the shared map so one stuck chunk does not
+hold progress back; grouping waiting chunks by region; storing the terrain block plus a fluid id instead of top block plus bed; splitting the single "Xaero diagnostics" switch by feature.
 
 ## After beta 40: shared bytecode scan in CompatCalls (tried, reverted)
 

@@ -29,7 +29,8 @@ public final class SharedMapSummarizerTest {
         check(summary!=null&&summary.valid()&&summary.x==2&&summary.z==3&&summary.stamp==12345&&summary.dimension.equals("minecraft:overworld"),"a chunk is summarized and valid");
         check(summary.blockAt(8,8).equals("minecraft:grass_block")&&summary.height[summary.index(8,8)]==64&&summary.top[summary.index(8,8)]==64,"dry land: top and terrain heights agree");
         check(summary.blockAt(1,1).equals("minecraft:water")&&summary.top[summary.index(1,1)]==64&&summary.height[summary.index(1,1)]==62,"under water the terrain height is the bed (62) and the top is the surface (64)");
-        check(summary.blocks.length==2&&summary.biomes.length==2,"palettes hold only what is used: "+Arrays.toString(summary.blocks)+Arrays.toString(summary.biomes));
+        check(summary.bedAt(1,1).equals("minecraft:sand")&&summary.bedAt(8,8)==null,"under water the bed block is recorded (sand); dry land has none");
+        check(summary.blocks.length==3&&summary.biomes.length==2,"palettes hold only what is used (grass, water, and the sand bed): "+Arrays.toString(summary.blocks)+Arrays.toString(summary.biomes));
         check(world.biomeReads==16,"biome read once per 4x4 columns (16 reads), not per column: "+world.biomeReads);
         check(chunk.heightReads==256,"one heightmap sample per column");
 
@@ -42,6 +43,7 @@ public final class SharedMapSummarizerTest {
         Chunk ocean=new Chunk();Arrays.fill(ocean.surface,65);
         for(int x=0;x<16;x++)for(int z=0;z<16;z++)for(int y=0;y<=64;y++)ocean.overrides.put(key(32+x,y,48+z),new State("minecraft:water",true));
         SharedMapChunk deep=(SharedMapChunk)summarize.invoke(null,world,ocean,"minecraft:overworld",2,3,1L);
+        check(deep.bedAt(0,0)==null,"no bed is recorded when the scan gave up before finding one");
         check(deep.top[0]==64&&deep.height[0]==0,"a fluid column deeper than the scan limit stops at the limit (height "+deep.height[0]+")");
         check(ocean.blockReads<256*70,"bounded block reads for an ocean: "+ocean.blockReads);
 

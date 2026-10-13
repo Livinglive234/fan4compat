@@ -60,7 +60,9 @@ public final class XaeroSyncBridge {
         call(field(type(API+"ServerConfigurationConnectionEvents"),"CONFIGURE"),"register",PayloadChannel.listener(API+"ServerConfigurationConnectionEvents$Configure",args->{
             Object handler=args[0],minecraft=args[1];
             try {
-                if(!(Boolean)call(type(API+"ServerConfigurationNetworking"),"canSend",handler,type))return;
+                boolean receives=(Boolean)call(type(API+"ServerConfigurationNetworking"),"canSend",handler,type);
+                trace("server",()->"a player is joining; their client can take part in the exchange: "+receives);
+                if(!receives)return;
                 UUID player=(UUID)call(field(handler,"field_45022"),"getId");
                 WaypointServer waypoints=server(minecraft);
                 Join join=new Join(player);JOINS.put(handler,join);
@@ -69,7 +71,9 @@ public final class XaeroSyncBridge {
                     case "method_52376" -> {
                         @SuppressWarnings("unchecked") Consumer<Object> sender=(Consumer<Object>)taskArgs[0];
                         try {
-                            sender.accept(call(type(API+"ServerConfigurationNetworking"),"createS2CPacket",payload(waypoints.snapshot(player))));
+                            byte[] snapshot=waypoints.snapshot(player);
+                            trace("server",()->"sending "+snapshot.length+" bytes of stored waypoints to "+player);
+                            sender.accept(call(type(API+"ServerConfigurationNetworking"),"createS2CPacket",payload(snapshot)));
                             TIMER.schedule(()->release(handler,minecraft,join),CONFIG_TIMEOUT_SECONDS,TimeUnit.SECONDS);
                         } catch(IOException|RuntimeException|LinkageError failure) {
                             // Nothing was sent, so the client will never answer: let the join continue now.
@@ -90,6 +94,7 @@ public final class XaeroSyncBridge {
             byte[] bytes=bytes(args[0]);
             try {
                 String refused=server(minecraft).receive(join.player,bytes,System.currentTimeMillis());
+                trace("server",()->"message of "+bytes.length+" bytes from "+join.player+" during the join: "+(refused==null?"accepted":"refused ("+refused+")")+(WaypointServer.isDone(bytes)?", the client says it is done":""));
                 if(refused!=null)dev.fan4.compat.shared.GameLog.debug("Xaero waypoint upload refused: "+refused);
                 if(WaypointServer.isDone(bytes))release(handler,minecraft,join);
             } catch(IOException|RuntimeException|LinkageError failure){dev.fan4.compat.shared.GameLog.warn("Xaero waypoint upload failed",failure);release(handler,minecraft,join);}
@@ -99,6 +104,7 @@ public final class XaeroSyncBridge {
             try {
                 UUID id=UUID.fromString((String)call(player,"method_5845"));
                 String refused=server(call(context,"server")).receive(id,bytes(args[0]),System.currentTimeMillis());
+                trace("server",()->"upload from "+id+" while playing: "+(refused==null?"accepted":"refused ("+refused+")"));
                 if(refused!=null)dev.fan4.compat.shared.GameLog.debug("Xaero waypoint upload refused: "+refused);
             } catch(IOException|RuntimeException|LinkageError failure){dev.fan4.compat.shared.GameLog.warn("Xaero waypoint upload failed",failure);}
         }));
@@ -122,9 +128,23 @@ public final class XaeroSyncBridge {
         Path data=XaeroPaths.clientData(gameDir);
         return new WaypointClient(serverFolder,data.resolve("state").resolve(node+".properties"),data.resolve("backups").resolve(node),WaypointStore.Limits.defaults().maxFileBytes(),System::currentTimeMillis);
     }
+    /**
+     * The server address while the join is still being configured: the game has not recorded its "current server" yet then, but the
+     * network handler already carries the server entry the player connected with (the address Xaero names its folder after); failing
+     * that, the host of the connection itself.
+     */
+    private static void trace(String side,java.util.function.Supplier<String> message){XaeroTrace.event(()->"waypoint sync, "+side+": "+message.get());}
+    private static String addressOf(Object serverInfo){return (String)field(serverInfo,"field_3761");}
+    static String address(Object handler) {
+        Object info=field(handler,"field_45590");
+        if(info!=null)return addressOf(info);
+        Object remote=call(field(handler,"field_45589"),"method_10755");
+        if(remote instanceof java.net.InetSocketAddress socket)return socket.getHostString();
+        return address();
+    }
     static String address() {
         Object info=call(call(type("net.minecraft.class_310"),"method_1551"),"method_1558");
-        return info==null?null:(String)field(info,"field_3761");
+        return info==null?null:addressOf(info);
     }
     /** Receive the server's files, write them before Xaero looks, and answer; always ends by telling the server we are done. */
     public static void registerClient() {
@@ -132,9 +152,15 @@ public final class XaeroSyncBridge {
             try {
                 WaypointProtocol.Message message=WaypointProtocol.decode(bytes(args[0]),WaypointStore.Limits.MAX_SNAPSHOT_BYTES);
                 if(message instanceof WaypointProtocol.Snapshot snapshot) {
-                    WaypointClient local=clientFor(FabricLoader.getInstance().getGameDir(),FabricLoader.getInstance().getConfigDir(),address());
+                    String address=address(call(args[1],"networkHandler"));
+                    WaypointClient local=clientFor(FabricLoader.getInstance().getGameDir(),FabricLoader.getInstance().getConfigDir(),address);
                     client=local;
-                    if(local!=null)for(WaypointProtocol.Chunk chunk:local.sync(snapshot))sendConfig(chunk);
+                    trace("client",()->"the server sent "+snapshot.items().size()+" waypoint file(s); server address "+address+", Xaero folder "+(local==null?"unknown, so nothing is synced":"found"));
+                    if(local!=null) {
+                        List<WaypointProtocol.Chunk> answers=local.sync(snapshot);
+                        trace("client",()->"sending the server "+answers.size()+" message(s) with local waypoint files");
+                        for(WaypointProtocol.Chunk chunk:answers)sendConfig(chunk);
+                    }
                 }
             } catch(IOException|RuntimeException|LinkageError failure){dev.fan4.compat.shared.GameLog.warn("Xaero waypoint sync failed; continuing the join",failure);}
             finally{sendConfig(new WaypointProtocol.Done());}
@@ -147,13 +173,15 @@ public final class XaeroSyncBridge {
         catch(IOException|RuntimeException|LinkageError failure){dev.fan4.compat.shared.GameLog.warn("Could not send Xaero sync message",failure);}
     }
     private static synchronized void startUploads(Object minecraft) {
-        stopUploads();
+        cancelUploads();   // not stopUploads(): the sync client was set up during the join and must survive into play
+        trace("client",()->"play started; uploads while playing are "+(client==null?"off (no folder was found during the join)":"on"));
         if(client==null)return;
         periodic=TIMER.scheduleWithFixedDelay(()->{
             try {
                 WaypointClient local=client;if(local==null)return;
                 List<WaypointProtocol.Chunk> chunks=local.changes();
                 if(chunks.isEmpty())return;
+                trace("client",()->"uploading "+chunks.size()+" changed waypoint message(s)");
                 call(minecraft,"execute",(Runnable)()->{
                     try {
                         if(!(Boolean)call(type(CLIENT_API+"ClientPlayNetworking"),"canSend",type))return;
@@ -163,8 +191,6 @@ public final class XaeroSyncBridge {
             } catch(RuntimeException|LinkageError failure){dev.fan4.compat.shared.GameLog.warn("Xaero waypoint scan failed",failure);}
         },UPLOAD_PERIOD_SECONDS,UPLOAD_PERIOD_SECONDS,TimeUnit.SECONDS);
     }
-    private static synchronized void stopUploads() {
-        if(periodic!=null){periodic.cancel(false);periodic=null;}
-        client=null;
-    }
+    private static void cancelUploads(){if(periodic!=null){periodic.cancel(false);periodic=null;}}
+    private static synchronized void stopUploads(){cancelUploads();client=null;}
 }
