@@ -6,8 +6,9 @@ import java.util.zip.*;
 
 /** Batches of chunk summaries as a deflated stream, used on the wire and for the server's region files. Decoding is bounded. */
 public final class SharedMapCodec {
-    /** VERSION: the small messages (hello, mode). BATCH_VERSION: chunk batches, which also carry the block under water (version 1 batches, written by older builds, are still read). */
-    public static final int VERSION=1,LEGACY_BATCH_VERSION=1,BATCH_VERSION=2,MAX_CHUNKS=512,MAX_INFLATED_BYTES=4*1024*1024,MAX_HELLO_DIMENSIONS=16;
+    /** VERSION: the small messages (hello, mode). BATCH_VERSION: chunk batches, with the fluid on each column's terrain block. Older batches
+     * are still read: version 1 had no fluid, version 2 stored the water as the block and the block under it as a "bed". */
+    public static final int VERSION=1,LEGACY_BATCH_VERSION=1,BED_BATCH_VERSION=2,BATCH_VERSION=3,MAX_CHUNKS=512,MAX_INFLATED_BYTES=4*1024*1024,MAX_HELLO_DIMENSIONS=16,MAX_OWED=1024,HELLO_VERSION=2;
     private SharedMapCodec() {}
 
     public static byte[] encode(List<SharedMapChunk> chunks)throws IOException {
@@ -24,7 +25,7 @@ public final class SharedMapCodec {
         out.writeUTF(chunk.dimension);out.writeInt(chunk.x);out.writeInt(chunk.z);out.writeLong(chunk.stamp);
         out.writeByte(chunk.blocks.length);for(String id:chunk.blocks)out.writeUTF(id);
         out.writeByte(chunk.biomes.length);for(String id:chunk.biomes)out.writeUTF(id);
-        out.write(chunk.block);out.write(chunk.biome);out.write(chunk.bed);
+        out.write(chunk.block);out.write(chunk.biome);out.write(chunk.fluid);
         for(short h:chunk.height)out.writeShort(h);
         for(short t:chunk.top)out.writeShort(t);
     }
@@ -45,35 +46,56 @@ public final class SharedMapCodec {
         String dimension=in.readUTF();int x=in.readInt(),z=in.readInt();long stamp=in.readLong();
         String[] blocks=new String[in.readUnsignedByte()];for(int i=0;i<blocks.length;i++)blocks[i]=in.readUTF();
         String[] biomes=new String[in.readUnsignedByte()];for(int i=0;i<biomes.length;i++)biomes[i]=in.readUTF();
-        byte[] block=new byte[SharedMapChunk.COLUMNS],biome=new byte[SharedMapChunk.COLUMNS],bed=new byte[SharedMapChunk.COLUMNS];in.readFully(block);in.readFully(biome);if(version>=BATCH_VERSION)in.readFully(bed);
+        byte[] block=new byte[SharedMapChunk.COLUMNS],biome=new byte[SharedMapChunk.COLUMNS],fluid=new byte[SharedMapChunk.COLUMNS];in.readFully(block);in.readFully(biome);if(version>=BED_BATCH_VERSION)in.readFully(fluid);
         short[] height=new short[SharedMapChunk.COLUMNS],top=new short[SharedMapChunk.COLUMNS];
         for(int i=0;i<height.length;i++)height[i]=in.readShort();
         for(int i=0;i<top.length;i++)top[i]=in.readShort();
-        SharedMapChunk chunk=new SharedMapChunk(dimension,x,z,stamp,blocks,biomes,block,biome,bed,height,top);
+        if(version==BED_BATCH_VERSION)
+            for(int i=0;i<fluid.length;i++){int bed=fluid[i]&0xff;if(bed!=0){fluid[i]=(byte)((block[i]&0xff)+1);block[i]=(byte)(bed-1);}}
+        SharedMapChunk chunk=new SharedMapChunk(dimension,x,z,stamp,blocks,biomes,block,biome,fluid,height,top);
         if(!chunk.valid())throw new IOException("invalid chunk data");
         return chunk;
     }
-    /** Client to server: for each dimension, the newest stamp the client has already applied. */
-    public static byte[] encodeHello(Map<String,Long> since)throws IOException {
+    /** What a client tells the server at join: for each dimension, the newest stamp up to which it has applied everything, and chunks it still lacks below that. */
+    public record Hello(Map<String,Long> since,Map<String,Set<Long>> owed){}
+    public static byte[] encodeHello(Map<String,Long> since)throws IOException{return encodeHello(since,Map.of());}
+    public static byte[] encodeHello(Map<String,Long> since,Map<String,Set<Long>> owed)throws IOException {
         ByteArrayOutputStream bytes=new ByteArrayOutputStream();
         try(DataOutputStream out=new DataOutputStream(bytes)) {
-            out.writeByte(VERSION);
-            List<Map.Entry<String,Long>> entries=new ArrayList<>(since.entrySet());
-            entries.removeIf(e->!SharedMapChunk.validId(e.getKey()));
-            if(entries.size()>MAX_HELLO_DIMENSIONS)entries=entries.subList(0,MAX_HELLO_DIMENSIONS);
-            out.writeByte(entries.size());
-            for(var e:entries){out.writeUTF(e.getKey());out.writeLong(e.getValue());}
+            out.writeByte(HELLO_VERSION);
+            Set<String> dimensions=new TreeSet<>(since.keySet());dimensions.addAll(owed.keySet());
+            dimensions.removeIf(d->!SharedMapChunk.validId(d));
+            List<String> sent=new ArrayList<>(dimensions);
+            if(sent.size()>MAX_HELLO_DIMENSIONS)sent=sent.subList(0,MAX_HELLO_DIMENSIONS);
+            out.writeByte(sent.size());
+            for(String dimension:sent) {
+                out.writeUTF(dimension);out.writeLong(since.getOrDefault(dimension,0L));
+                List<Long> keys=new ArrayList<>(owed.getOrDefault(dimension,Set.of()));
+                if(keys.size()>MAX_OWED)keys=keys.subList(0,MAX_OWED);
+                out.writeShort(keys.size());
+                for(long key:keys){out.writeInt((int)(key>>32));out.writeInt((int)key);}
+            }
         }
         return bytes.toByteArray();
     }
-    public static Map<String,Long> decodeHello(byte[] data)throws IOException {
+    /** Reads a hello; version 1 (written by older builds) had progress only. */
+    public static Hello decodeHello(byte[] data)throws IOException {
         try(DataInputStream in=new DataInputStream(new ByteArrayInputStream(data))) {
-            if(in.readUnsignedByte()!=VERSION)throw new IOException("unsupported version");
+            int version=in.readUnsignedByte();
+            if(version<VERSION||version>HELLO_VERSION)throw new IOException("unsupported version");
             int count=in.readUnsignedByte();if(count>MAX_HELLO_DIMENSIONS)throw new IOException("too many dimensions");
-            Map<String,Long> since=new HashMap<>();
-            for(int i=0;i<count;i++){String dimension=in.readUTF();long stamp=in.readLong();if(!SharedMapChunk.validId(dimension))throw new IOException("bad dimension");since.put(dimension,Math.max(0,stamp));}
+            Map<String,Long> since=new HashMap<>();Map<String,Set<Long>> owed=new HashMap<>();
+            for(int i=0;i<count;i++) {
+                String dimension=in.readUTF();long stamp=in.readLong();if(!SharedMapChunk.validId(dimension))throw new IOException("bad dimension");
+                since.put(dimension,Math.max(0,stamp));
+                if(version<HELLO_VERSION)continue;
+                int owedCount=in.readUnsignedShort();if(owedCount>MAX_OWED)throw new IOException("too many owed chunks");
+                Set<Long> keys=new LinkedHashSet<>();
+                for(int k=0;k<owedCount;k++){int x=in.readInt(),z=in.readInt();keys.add(SharedMapChunk.key(x,z));}
+                if(!keys.isEmpty())owed.put(dimension,keys);
+            }
             if(in.read()!=-1)throw new IOException("trailing bytes");
-            return since;
+            return new Hello(since,owed);
         } catch(EOFException truncated){throw new IOException("truncated hello",truncated);}
     }
     /** Server to client: which mode the server runs, so the client knows whether to upload. */

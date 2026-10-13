@@ -72,10 +72,10 @@ public final class SharedMapClientTest {
         busy.chunks.get(List.of(0,0)).downloading=false;check(run.apply(writer,chunk(64,0,1)).equals("APPLIED"),"and once it settles, applied");
         busy.normal=false;busy.chunks.clear();check(run.apply(writer,chunk(64,0,1)).equals("DISCARD"),"not normal map data: discarded");
 
-        // Water is written the way Xaero stores it: the bed is the block, the water an overlay whose opacity is its depth.
-        byte[] under=new byte[256];Arrays.fill(under,(byte)2);
+        // Water is written the way Xaero stores it: the terrain is the block, the fluid an overlay whose opacity is its depth.
+        byte[] under=new byte[256],sand=new byte[256];Arrays.fill(under,(byte)1);Arrays.fill(sand,(byte)1);
         short[] bedY=new short[256],surfaceY=new short[256];Arrays.fill(bedY,(short)60);Arrays.fill(surfaceY,(short)64);
-        SharedMapChunk lake=new SharedMapChunk("minecraft:overworld",8,8,50,new String[]{"minecraft:water","minecraft:sand"},new String[]{"minecraft:plains"},new byte[256],new byte[256],under,bedY,surfaceY);
+        SharedMapChunk lake=new SharedMapChunk("minecraft:overworld",8,8,50,new String[]{"minecraft:water","minecraft:sand"},new String[]{"minecraft:plains"},sand,new byte[256],under,bedY,surfaceY);
         Region lakeRegion=loaded(writer,0,0);
         check(run.apply(writer,lake).equals("APPLIED"),"a lake chunk is written");
         MapBlock lakeBlock=(MapBlock)((MapTile)lakeRegion.chunks.get(List.of(2,2)).getTile(0,0)).blocks.get(List.of(3,4));
@@ -119,7 +119,7 @@ public final class SharedMapClientTest {
             return Enum.valueOf((Class<Enum>)resultType,script.getOrDefault(c.stamp,"APPLIED"));
         });
         script.put(401L,"RETRY");script.put(402L,"DISCARD");script.put(403L,"SKIPPED");
-        SharedMapClient.accept(List.of(chunk(0,0,400),chunk(1,0,401),chunk(2,0,402),chunk(3,0,403),chunk(4,0,404)));
+        SharedMapClient.accept(List.of(chunk(0,0,400),chunk(32,0,401),chunk(64,0,402),chunk(96,0,403),chunk(128,0,404)));   // one region each
         tick.invoke(null,writer,applierProxy);
         check(seen.equals(List.of(400L,401L,402L)),"three chunks per frame: "+seen);
         check(SharedMapClient.since().get("minecraft:overworld")==400,"only applied chunks advance progress (retry and discard do not)");
@@ -130,14 +130,40 @@ public final class SharedMapClientTest {
         tick.invoke(null,writer,applierProxy);
         check(seen.equals(List.of(400L,401L,402L,401L,403L,404L,401L)),"with nothing new to do, the waiting chunk is tried again at once and written");
         check(SharedMapClient.since().get("minecraft:overworld")==401,"progress now stops just before the chunk that was for another dimension (402), so the server sends it again next time");
+        // Chunks of one region wait together: a region that turns one away is not asked again for its others in the same frame.
+        seen.clear();script.put(5000L,"RETRY");
+        SharedMapClient.accept(List.of(chunk(256,0,5000),chunk(257,0,5001),chunk(258,0,5002),chunk(288,0,5003)));
+        tick.invoke(null,writer,applierProxy);
+        check(seen.equals(List.of(5000L,5003L)),"a region that said no is asked once; the other regions' chunks go on: "+seen);
+        script.remove(5000L);seen.clear();
+        tick.invoke(null,writer,applierProxy);
+        check(seen.equals(List.of(5000L)),"next frame one waiting chunk is tried, and it is the region's first: "+seen);
+        for(int i=0;i<8;i++)tick.invoke(null,writer,applierProxy);
+        check(seen.containsAll(List.of(5000L,5001L,5002L))&&SharedMapClient.since().get("minecraft:overworld")==401,"once the region is ready its chunks are all written ("+seen+")");
         SharedMapClient.accept(List.of(chunk(9,9,999)));script.put(999L,"BOOM");
         tick.invoke(null,writer,applierProxy);
         SharedMapClient.accept(List.of(chunk(10,9,1000)));int count=seen.size();tick.invoke(null,writer,applierProxy);
         check(seen.size()==count,"after a failure the shared map is off for the session and the game is unaffected");
         SharedMapClient.leave();
         check(Files.readString(file).contains("minecraft\\:overworld=401"),"progress is saved when leaving the server");
+        // A region that never becomes ready is given up on: its chunks are owed, saved, and hold nothing else back.
+        Path owedFile=Files.createTempDirectory("fan4owed").resolve("owed.properties");
+        SharedMapClient.join(owedFile);script.clear();script.put(7000L,"RETRY");
+        SharedMapClient.accept(List.of(chunk(256,0,7000),chunk(300,0,7001)));
+        tick.invoke(null,writer,applierProxy);
+        check(SharedMapClient.since().get("minecraft:overworld")==6999&&SharedMapClient.owed().isEmpty(),"while a chunk waits, progress stays behind it");
+        for(int i=0;i<3700;i++)tick.invoke(null,writer,applierProxy);
+        check(SharedMapClient.since().get("minecraft:overworld")==7001,"a region stuck for a minute no longer holds the progress back");
+        check(SharedMapClient.owed().equals(Map.of("minecraft:overworld",Set.of(SharedMapChunk.key(256,0)))),"the stuck chunk is owed instead");
+        SharedMapClient.leave();
+        check(Files.readString(owedFile).contains("owed\\ minecraft\\:overworld=256,0,7000"),"owed chunks are saved with the progress");
+        SharedMapClient.join(owedFile);
+        check(SharedMapClient.owed().equals(Map.of("minecraft:overworld",Set.of(SharedMapChunk.key(256,0))))&&SharedMapClient.since().get("minecraft:overworld")==7001,"and loaded again at the next join");
+        script.put(7000L,"APPLIED");SharedMapClient.accept(List.of(chunk(256,0,7000)));tick.invoke(null,writer,applierProxy);
+        check(SharedMapClient.owed().isEmpty(),"an owed chunk that is written is no longer owed");
+        SharedMapClient.leave();
         SharedMapClient.join(null);SharedMapClient.accept(List.of(new SharedMapChunk("bad",0,0,1,new String[]{"x"},new String[]{"y"},new byte[256],new byte[256],new short[256],new short[256])));
         check(!SharedMapClient.since().containsKey("bad"),"invalid chunks are dropped on receipt");
-        System.out.println("PASS: shared map applier mirrors Xaero's write sequence (create/skip/retry/discard cases, coordinates incl. negatives) and the client queue (progress, retry rationing, failure containment, saved progress)");
+        System.out.println("PASS: shared map applier mirrors Xaero's write sequence (create/skip/retry/discard cases, coordinates incl. negatives) and the client queue (progress, per-region waiting, owed chunks, retry rationing, failure containment, saved progress)");
     }
 }

@@ -38,6 +38,12 @@ public final class SharedMapServerTest {
         check(live.size()==1&&live.get(0).x==100,"a live change in the player's dimension is sent, another dimension's is not");
         relay.moved(nether,1,1);
         check(relay.next(10).stream().map(c->c.dimension+c.x).toList().equals(List.of(nether+1)),"entering another dimension starts that dimension's catch-up");
+        // Chunks the client says it lacks are sent again even though they are below its floor, and only once.
+        SharedMapRelay owing=new SharedMapRelay(store,new SharedMapCodec.Hello(Map.of(overworld,100L),Map.of(overworld,new HashSet<>(Set.of(SharedMapChunk.key(8,0),SharedMapChunk.key(999,999))))));
+        owing.moved(overworld,0,0);
+        check(owing.next(100).stream().map(c->c.x).toList().equals(List.of(8)),"an owed chunk below the floor is sent (and one the server does not hold is ignored)");
+        owing.moved(nether,0,0);owing.moved(overworld,0,0);
+        check(owing.next(100).isEmpty(),"and an owed chunk is not sent a second time");
         SharedMapRelay everything=new SharedMapRelay(store,Map.of());
         everything.moved(overworld,0,0);
         check(everything.next(3).size()==3&&!everything.idle()&&everything.next(100).size()==2,"batches respect the limit and continue where they left off");

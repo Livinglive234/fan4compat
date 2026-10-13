@@ -202,8 +202,17 @@ Tests and real-jar member checks pass; not run in real Xaero yet.
 
 Beta 41 simplify pass: one `SharedMapChunk.paletteIndex` for the reader and summarizer's palette limits, one `bedAt`/`bedOf`, codec version constants, overlay builder resolved once per
 chunk, one load-request throttle check with a reset between connections, retries of unwritable chunks every fourth frame when nothing new arrives, a trace helper
-for the waypoint exchange, one `addressOf`. Not done (larger redesigns, left for later): a per-chunk (not per-stream) delivery protocol for the shared map so one stuck chunk does not
-hold progress back; grouping waiting chunks by region; storing the terrain block plus a fluid id instead of top block plus bed; splitting the single "Xaero diagnostics" switch by feature.
+for the waypoint exchange, one `addressOf`. Left for later at that point (the first three are done, see below): per-chunk delivery, grouping waiting chunks by region, terrain block plus fluid; still open: splitting the single "Xaero diagnostics" switch by feature.
+
+## Beta 42: terrain plus fluid, per-region waiting, owed chunks
+- `SharedMapChunk` stores the terrain block per column plus an optional fluid (`fluid`, 1 + palette index) instead of top block plus bed; `blockAt` is the terrain, `fluidAt` the fluid. Batches are version 3;
+  version 1 and version 2 (water as the block, bed beside it) are converted on read, so stored region files from beta 41 keep working. Reader, summarizer and applier follow Xaero's own model directly.
+- `SharedMapClient` keeps waiting chunks in per-region groups. A region that turns a chunk away is not asked again for its others that frame and goes to the back of the line, so an unready region costs
+  one attempt, not one per chunk. A group that has taken nothing for 3600 frames is given up for the session and its chunks become *owed*.
+- Owed chunks (per dimension, key and stamp, at most 1024, oldest evicted into the old progress pin) are saved with the progress (`owed <dimension>` keys) and sent in the hello (version 2); the relay sends them
+  even though they are below the progress stamp, and once. So one region that cannot be written no longer holds back progress for everything else. Verified by tests and the three real-jar native checks; not yet in game.
+- Moving the server's region IO off the tick thread was written (one background worker owning the store, batches prepared ahead) and left out of this release unshipped; it is the only unverified-threading change and
+  can be redone separately.
 
 ## After beta 40: shared bytecode scan in CompatCalls (tried, reverted)
 
@@ -220,7 +229,7 @@ client data folder) replaces duplicated lookups in the two bridges; the waypoint
 block, fluid and biome lookups per tile/chunk and the uploader skips its per-frame lookups while resting and keys its sent-table by chunk key; the
 client queue settles chunk results in one place and saves progress when a batch is worked off; the generator has one `redirectRead` emitter. Fixed
 a real bug found on the way: `SharedMapStore.regions` compared boxed Integers with `!=`. The compass's debug report became the default-off "Xaero TARDIS diagnostics" switch (also logs the cave start and layer). Not done (behaviour or
-build changes, left for later): moving region reads and flushes off the server tick thread, a compile-time log4j dependency for `GameLog`, deriving the
+build changes, left for later): moving region reads and flushes off the server tick thread (tried after beta 41, not shipped), a compile-time log4j dependency for `GameLog`, deriving the
 cave-start rule from Xaero, one shared ASM scan for `exact`/`call`.
 
 ## Beta 40: compass and radar inside the TARDIS

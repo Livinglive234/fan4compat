@@ -146,7 +146,7 @@ public final class SharedMapBridge {
                 String node=XaeroPaths.node(FabricLoader.getInstance().getConfigDir(),XaeroSyncBridge.address());
                 SharedMapClient.join(node==null?null:XaeroPaths.clientData(FabricLoader.getInstance().getGameDir()).resolve("shared-map").resolve(node+".properties"));
                 if((Boolean)call(type(CLIENT_API+"ClientPlayNetworking"),"canSend",hello.type))
-                    call(type(CLIENT_API+"ClientPlayNetworking"),"send",hello.payload(SharedMapCodec.encodeHello(SharedMapClient.since())));
+                    call(type(CLIENT_API+"ClientPlayNetworking"),"send",hello.payload(SharedMapCodec.encodeHello(SharedMapClient.since(),SharedMapClient.owed())));
             } catch(IOException|RuntimeException|LinkageError failure){warn(failure);}
         }));
         call(field(type(CLIENT_API+"ClientPlayConnectionEvents"),"DISCONNECT"),"register",PayloadChannel.listener(CLIENT_API+"ClientPlayConnectionEvents$Disconnect",args->SharedMapClient.leave()));

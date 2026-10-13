@@ -28,9 +28,9 @@ public final class SharedMapSummarizerTest {
         SharedMapChunk summary=(SharedMapChunk)summarize.invoke(null,world,chunk,"minecraft:overworld",2,3,12345L);
         check(summary!=null&&summary.valid()&&summary.x==2&&summary.z==3&&summary.stamp==12345&&summary.dimension.equals("minecraft:overworld"),"a chunk is summarized and valid");
         check(summary.blockAt(8,8).equals("minecraft:grass_block")&&summary.height[summary.index(8,8)]==64&&summary.top[summary.index(8,8)]==64,"dry land: top and terrain heights agree");
-        check(summary.blockAt(1,1).equals("minecraft:water")&&summary.top[summary.index(1,1)]==64&&summary.height[summary.index(1,1)]==62,"under water the terrain height is the bed (62) and the top is the surface (64)");
-        check(summary.bedAt(1,1).equals("minecraft:sand")&&summary.bedAt(8,8)==null,"under water the bed block is recorded (sand); dry land has none");
-        check(summary.blocks.length==3&&summary.biomes.length==2,"palettes hold only what is used (grass, water, and the sand bed): "+Arrays.toString(summary.blocks)+Arrays.toString(summary.biomes));
+        check(summary.blockAt(1,1).equals("minecraft:sand")&&summary.top[summary.index(1,1)]==64&&summary.height[summary.index(1,1)]==62,"under water the terrain height is the bed (62) and the top is the surface (64)");
+        check(summary.fluidAt(1,1).equals("minecraft:water")&&summary.fluidAt(8,8)==null,"under water the block is the terrain (sand) with water as the fluid; dry land has no fluid");
+        check(summary.blocks.length==3&&summary.biomes.length==2,"palettes hold only what is used (grass, sand and water): "+Arrays.toString(summary.blocks)+Arrays.toString(summary.biomes));
         check(world.biomeReads==16,"biome read once per 4x4 columns (16 reads), not per column: "+world.biomeReads);
         check(chunk.heightReads==256,"one heightmap sample per column");
 
@@ -43,7 +43,7 @@ public final class SharedMapSummarizerTest {
         Chunk ocean=new Chunk();Arrays.fill(ocean.surface,65);
         for(int x=0;x<16;x++)for(int z=0;z<16;z++)for(int y=0;y<=64;y++)ocean.overrides.put(key(32+x,y,48+z),new State("minecraft:water",true));
         SharedMapChunk deep=(SharedMapChunk)summarize.invoke(null,world,ocean,"minecraft:overworld",2,3,1L);
-        check(deep.bedAt(0,0)==null,"no bed is recorded when the scan gave up before finding one");
+        check(deep.fluidAt(0,0)==null&&deep.blockAt(0,0).equals("minecraft:water"),"when the scan gave up before finding terrain, the water is the block and no fluid is recorded");
         check(deep.top[0]==64&&deep.height[0]==0,"a fluid column deeper than the scan limit stops at the limit (height "+deep.height[0]+")");
         check(ocean.blockReads<256*70,"bounded block reads for an ocean: "+ocean.blockReads);
 
@@ -54,13 +54,22 @@ public final class SharedMapSummarizerTest {
 
         // The hello message.
         Map<String,Long> since=Map.of("minecraft:overworld",12345L,"minecraft:the_nether",7L);
-        check(SharedMapCodec.decodeHello(SharedMapCodec.encodeHello(since)).equals(since),"hello round trip");
-        check(SharedMapCodec.decodeHello(SharedMapCodec.encodeHello(Map.of("bad id",5L,"minecraft:overworld",9L))).equals(Map.of("minecraft:overworld",9L)),"invalid dimension ids are not sent");
+        check(SharedMapCodec.decodeHello(SharedMapCodec.encodeHello(since)).since().equals(since)&&SharedMapCodec.decodeHello(SharedMapCodec.encodeHello(since)).owed().isEmpty(),"hello round trip");
+        check(SharedMapCodec.decodeHello(SharedMapCodec.encodeHello(Map.of("bad id",5L,"minecraft:overworld",9L))).since().equals(Map.of("minecraft:overworld",9L)),"invalid dimension ids are not sent");
+        Set<Long> owedKeys=new LinkedHashSet<>(List.of(SharedMapChunk.key(-3,4),SharedMapChunk.key(70,-90)));
+        var owedHello=SharedMapCodec.decodeHello(SharedMapCodec.encodeHello(since,Map.of("minecraft:overworld",owedKeys,"minecraft:the_end",Set.of(SharedMapChunk.key(1,1)))));
+        check(owedHello.owed().get("minecraft:overworld").equals(owedKeys)&&owedHello.owed().get("minecraft:the_end").equals(Set.of(SharedMapChunk.key(1,1)))&&owedHello.since().get("minecraft:the_end")==0L,"owed chunks travel with the hello, even for a dimension with no progress yet");
+        Set<Long> tooMany=new LinkedHashSet<>();for(int i=0;i<SharedMapCodec.MAX_OWED+50;i++)tooMany.add(SharedMapChunk.key(i,0));
+        check(SharedMapCodec.decodeHello(SharedMapCodec.encodeHello(Map.of(),Map.of("minecraft:overworld",tooMany))).owed().get("minecraft:overworld").size()==SharedMapCodec.MAX_OWED,"the owed list is capped");
+        check(SharedMapCodec.decodeHello(new byte[]{1,1,0,19,'m','i','n','e','c','r','a','f','t',':','o','v','e','r','w','o','r','l','d',0,0,0,0,0,0,0,5}).since().get("minecraft:overworld")==5L,"a version 1 hello (progress only) is still read");
+        byte[] tooManyOwed=SharedMapCodec.encodeHello(Map.of("minecraft:overworld",1L),Map.of("minecraft:overworld",Set.of(SharedMapChunk.key(1,1))));
+        tooManyOwed[tooManyOwed.length-10]=(byte)0xff;tooManyOwed[tooManyOwed.length-9]=(byte)0xff;
+        try{SharedMapCodec.decodeHello(tooManyOwed);throw new AssertionError("accepted an oversized owed list");}catch(java.io.IOException expected){}
         for(byte[] bad:new byte[][]{{},{1},{9,0},{1,2},{1,1,0,3,'a','b','c',0,0,0,0,0,0,0,1}}) {
             try{SharedMapCodec.decodeHello(bad);throw new AssertionError("accepted a malformed hello");}catch(java.io.IOException expected){}
         }
         byte[] trailing=Arrays.copyOf(SharedMapCodec.encodeHello(since),SharedMapCodec.encodeHello(since).length+1);
         try{SharedMapCodec.decodeHello(trailing);throw new AssertionError("accepted trailing bytes");}catch(java.io.IOException expected){}
-        System.out.println("PASS: shared map summarizer (water beds, palettes, per-cell biomes, bounded ocean scans, palette overflow) and the hello message");
+        System.out.println("PASS: shared map summarizer (terrain and fluid, palettes, per-cell biomes, bounded ocean scans, palette overflow) and the hello message");
     }
 }

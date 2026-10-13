@@ -14,7 +14,7 @@ final class SharedMapSummarizer {
         Map<String,Integer> blockPalette=new LinkedHashMap<>(),biomePalette=new LinkedHashMap<>();
         byte[] block=new byte[SharedMapChunk.COLUMNS],biome=new byte[SharedMapChunk.COLUMNS];
         short[] height=new short[SharedMapChunk.COLUMNS],top=new short[SharedMapChunk.COLUMNS];
-        byte[] cellBiome=new byte[16],bed=new byte[SharedMapChunk.COLUMNS];
+        byte[] cellBiome=new byte[16],fluid=new byte[SharedMapChunk.COLUMNS];
         // Columns mostly share block states: resolve each state's block id and whether it holds fluid once per chunk.
         Map<Object,String> ids=new IdentityHashMap<>();Map<Object,Boolean> dry=new IdentityHashMap<>();
         for(int z=0;z<16;z++)
@@ -22,22 +22,23 @@ final class SharedMapSummarizer {
                 int topY=(Integer)call(chunk,"method_12005",surface,x,z)-1;
                 Object state=call(chunk,"method_8320",create(POS,chunkX*16+x,topY,chunkZ*16+z));
                 String id=ids.computeIfAbsent(state,t->String.valueOf(call(blocks,"method_10221",call(t,"method_26204"))));
-                int terrainY=topY;Object bedState=null;
-                // Under fluid, the terrain is the first non-fluid block below (bounded so a deep ocean costs little); that block is the bed.
+                int terrainY=topY;Object terrainState=null;
+                // Under fluid, the terrain is the first non-fluid block below (bounded so a deep ocean costs little).
                 if(!dry.computeIfAbsent(state,t->(Boolean)call(call(t,"method_26227"),"method_15769")))
                     for(int depth=1;depth<=64;depth++) {
                         Object below=call(chunk,"method_8320",create(POS,chunkX*16+x,topY-depth,chunkZ*16+z));
                         terrainY=topY-depth;
-                        if(dry.computeIfAbsent(below,t->(Boolean)call(call(t,"method_26227"),"method_15769"))){bedState=below;break;}
+                        if(dry.computeIfAbsent(below,t->(Boolean)call(call(t,"method_26227"),"method_15769"))){terrainState=below;break;}
                     }
                 int column=z*16+x;
-                int blockIndex=SharedMapChunk.paletteIndex(blockPalette,id);
+                // Terrain found under a fluid: that is the block, with the fluid on top. Otherwise the top block is all there is.
+                int blockIndex=SharedMapChunk.paletteIndex(blockPalette,terrainState==null?id:ids.computeIfAbsent(terrainState,t->String.valueOf(call(blocks,"method_10221",call(t,"method_26204")))));
                 if(blockIndex<0)return null;
                 block[column]=(byte)blockIndex;
-                if(bedState!=null) {
-                    int bedIndex=SharedMapChunk.paletteIndex(blockPalette,ids.computeIfAbsent(bedState,t->String.valueOf(call(blocks,"method_10221",call(t,"method_26204")))));
-                    if(bedIndex<0)return null;
-                    bed[column]=(byte)(bedIndex+1);
+                if(terrainState!=null) {
+                    int fluidIndex=SharedMapChunk.paletteIndex(blockPalette,id);
+                    if(fluidIndex<0)return null;
+                    fluid[column]=(byte)(fluidIndex+1);
                 }
                 // Biomes change slowly: read one per 4x4 cell of columns.
                 int cell=(z>>2)*4+(x>>2);
@@ -52,7 +53,7 @@ final class SharedMapSummarizer {
                 biome[column]=cellBiome[cell];
                 top[column]=(short)topY;height[column]=(short)Math.min(terrainY,topY);
             }
-        SharedMapChunk summary=new SharedMapChunk(dimension,chunkX,chunkZ,stamp,blockPalette.keySet().toArray(String[]::new),biomePalette.keySet().toArray(String[]::new),block,biome,bed,height,top);
+        SharedMapChunk summary=new SharedMapChunk(dimension,chunkX,chunkZ,stamp,blockPalette.keySet().toArray(String[]::new),biomePalette.keySet().toArray(String[]::new),block,biome,fluid,height,top);
         return summary.valid()?summary:null;
     }
 }

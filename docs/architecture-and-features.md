@@ -1,6 +1,6 @@
 # Fan4Compat: architecture, features and contributor guide
 
-This document explains the active implementation at **0.1.0-beta.41**, reviewed
+This document explains the active implementation at **0.1.0-beta.42**, reviewed
 2026-10-11 (America/Chicago). It is an onboarding guide for human contributors and
 AI coding assistants. The source and version gates describe what actually runs;
 older release notes describe historical builds and can contain superseded behavior.
@@ -828,7 +828,9 @@ in 16x16-chunk region files (a deflated `SharedMapCodec` batch, written atomical
 regions, and only replaces a chunk when its terrain differs and its stamp is not older. Each Fan4Compat client that sent a hello gets a
 `SharedMapRelay`: chunks newer than the per-dimension stamp the client reported, nearest region and chunk first, then live changes, in
 batches of 100 every half second. The batch is a single byte-array payload (`fan4compat:shared_map`); the hello
-(`fan4compat:shared_map_hello`) is the client's newest applied stamp per dimension. Decoding is bounded (512 chunks per batch, 4 MiB
+(`fan4compat:shared_map_hello`) is, per dimension, the client's progress (the newest stamp such that everything up to it is written) plus the chunks below
+that it still lacks ("owed", at most 1024 per dimension), which the relay sends once regardless of stamp. Each column of a chunk holds the terrain block and an optional fluid
+(batch version 3; versions 1 and 2 are converted on read). Decoding is bounded (512 chunks per batch, 4 MiB
 inflated, validated ids, heights and palette indexes).
 
 **Client.** `SharedMapClient` queues received chunks (4096 at most) and a hook on `MapWriter.onRender` (`SharedMapTickMixin`) applies

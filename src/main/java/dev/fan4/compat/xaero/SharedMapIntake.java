@@ -25,7 +25,7 @@ public final class SharedMapIntake {
             if(window[1]>=PER_WINDOW)break;
             window[1]++;
             if(!chunk.valid()||!chunk.dimension.equals(playerDimension)||!insideWorld.test(chunk))continue;
-            SharedMapChunk stamped=new SharedMapChunk(chunk.dimension,chunk.x,chunk.z,now,chunk.blocks,chunk.biomes,chunk.block,chunk.biome,chunk.bed,chunk.height,chunk.top);
+            SharedMapChunk stamped=new SharedMapChunk(chunk.dimension,chunk.x,chunk.z,now,chunk.blocks,chunk.biomes,chunk.block,chunk.biome,chunk.fluid,chunk.height,chunk.top);
             if(mode.captures?store.putIfAbsent(stamped):store.put(stamped))stored.add(stamped);
         }
         return stored;

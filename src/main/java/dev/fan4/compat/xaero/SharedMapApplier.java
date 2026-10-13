@@ -62,13 +62,13 @@ final class SharedMapApplier {
                     int index=shared.index(x,z);
                     Object block=create(BLOCK),biome=biome(shared.biomeAt(x,z));
                     call(block,"prepareForWriting",(int)shared.height[index]);
-                    // Water is what Xaero itself stores as an overlay (opacity from its depth) on the bed block, which is the block it records.
-                    String top=shared.blockAt(x,z),bed=shared.bedAt(x,z);
-                    call(block,"write",state(bed!=null?bed:top),(int)shared.height[index],(int)shared.top[index],biome,(byte)15,false,false);
-                    if(bed!=null) {
+                    // A fluid is what Xaero itself stores as an overlay (opacity from its depth) on the terrain block, which is the block it records.
+                    String fluid=shared.fluidAt(x,z);
+                    call(block,"write",state(shared.blockAt(x,z)),(int)shared.height[index],(int)shared.top[index],biome,(byte)15,false,false);
+                    if(fluid!=null) {
                         if(overlays==null)overlays=overlayBuilder(processor);
                         call(overlays,"startBuilding");
-                        call(overlays,"build",state(top),Math.max(1,shared.top[index]-shared.height[index]),(byte)15,processor,biome);
+                        call(overlays,"build",state(fluid),Math.max(1,shared.top[index]-shared.height[index]),(byte)15,processor,biome);
                         call(overlays,"finishBuilding",block);
                     }
                     call(tile,"setBlock",x,z,block);

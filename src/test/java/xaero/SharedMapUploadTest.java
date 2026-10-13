@@ -29,13 +29,13 @@ public final class SharedMapUploadTest {
         MapTile tile=(MapTile)region.chunks.get(List.of(1,1)).getTile(1,2);
         SharedMapChunk readBack=(SharedMapChunk)read.invoke(null,tile,OVERWORLD,5,6);
         check(readBack!=null&&readBack.sameTerrain(original)&&readBack.x==5&&readBack.z==6&&readBack.contentHash()==original.contentHash(),"a tile read back equals the chunk it was written from");
-        // Water read back from Xaero's overlay model: the overlay is what is seen, the block under it is the bed.
-        byte[] lakeBeds=new byte[256];Arrays.fill(lakeBeds,(byte)2);short[] lakeBed=new short[256],lakeTop=new short[256];Arrays.fill(lakeBed,(short)60);Arrays.fill(lakeTop,(short)64);
-        SharedMapChunk lake=new SharedMapChunk(OVERWORLD,9,9,1,new String[]{"minecraft:water","minecraft:sand"},new String[]{"minecraft:plains"},new byte[256],new byte[256],lakeBeds,lakeBed,lakeTop);
+        // Water read back from Xaero's overlay model: the block is the terrain, the (first) overlay is the fluid.
+        byte[] lakeFluid=new byte[256],lakeSand=new byte[256];Arrays.fill(lakeFluid,(byte)1);Arrays.fill(lakeSand,(byte)1);short[] lakeBed=new short[256],lakeTop=new short[256];Arrays.fill(lakeBed,(short)60);Arrays.fill(lakeTop,(short)64);
+        SharedMapChunk lake=new SharedMapChunk(OVERWORLD,9,9,1,new String[]{"minecraft:water","minecraft:sand"},new String[]{"minecraft:plains"},lakeSand,new byte[256],lakeFluid,lakeBed,lakeTop);
         apply.invoke(null,writer,lake);
         MapTile lakeTile=(MapTile)region.chunks.get(List.of(2,2)).getTile(1,1);
         SharedMapChunk lakeRead=(SharedMapChunk)read.invoke(null,lakeTile,OVERWORLD,9,9);
-        check(lakeRead!=null&&lakeRead.sameTerrain(lake)&&lakeRead.blockAt(3,3).equals("minecraft:water")&&lakeRead.bedAt(3,3).equals("minecraft:sand"),"a lake written to Xaero is read back as water over its bed, so an upload keeps its water");
+        check(lakeRead!=null&&lakeRead.sameTerrain(lake)&&lakeRead.blockAt(3,3).equals("minecraft:sand")&&lakeRead.fluidAt(3,3).equals("minecraft:water"),"a lake written to Xaero is read back as water over its terrain, so an upload keeps its water");
         tile.loaded=false;check(read.invoke(null,tile,OVERWORLD,5,6)==null,"a tile that is not loaded is not read");
         tile.loaded=true;tile.blocks.remove(List.of(3,3));check(read.invoke(null,tile,OVERWORLD,5,6)==null,"a tile with a missing column is not read");
         check(original.contentHash()==SharedMapTest.chunk(OVERWORLD,5,6,900,"minecraft:grass_block",64).contentHash()&&original.contentHash()!=SharedMapTest.chunk(OVERWORLD,5,6,500,"minecraft:sand",64).contentHash(),"the content hash ignores the stamp and sees terrain changes");
@@ -48,10 +48,10 @@ public final class SharedMapUploadTest {
         SharedMapChunk upload=SharedMapTest.chunk(OVERWORLD,40,41,1,"minecraft:sand",70);
         List<SharedMapChunk> stored=both.accept(alice,OVERWORLD,List.of(upload),123456,c->true);
         check(stored.size()==1&&stored.get(0).stamp==123456&&store.get(OVERWORLD,40,41).stamp==123456,"an upload is stored with the server's stamp, not the client's");
-        byte[] wet=new byte[256];wet[0]=3;
-        SharedMapChunk wetUpload=new SharedMapChunk(OVERWORLD,42,43,1,new String[]{"minecraft:water","minecraft:stone","minecraft:sand"},new String[]{"minecraft:plains"},new byte[256],new byte[256],wet,upload.height,upload.top);
+        byte[] wet=new byte[256],wetBlock=new byte[256];wet[0]=1;wetBlock[0]=2;
+        SharedMapChunk wetUpload=new SharedMapChunk(OVERWORLD,42,43,1,new String[]{"minecraft:water","minecraft:stone","minecraft:sand"},new String[]{"minecraft:plains"},wetBlock,new byte[256],wet,upload.height,upload.top);
         both.accept(alice,OVERWORLD,List.of(wetUpload),123457,c->true);
-        check(store.get(OVERWORLD,42,43)!=null&&store.get(OVERWORLD,42,43).bedAt(0,0).equals("minecraft:sand"),"the block under water survives the server's intake");
+        check(store.get(OVERWORLD,42,43)!=null&&store.get(OVERWORLD,42,43).blockAt(0,0).equals("minecraft:sand")&&store.get(OVERWORLD,42,43).fluidAt(0,0).equals("minecraft:water"),"the terrain and fluid survive the server's intake");
         check(both.accept(alice,OVERWORLD,List.of(SharedMapTest.chunk(OVERWORLD,40,41,2,"minecraft:snow",90)),123500,c->true).isEmpty()&&store.get(OVERWORLD,40,41).blockAt(0,0).equals("minecraft:sand"),"in BOTH an upload never replaces a held chunk");
         check(both.accept(alice,OVERWORLD,List.of(SharedMapTest.chunk("minecraft:the_nether",1,1,1,"minecraft:netherrack",70)),1,c->true).isEmpty(),"a chunk of a dimension the player is not in is refused");
         check(both.accept(alice,"minecraft:the_end",List.of(SharedMapTest.chunk("minecraft:the_end",1,1,1,"minecraft:end_stone",70)),1,c->true).isEmpty(),"a dimension that is not shared is refused");

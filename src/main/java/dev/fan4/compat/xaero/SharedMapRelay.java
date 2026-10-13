@@ -4,16 +4,20 @@ import java.util.*;
 
 /**
  * What one player is owed: chunks stored for their dimension that are newer than what their client already has (the client
- * reports, per dimension, the newest stamp it applied), nearest first, then live changes as they are captured. Sent in small
+ * reports, per dimension, the newest stamp it applied, and the chunks below that which it still lacks), nearest first, then live changes as they are captured. Sent in small
  * batches so a big world cannot flood a connection.
  */
 public final class SharedMapRelay {
     private static final int MAX_LIVE=2048;
-    private final SharedMapStore store;private final Map<String,Long> since;
+    private final SharedMapStore store;private final Map<String,Long> since;private final Map<String,Set<Long>> owed=new HashMap<>();
     private String dimension;private int chunkX,chunkZ;
     private final Deque<int[]> regions=new ArrayDeque<>();private final Deque<SharedMapChunk> loaded=new ArrayDeque<>();
     private final Deque<SharedMapChunk> live=new ArrayDeque<>();private boolean liveOverflowed;
     public SharedMapRelay(SharedMapStore store,Map<String,Long> since){this.store=store;this.since=new HashMap<>(since);}
+    public SharedMapRelay(SharedMapStore store,SharedMapCodec.Hello hello) {
+        this(store,hello.since());
+        for(var entry:hello.owed().entrySet())owed.put(entry.getKey(),new HashSet<>(entry.getValue()));
+    }
 
     /** The player is in this dimension at this chunk: start (or keep) catching up for it. */
     public synchronized void moved(String dimension,int chunkX,int chunkZ) {
@@ -36,6 +40,7 @@ public final class SharedMapRelay {
     public synchronized List<SharedMapChunk> next(int max) {
         List<SharedMapChunk> batch=new ArrayList<>();
         long floor=since.getOrDefault(dimension==null?"":dimension,0L);
+        Set<Long> lacking=owed.get(dimension==null?"":dimension);
         while(batch.size()<max&&!live.isEmpty())batch.add(live.poll());
         while(batch.size()<max) {
             if(loaded.isEmpty()) {
@@ -46,7 +51,7 @@ public final class SharedMapRelay {
                     break;
                 }
                 List<SharedMapChunk> fresh=new ArrayList<>();
-                for(SharedMapChunk c:store.region(dimension,region[0],region[1]))if(c.stamp>floor)fresh.add(c);
+                for(SharedMapChunk c:store.region(dimension,region[0],region[1]))if(c.stamp>floor||lacking!=null&&lacking.remove(c.key()))fresh.add(c);
                 fresh.sort(Comparator.comparingLong(c->(long)(c.x-chunkX)*(c.x-chunkX)+(long)(c.z-chunkZ)*(c.z-chunkZ)));
                 loaded.addAll(fresh);
                 continue;
