@@ -1999,3 +1999,6 @@ the causal link to Mac gun/portal overlap remains unproven.
 a different dimension -> back on, only if we turned them off and they are still off; TARDIS dimensions, found with DWM's `TardisHelper.isTardisDimension`, are ignored in both directions; leaving the world restores them).
 `BumblezoneInitializer` polls the dimension on `ClientTickEvents.END_CLIENT_TICK` and uses Iris's public API (`IrisApi.getInstance().getConfig().setShadersEnabledAndApply`), which saves Iris's setting, so a crash inside the Bumblezone leaves shaders off until turned on again.
 `BumblezoneShadersTest` covers the logic; `bumblezoneNativeCheck` (args: irisJar, fabricNetworkingJar, fabricLifecycleJar, xaeroMinecraftJar) checks every member against real jars (Iris 1.8.14). The dimension id is not checked against a Bumblezone jar (none available locally); not run in game.
+
+## Beta 45: save-message filter stack overflow
+The beta 43 filter recursed forever on log4j's reusable events (`MutableLogEvent.getMessage()` returns the event itself), logging a `StackOverflowError` from `SaveLogFilter.noisy` for messages such as "Thread {} stopped". The filter now reads an event's message once, never follows it, and resolves the log4j classes and methods once. `SaveLogFilterTest` now covers a reusable event that is its own message (it overflows on the beta 43 code).

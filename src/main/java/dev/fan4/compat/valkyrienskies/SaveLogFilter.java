@@ -28,12 +28,15 @@ public final class SaveLogFilter implements ModInitializer {
         filterable.getMethod("addFilter",filterType).invoke(root,filter(loader));
     }
     /** A log4j {@code Filter} that denies the one message and has no opinion on anything else. */
-    static Object filter(ClassLoader loader)throws ClassNotFoundException {
+    static Object filter(ClassLoader loader)throws ReflectiveOperationException {
         Class<?> filterType=Class.forName(CORE+"Filter",true,loader);
+        // Every message in the game passes through here: resolve what is needed once.
+        Class<?> event=Class.forName(CORE+"LogEvent",true,loader),message=Class.forName("org.apache.logging.log4j.message.Message",true,loader);
+        Method eventMessage=event.getMethod("getMessage"),messageFormat=message.getMethod("getFormat");
         return Proxy.newProxyInstance(loader,new Class<?>[]{filterType},(proxy,method,args)->{
             Class<?> result=method.getReturnType();
             if(method.getDeclaringClass()==Object.class)return switch(method.getName()){case "hashCode"->System.identityHashCode(proxy);case "equals"->proxy==args[0];default->"Fan4Compat save message filter";};
-            if(method.getName().equals("filter"))return constant(result,args!=null&&isNoise(args)?"DENY":"NEUTRAL");
+            if(method.getName().equals("filter"))return constant(result,args!=null&&isNoise(args,event,eventMessage,message,messageFormat)?"DENY":"NEUTRAL");
             if(result==boolean.class)return !method.getName().equals("isStopped")&&!method.getName().equals("stop");
             if(result.isEnum())return constant(result,method.getName().equals("getState")?"STARTED":"NEUTRAL");
             return null;
@@ -44,16 +47,15 @@ public final class SaveLogFilter implements ModInitializer {
         return type.getEnumConstants()[0];
     }
     /** Any argument that is the message: a string, a log4j Message (its format), a LogEvent (its message), or an object printed as one. */
-    private static boolean isNoise(Object[] args) {
-        for(Object arg:args)if(arg!=null&&!arg.getClass().isArray()&&noisy(arg))return true;
-        return false;
-    }
-    private static boolean noisy(Object arg) {
+    private static boolean isNoise(Object[] args,Class<?> event,Method eventMessage,Class<?> message,Method messageFormat) {
         try {
-            if(arg instanceof CharSequence text)return text.toString().contains(NOISE);
-            Class<?> type=arg.getClass();
-            if(Class.forName(CORE+"LogEvent",true,type.getClassLoader()).isInstance(arg))return noisy(type.getMethod("getMessage").invoke(arg));
-            if(Class.forName("org.apache.logging.log4j.message.Message",true,type.getClassLoader()).isInstance(arg))return String.valueOf(type.getMethod("getFormat").invoke(arg)).contains(NOISE);
+            for(Object arg:args) {
+                if(arg==null||arg.getClass().isArray())continue;
+                if(arg instanceof CharSequence text){if(text.toString().contains(NOISE))return true;continue;}
+                // An event's message is read once; a reusable event is also its own message (getMessage can return itself), so it is never followed further.
+                Object source=event.isInstance(arg)?eventMessage.invoke(arg):arg;
+                if(source!=null&&message.isInstance(source)&&String.valueOf(messageFormat.invoke(source)).contains(NOISE))return true;
+            }
         } catch(ReflectiveOperationException|RuntimeException|LinkageError unknown){}
         return false;
     }
