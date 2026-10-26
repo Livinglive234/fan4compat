@@ -1,6 +1,6 @@
 # Fan4Compat: architecture, features and contributor guide
 
-This document explains the active implementation at **0.1.0-beta.46**, reviewed
+This document explains the active implementation at **0.1.0-beta.47**, reviewed
 2026-10-11 (America/Chicago). It is an onboarding guide for human contributors and
 AI coding assistants. The source and version gates describe what actually runs;
 older release notes describe historical builds and can contain superseded behavior.
@@ -168,11 +168,11 @@ the supplied VS/Eureka files have different marketing and metadata versions.
 | `pointblank` | `2.2.0` |
 | `accessories` | `1.1.0-beta.48+1.21.1` |
 | `graves` | `1.0.0` |
-| `sound_physics_remastered` | `1.21.1-1.5.1` |
+| `sound_physics_remastered` | `1.21.1-1.5.2` |
 | `bclib` | `30.4.0` |
 | `jade` | `15.10.6+fabric` |
-| `xaerominimap` | `26.5.0` |
-| `xaeroworldmap` | `1.46.0` |
+| `xaerominimap` | `26.6.0` (also `26.5.0`) |
+| `xaeroworldmap` | `1.47.0` (also `1.46.0`) |
 | `elytratrails` | `1.4.7.5-1.21.1` |
 
 Trinkets' grave helper separately checks `3.10.0`. Aether is presence-gated for
@@ -206,10 +206,10 @@ optional-recipe filter checks installed recipe dependencies individually.
 | BCLib stack codec/recipe format | Supported BCLib. |
 | Optional recipe dependency filter | BCLib or one of JEED/Supplementaries/Amendments/Moonlight installed. |
 | Wing-tip fallback | Supported Elytra Contrails. |
-| Xaero shared explored map | Server: dedicated server with Fabric API networking and lifecycle events. Client: supported Xaero World Map `1.46.0`; one hook on `MapWriter.onRender`. No DWM needed. |
-| Xaero minimap/waypoints follow the TARDIS exterior | Client only: Xaero Minimap `26.5.0` + World Map `1.46.0` + supported DWM; six more hooks (see below). |
-| Xaero map TARDIS exterior | Client only: Xaero World Map `1.46.0` + supported DWM; one hook on `GuiMap`'s constructor. |
-| Xaero waypoint sync | Server: Fabric API and the `xaeroWaypointSync` switch. Client: the same plus Xaero's Minimap `26.5.0` (no mixins; Fabric API networking only). |
+| Xaero shared explored map | Server: dedicated server with Fabric API networking and lifecycle events. Client: supported Xaero World Map `1.47.0`; one hook on `MapWriter.onRender`. No DWM needed. |
+| Xaero minimap/waypoints follow the TARDIS exterior | Client only: Xaero Minimap `26.6.0` + World Map `1.47.0` + supported DWM; six more hooks (see below). |
+| Xaero map TARDIS exterior | Client only: Xaero World Map `1.47.0` + supported DWM; one hook on `GuiMap`'s constructor. |
+| Xaero waypoint sync | Server: Fabric API and the `xaeroWaypointSync` switch. Client: the same plus Xaero's Minimap `26.6.0` (no mixins; Fabric API networking only). |
 | Updater/settings entrypoints | Always initialized; updater can be disabled and requires an eligible installed jar to operate. |
 
 Treat this table as an explanation of the gate code, not an invitation to enable

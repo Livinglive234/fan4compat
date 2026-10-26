@@ -10,7 +10,7 @@ public final class PortalSoundCompat {
     private static final Map<Object,AcousticBounds> BOUNDS=Collections.synchronizedMap(new dev.fan4.compat.shared.WeakIdentityMap<>());
     public static Object snapshot(){return SCOPE.get();}
     public static boolean scoped(){return SCOPE.get()!=null;}
-    public static Object evaluate(Object operation,int source,double x,double y,double z,Object category,Object id,boolean auxiliary) {
+    public static Object evaluate(Object operation,int source,double x,double y,double z,Object category,Object id,float auxiliary) {
         Object client=call(type("net.minecraft.class_310"),"method_1551");
         Object proxy=call(type("com.sonicether.soundphysics.utils.LevelAccessUtils"),"getClientLevelProxy",client);
         if(proxy==null){call(type("com.sonicether.soundphysics.SoundPhysics"),"setDefaultEnvironment",source,auxiliary);return null;}

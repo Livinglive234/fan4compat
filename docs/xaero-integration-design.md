@@ -7,8 +7,8 @@ approval before any code.
 
 | Mod | Pinned version | Mod ID |
 | --- | --- | --- |
-| Xaero's Minimap (Fabric 1.21.1) | `26.5.0` | `xaerominimap` |
-| Xaero's World Map (Fabric 1.21.1) | `1.46.0` | `xaeroworldmap` |
+| Xaero's Minimap (Fabric 1.21.1) | `26.6.0` (design read from 26.5.0; 26.6.0 changed only the cave zoom and Open Parties and Claims support) | `xaerominimap` |
+| Xaero's World Map (Fabric 1.21.1) | `1.47.0` (design read from 1.46.0; 1.47.0 changed only Open Parties and Claims support) | `xaeroworldmap` |
 
 Both are "All Rights Reserved": Fan4Compat may hook them with generated Mixins,
 as it does other mods, but must not copy or bundle their code. Like other
@@ -364,8 +364,8 @@ architecture guide for the details and the unverified camera behavior.
 - One Fan4Compat network channel registered on server and client, with a version
   handshake. If either side lacks it, both features stay inactive.
 - A server-side store with atomic writes, size caps and per-player rate limits.
-- Version gates in `CompatibilityRules` for `xaerominimap` `26.5.0` and
-  `xaeroworldmap` `1.46.0`; each feature gates independently. Generated hooks go in
+- Version gates in `CompatibilityRules` for `xaerominimap` `26.6.0` and
+  `xaeroworldmap` `1.47.0`; each feature gates independently. Generated hooks go in
   `fan4compat.mixins.json` with the usual featureLinkAudit coverage.
 - Client-only classes must stay out of the common/server code path, using the same
   exact/typed reflection rules as other integrations.

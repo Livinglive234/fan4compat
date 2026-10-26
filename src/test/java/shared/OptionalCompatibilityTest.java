@@ -35,6 +35,11 @@ public final class OptionalCompatibilityTest {
         }
         check(CompatibilityRules.requirement("dwm").equals(">=1.0.38.4"),"startup warning states minimum");
         check(CompatibilityRules.requirement("pointblank").equals("2.2.0"),"other version pins remain exact");
+        check(CompatibilityRules.requirement("xaerominimap").equals("26.6.0 (or 26.5.0)")&&CompatibilityRules.requirement("xaeroworldmap").equals("1.47.0 (or 1.46.0)"),"Xaero states the build it was written for and the older one it still accepts");
+        for(String[] pair:new String[][]{{"xaerominimap","26.6.0"},{"xaerominimap","26.5.0"},{"xaeroworldmap","1.47.0"},{"xaeroworldmap","1.46.0"}})
+            check(CompatibilityRules.supported(Map.of(pair[0],pair[1]),pair[0]),pair[0]+" "+pair[1]+" is supported");
+        for(String[] pair:new String[][]{{"xaerominimap","26.4.0"},{"xaerominimap","26.7.0"},{"xaeroworldmap","1.45.0"},{"xaeroworldmap","1.48.0"},{"sound_physics_remastered","1.21.1-1.5.1"}})
+            check(!CompatibilityRules.supported(Map.of(pair[0],pair[1]),pair[0]),pair[0]+" "+pair[1]+" is not supported");
         check(!applies(Map.of("pointblank","2.2.0"),"pointblank.client.PortalStencilCacheMixin"),"portal stencil bridge requires IP");
         check(!applies(Map.of("pointblank","2.2.0","immersive_portals","unsupported"),"pointblank.client.PortalStencilCacheMixin"),"portal stencil bridge rejects unsupported IP");
         check(applies(Map.of("pointblank","2.2.0","immersive_portals","6.0.6"),"pointblank.client.PortalStencilCacheMixin"),"portal stencil bridge needs no VS/Iris");
@@ -84,10 +89,10 @@ public final class OptionalCompatibilityTest {
         check(!applies(Map.of("iris",CompatibilityRules.VERSIONS.get("iris")),"iris.client.DhDepthAttachmentMixin"),"DH depth ownership requires DH");
         Map<String,String> wrongIp=new HashMap<>(all);wrongIp.put("immersive_portals","unsupported-test-version");
         for(String name:mixins)if(name.startsWith("doctorwho.")&&!name.contains("ModelCache"))check(!applies(wrongIp,name),"indirect ship portal update with unsupported IP: "+name);
-        Map<String,String> audio=Map.of("immersive_portals","6.0.6","sound_physics_remastered","1.21.1-1.5.1");
+        Map<String,String> audio=Map.of("immersive_portals","6.0.6","sound_physics_remastered","1.21.1-1.5.2");
         check(applies(audio,"soundphysics.client.PortalSoundSnapshotMixin")&&applies(audio,"soundphysics.client.PortalSoundRayMixin"),"standalone IP/Sound Physics hooks");
         check(!applies(audio,"soundphysics.client.ShipAcousticRaycastMixin"),"ship ray enabled without VS");
-        check(!applies(Map.of("sound_physics_remastered","1.21.1-1.5.1"),"soundphysics.client.PortalSoundSnapshotMixin"),"portal scope without IP");
+        check(!applies(Map.of("sound_physics_remastered","1.21.1-1.5.2"),"soundphysics.client.PortalSoundSnapshotMixin"),"portal scope without IP");
         check(!CompatibilityRules.applies(all,false,PREFIX+"sable.common.SableCompatMixin"),"missing Sable class");
         check(!CompatibilityRules.applies(all,true,PREFIX+"unknown.common.FutureMixin"),"unknown integration enabled");
         String metadata=Files.readString(Path.of("src/main/resources/fabric.mod.json"));

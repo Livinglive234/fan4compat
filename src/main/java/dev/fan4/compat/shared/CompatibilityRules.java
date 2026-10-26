@@ -13,8 +13,10 @@ public final class CompatibilityRules {
         Map.entry("vs_eureka","1.5.3-beta.4-td.4+b0d9511582"),
         Map.entry("freecam","1.3.0+mc1.21"),Map.entry("distanthorizons","3.3.3"),Map.entry("pointblank","2.2.0"),
         Map.entry("iris","1.8.1+mc1.21.1"),Map.entry("accessories","1.1.0-beta.48+1.21.1"),
-        Map.entry("sound_physics_remastered","1.21.1-1.5.1"),Map.entry("bclib","30.4.0"),
-        Map.entry("graves","1.0.0"),Map.entry("xaerominimap","26.5.0"),Map.entry("xaeroworldmap","1.46.0"),Map.entry("jade","15.10.6+fabric"),Map.entry("elytratrails","1.4.7.5-1.21.1"));
+        Map.entry("sound_physics_remastered","1.21.1-1.5.2"),Map.entry("bclib","30.4.0"),
+        Map.entry("graves","1.0.0"),Map.entry("xaerominimap","26.6.0"),Map.entry("xaeroworldmap","1.47.0"),Map.entry("jade","15.10.6+fabric"),Map.entry("elytratrails","1.4.7.5-1.21.1"));
+    /** Older builds that are still supported next to the one in VERSIONS: every class the hooks and helpers touch was checked identical. */
+    public static final Map<String,Set<String>> ALSO_SUPPORTED=Map.of("xaerominimap",Set.of("26.5.0"),"xaeroworldmap",Set.of("1.46.0"));
     private static final Set<String> PORTAL_TARDIS=Set.of("TardisShipPortalMixin","TardisShipPortalDataMixin","TardisShipExteriorShapeMixin");
     private CompatibilityRules() {}
     public static boolean supported(Map<String,String> mods,String id) {
@@ -24,10 +26,14 @@ public final class CompatibilityRules {
             try{return SemanticVersion.parse(version).compareTo(SemanticVersion.parse(VERSIONS.get(id)))>=0;}
             catch(VersionParsingException invalid){return false;}
         }
-        return version.equals(VERSIONS.getOrDefault(id,version));
+        return version.equals(VERSIONS.getOrDefault(id,version))||ALSO_SUPPORTED.getOrDefault(id,Set.of()).contains(version);
     }
-    /** VERSIONS contains exact pins except DWM, whose entry is its inclusive minimum. */
-    public static String requirement(String id){return id.equals("dwm")?">="+VERSIONS.get(id):VERSIONS.get(id);}
+    /** VERSIONS contains exact pins except DWM, whose entry is its inclusive minimum; ALSO_SUPPORTED adds older exact builds. */
+    public static String requirement(String id) {
+        if(id.equals("dwm"))return ">="+VERSIONS.get(id);
+        Set<String> also=ALSO_SUPPORTED.getOrDefault(id,Set.of());
+        return also.isEmpty()?VERSIONS.get(id):VERSIONS.get(id)+" (or "+String.join(", ",new java.util.TreeSet<>(also))+")";
+    }
     /** VS and IP are both installed at their supported builds. */
     public static boolean portalsOnVs(Map<String,String> mods) {
         return supported(mods,"valkyrienskies")&&supported(mods,"immersive_portals");

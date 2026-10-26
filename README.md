@@ -5,7 +5,7 @@ It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
 Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
 It does not overwrite existing mod jars.
 
-**Status: beta, 0.1.0-beta.46.** Eureka warnings are suppressed in both normal
+**Status: beta, 0.1.0-beta.47.** Eureka warnings are suppressed in both normal
 and severe incompatibility notices, on client and dedicated server, for the
 supported Eureka/IP combination. Other mod warnings remain unchanged.
 
@@ -20,7 +20,7 @@ shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fi
 Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
 Ship visibility through reopened doors before exiting remains a known limitation.
 
-[Beta 46 release notes](docs/releases/0.1.0-beta.46.md) ·
+[Beta 47 release notes](docs/releases/0.1.0-beta.47.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -227,7 +227,7 @@ These changes require in-game verification against the reported boundary freeze.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.46.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.47.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -257,7 +257,7 @@ No target mods installed means no compatibility mixins apply.
 | Immersive Portals | Fabric `6.0.6`, supplied filename says 6.0.7 |
 | Eureka debug control | `1.5.3-beta.4-td.4+b0d9511582` |
 | Doctor Who Mod ship bridges | `>=1.0.38.4`, including `1.0.39`; older/unparseable versions skip these hooks |
-| Optional log fixes | Iris `1.8.1+mc1.21.1`, Accessories `1.1.0-beta.48+1.21.1`, Sound Physics `1.21.1-1.5.1`, BCLib `30.4.0` |
+| Optional log fixes | Iris `1.8.1+mc1.21.1`, Accessories `1.1.0-beta.48+1.21.1`, Sound Physics `1.21.1-1.5.2`, BCLib `30.4.0` |
 | Sable Companion crash observed | `1.6.0`, bundled in Windchimes `1.2.0+1.21.1` |
 | Elytra Contrails fallback | `1.4.7.5-1.21.1` only |
 | Jade helm overlay | `15.10.6+fabric` only |
@@ -420,7 +420,7 @@ separately. Xaero waypoint sync has its entry above.
 
 ## Xaero minimap and waypoints follow the TARDIS exterior
 
-Client only; needs Xaero's Minimap 26.5.0, Xaero's World Map 1.46.0 and Doctor Who Mod. While you are inside a TARDIS that
+Client only; needs Xaero's Minimap 26.6.0 (or 26.5.0), Xaero's World Map 1.47.0 (or 1.46.0) and Doctor Who Mod. While you are inside a TARDIS that
 has landed, Xaero treats you as standing at the exterior:
 
 - **Waypoints** belong to the outside. The waypoint list shows the exterior dimension's waypoints (the same world switch the
@@ -446,7 +446,7 @@ differently scaled dimension such as the Nether (coordinates may be scaled wrong
 
 ## Shared explored map
 
-Needs Fan4Compat on the **server and on each client**, and Xaero's World Map 1.46.0 on the client. Terrain that any player has explored shows
+Needs Fan4Compat on the **server and on each client**, and Xaero's World Map 1.47.0 (or 1.46.0) on the client. Terrain that any player has explored shows
 up on everyone's World Map, including areas you have never visited. On by default.
 
 - **Where the terrain comes from (`sharedMapMode`, set by the server operator in `config/fan4compat-xaero.properties`).**
@@ -477,7 +477,7 @@ up on everyone's World Map, including areas you have never visited. On by defaul
 ## Xaero waypoint sync
 
 Your Xaero's Minimap waypoints are kept on the server, so they follow you between PCs. It needs Fan4Compat on
-the server and on your client, and Xaero's Minimap 26.5.0 on the client. It is on by default.
+the server and on your client, and Xaero's Minimap 26.6.0 (or 26.5.0) on the client. It is on by default.
 
 - **How it works.** While you log in, the server holds your join (briefly, in the connection's configuration
   phase, before the world loads) and sends the waypoint files it has for you. Your client writes the newer ones into
@@ -499,7 +499,7 @@ the server and on your client, and Xaero's Minimap 26.5.0 on the client. It is o
 
 ## Xaero map shows the TARDIS exterior
 
-Client only; needs Xaero's World Map 1.46.0 and Doctor Who Mod. Open the World Map while you are inside a TARDIS that
+Client only; needs Xaero's World Map 1.47.0 (or 1.46.0) and Doctor Who Mod. Open the World Map while you are inside a TARDIS that
 has landed and it opens on the exterior's dimension, centered on where the TARDIS is, instead of on the interior
 dimension. The client already receives the exterior from Doctor Who Mod, so no server change is needed. While the TARDIS
 is in flight, or if the exterior cannot be found, the map behaves as normal; leaving the TARDIS puts the map back. The

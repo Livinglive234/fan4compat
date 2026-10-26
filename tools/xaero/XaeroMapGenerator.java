@@ -3,7 +3,7 @@ import org.objectweb.asm.*;
 /**
  * Client hooks on Xaero's Minimap and World Map for TARDIS support: the map screen (open/close), and a "virtual location"
  * (exterior position, dimension and waypoint world) read through TardisLocation. Selectors and call sites come from the
- * real Xaero 26.5.0 / 1.46.0 classes and are re-verified by xaeroMapNativeCheck.
+ * real Xaero 26.6.0 / 1.47.0 classes (the hooked classes are identical in 26.5.0 / 1.46.0) and are re-verified by xaeroMapNativeCheck.
  */
 public final class XaeroMapGenerator implements Opcodes {
     static final String ROOT=GenerateAddon.ROOT+"mixin/xaero/client/",COMPAT=GenerateAddon.ROOT+"xaero/TardisMapCompat",LOCATION=GenerateAddon.ROOT+"xaero/TardisLocation",
