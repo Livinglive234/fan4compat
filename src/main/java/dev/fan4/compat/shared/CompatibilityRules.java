@@ -16,7 +16,7 @@ public final class CompatibilityRules {
         Map.entry("sound_physics_remastered","1.21.1-1.5.2"),Map.entry("bclib","30.4.0"),
         Map.entry("graves","1.0.0"),Map.entry("xaerominimap","26.6.0"),Map.entry("xaeroworldmap","1.47.0"),Map.entry("jade","15.10.6+fabric"),Map.entry("elytratrails","1.4.7.5-1.21.1"));
     /** Older builds that are still supported next to the one in VERSIONS: every class the hooks and helpers touch was checked identical. */
-    public static final Map<String,Set<String>> ALSO_SUPPORTED=Map.of("xaerominimap",Set.of("26.5.0"),"xaeroworldmap",Set.of("1.46.0"),"iris",Set.of("1.8.14-beta.1+mc1.21.1"));
+    public static final Map<String,Set<String>> ALSO_SUPPORTED=Map.of("xaerominimap",Set.of("26.5.0"),"xaeroworldmap",Set.of("1.46.0"),"iris",Set.of("1.8.14-beta.1+mc1.21.1"),"bclib",Set.of("30.5.4","30.5.6"));
     private static final Set<String> PORTAL_TARDIS=Set.of("TardisShipPortalMixin","TardisShipPortalDataMixin","TardisShipExteriorShapeMixin");
     private CompatibilityRules() {}
     public static boolean supported(Map<String,String> mods,String id) {

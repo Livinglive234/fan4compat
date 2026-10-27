@@ -8,9 +8,9 @@ Iris, Point Blank, Aether, Spatial GUI and more). It does not overwrite existing
 mod jars, and each fix applies only when the mod it targets is installed at a
 supported version.
 
-**Status: beta, 0.1.0-beta.53.**
+**Status: beta, 0.1.0-beta.54.**
 
-[Beta 53 release notes](docs/releases/0.1.0-beta.53.md) ·
+[Beta 54 release notes](docs/releases/0.1.0-beta.54.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -32,7 +32,7 @@ supported version.
 | Point Blank | Fabric `2.2.0` |
 | Accessories / Player Graves | `1.1.0-beta.48+1.21.1` / `1.0.0` |
 | Sound Physics Remastered | `1.21.1-1.5.2` |
-| BCLib | `30.4.0` |
+| BCLib / WorldWeaver / Better End | BCLib `30.4.0`, or `30.5.4` / `30.5.6` (Better End 30.5.6 needs BCLib and WorldWeaver 30.5.6) |
 | Jade | `15.10.6+fabric` only |
 | Elytra Contrails | `1.4.7.5-1.21.1` only |
 | Xaero's Minimap | `26.6.0` (or `26.5.0`) |
@@ -73,7 +73,7 @@ Other mod releases need another compatibility audit.
 - The Aether portal works with Immersive Portals (Aether 1.5.11) without a patched Aether jar.
 - Chest Tracker's button is hidden on screens that cannot hold items.
 - Bumblezone turns shaders off on entry and back on when you leave.
-- BCLib recipe fix and Sable Companion fallback.
+- Better End and BCLib custom recipes (infusion, smithing, alloying) load on BCLib 30.4.0 to 30.5.6; Sable Companion fallback.
 
 **Built in**
 - Automatic updates from this repository's releases.
@@ -82,7 +82,7 @@ Other mod releases need another compatibility audit.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.53.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.54.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.

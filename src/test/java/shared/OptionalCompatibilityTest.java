@@ -107,6 +107,9 @@ public final class OptionalCompatibilityTest {
         // Iris 1.8.14-beta.1 (the build that works with Sodium 0.8) is supported next to 1.8.1, so the Iris and Distant Horizons fixes apply to it; other builds are not.
         Map<String,String> iris14=new HashMap<>(all);iris14.put("iris","1.8.14-beta.1+mc1.21.1");
         check(CompatibilityRules.supported(iris14,"iris")&&applies(iris14,"iris.client.DhDepthAttachmentMixin")&&applies(iris14,"iris.client.DhPortalShaderMixin"),"Iris 1.8.14-beta.1 is supported and gets the Distant Horizons depth fixes");
+        Map<String,String> bclib=new HashMap<>(all);
+        for(String version:new String[]{"30.4.0","30.5.4","30.5.6"}) {bclib.put("bclib",version);check(CompatibilityRules.supported(bclib,"bclib")&&applies(bclib,"bclib.common.StackCodecAliasMixin"),"BCLib "+version+" gets the stack codec fix");}
+        bclib.put("bclib","30.5.5");check(!CompatibilityRules.supported(bclib,"bclib")&&!applies(bclib,"bclib.common.StackCodecAliasMixin"),"an unchecked BCLib build is skipped");
         iris14.put("iris","1.8.13+mc1.21.1");
         check(!CompatibilityRules.supported(iris14,"iris")&&!applies(iris14,"iris.client.DhDepthAttachmentMixin"),"other Iris builds are still skipped");
         // The Sodium 0.8 portal culling needs the 0.8 series and Immersive Portals, and has its own feature switch.

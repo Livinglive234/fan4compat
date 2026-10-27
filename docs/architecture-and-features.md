@@ -169,7 +169,7 @@ the supplied VS/Eureka files have different marketing and metadata versions.
 | `accessories` | `1.1.0-beta.48+1.21.1` |
 | `graves` | `1.0.0` |
 | `sound_physics_remastered` | `1.21.1-1.5.2` |
-| `bclib` | `30.4.0` |
+| `bclib` | `30.4.0` (also `30.5.4`, `30.5.6`) |
 | `jade` | `15.10.6+fabric` |
 | `xaerominimap` | `26.6.0` (also `26.5.0`) |
 | `xaeroworldmap` | `1.47.0` (also `1.46.0`) |
@@ -689,8 +689,8 @@ as solid walls. `AcousticBounds` supplies finite clipping bounds.
 ### BCLib/BetterEnd stack formats and optional recipes
 
 `RecipeDataCompat` repairs supported BCLib/BetterEnd custom recipe result objects
-using `id` where the old parser expects `item`, scoped to alloying, anvil and
-infusion recipes. Existing counts and component-patch `nbt` content remain.
+using `id` where the old parser expects `item`, scoped to alloying, anvil, smithing and
+infusion recipes (BCLib 30.5.x renamed anvil recipes to `bclib:smithing`). Existing counts and component-patch `nbt` content remain.
 `StackCodecCompat` separately wraps BCLib's MapLike decoder so a missing `item`
 lookup can fall back to `id`, including non-recipe decoding. It does not globally
 change Minecraft's ItemStack codec.

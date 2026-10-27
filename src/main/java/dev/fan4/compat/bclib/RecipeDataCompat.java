@@ -9,7 +9,7 @@ public final class RecipeDataCompat {
         if(!(Boolean)call(json,"isJsonObject"))return;
         Object object=call(json,"getAsJsonObject"),type=call(object,"get","type");
         if(type==null)return;String kind=call(type,"getAsString").toString();
-        if(!Set.of("bclib:alloying","bclib:anvil","betterend:infusion").contains(kind))return;
+        if(!Set.of("bclib:alloying","bclib:anvil","bclib:smithing","betterend:infusion").contains(kind))return;
         Object output=call(object,"get","result");
         if(output==null||!(Boolean)call(output,"isJsonObject"))return;
         output=call(output,"getAsJsonObject");
@@ -35,7 +35,7 @@ public final class RecipeDataCompat {
     }
     public static Map<?,?> available(Map<?,?> input) {
         var loader=net.fabricmc.loader.api.FabricLoader.getInstance();
-        boolean stacks=loader.getModContainer("bclib").map(mod->mod.getMetadata().getVersion().getFriendlyString().equals("30.4.0")).orElse(false);
+        boolean stacks=loader.getModContainer("bclib").map(mod->dev.fan4.compat.shared.CompatibilityRules.supported(Map.of("bclib",mod.getMetadata().getVersion().getFriendlyString()),"bclib")).orElse(false);
         return available(input,loader.isModLoaded("jeed"),loader.isModLoaded("suppsquared"),stacks);
     }
 }
