@@ -12,6 +12,7 @@
     "eureka.common.EurekaPortalWarningMixin",
     "aether.common.AetherCapeSkinLayersMixin",
     "spatialgui.client.SpatialGuiPerspectiveMixin",
+    "spatialgui.client.SpatialGuiPortalCameraMixin",
     "spatialgui.client.SpatialGuiLevelDiagnosticMixin",
     "spatialgui.client.SpatialGuiTargetDiagnosticMixin",
     "spatialgui.client.SpatialGuiRendererDiagnosticMixin",

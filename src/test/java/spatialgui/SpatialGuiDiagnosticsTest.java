@@ -39,6 +39,11 @@ public final class SpatialGuiDiagnosticsTest {
         // The perspective fix skips the save only inside a portal view, and never when the portal layer cannot be read.
         check(!SpatialGuiPortalFix.skipCapture(()->0)&&SpatialGuiPortalFix.skipCapture(()->1)&&SpatialGuiPortalFix.skipCapture(()->2),"skips only while a portal view renders");
         check(!SpatialGuiPortalFix.skipCapture(()->{throw new IllegalStateException("no layer");})&&!SpatialGuiPortalFix.skipCapture(()->{throw new NoClassDefFoundError("gone");}),"an unreadable layer keeps the normal capture");
-        System.out.println("PASS: Spatial GUI portal trace (silent without a screen, nesting depth, frame count, per-screen budget, total cap, failure latch, perspective fix)");
+        // The camera hook places the camera once per call, and one failure stops it for good without throwing.
+        List<Object> placed=new ArrayList<>();Object camera=new Object();
+        check(SpatialGuiPortalFix.keepPortalCamera(camera,false,placed::add)&&placed.equals(List.of(camera)),"places the camera");
+        check(!SpatialGuiPortalFix.keepPortalCamera(camera,true,placed::add)&&placed.size()==1,"does nothing once failed");
+        check(!SpatialGuiPortalFix.keepPortalCamera(camera,false,c->{throw new IllegalStateException("no portals");})&&!SpatialGuiPortalFix.keepPortalCamera(camera,false,c->{throw new NoClassDefFoundError("gone");}),"a failure is reported, not thrown");
+        System.out.println("PASS: Spatial GUI portal trace (silent without a screen, nesting depth, frame count, per-screen budget, total cap, failure latch, perspective fix, portal camera)");
     }
 }

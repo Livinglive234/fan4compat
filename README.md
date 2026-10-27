@@ -1,72 +1,104 @@
 # Fan4Compat
 
 A standalone Fabric 1.21.1 compatibility addon for the Fantastic 4 modpack.
-It bridges Valkyrien Skies, Immersive Portals, dynamic dimensions used by Doctor
-Who Mod / DimLib, and the Sable Companion library bundled with Windchimes.
-It does not overwrite existing mod jars.
+It bridges Valkyrien Skies, Immersive Portals, the dynamic dimensions used by
+Doctor Who Mod / DimLib and the Sable Companion library bundled with Windchimes,
+and carries smaller fixes for other mods in the pack (Xaero, Distant Horizons,
+Iris, Point Blank, Aether, Spatial GUI and more). It does not overwrite existing
+mod jars, and each fix applies only when the mod it targets is installed at a
+supported version.
 
-**Status: beta, 0.1.0-beta.50.** Eureka warnings are suppressed in both normal
-and severe incompatibility notices, on client and dedicated server, for the
-supported Eureka/IP combination. Other mod warnings remain unchanged.
+**Status: beta, 0.1.0-beta.51.**
 
-Distant Horizons LOD and terrain fade draws are skipped while Immersive Portals
-renders a portal view; Iris also ignores the main view's cached DH frame during
-those draws. Beta 5 also substitutes a far-depth sampler for Iris's DH depth
-textures during portal views; shader packs can otherwise sample stale terrain
-even when the DH frame flag is disabled. Main-view DH rendering stays enabled. Portal destinations use normal
-Minecraft terrain distance; this does not implement distant LODs through portals
-or stop background world generation. Requires supported DH/IP (and Iris for the
-shader guard), without requiring VS. The pack owner confirmed the BSL_v10.1.5 fix working; the initial LOD load can take longer, with subsequent loads behaving normally.
-Includes beta 2/3 dedicated-server lookup and detached TARDIS save fixes.
-Ship visibility through reopened doors before exiting remains a known limitation.
-
-[Beta 50 release notes](docs/releases/0.1.0-beta.50.md) ·
+[Beta 51 release notes](docs/releases/0.1.0-beta.51.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
 [Destination portal LOD prototype](docs/portal-destination-lods.md)
 
-## Latest gameplay validation (2026-10-11)
+## Supported builds
 
-The pack owner confirmed beta 33 resolves the Windows DH terrain overlay and
-reported normal Mac XM3, portal and TARDIS exterior-camera rendering. The Windows
-AMD RX 7700 XT log retains DH's own depth attachment during Iris main-depth
-refresh. The Apple M2 Pro log captures BSL_v10.1.5 gun and camera rendering,
-successful portal depth copies with `GL_NO_ERROR`, normal render mode and normal
-shutdown. These are full-pack user reports, not automated GPU tests.
+| Component | Target |
+| --- | --- |
+| Minecraft / loader | Fabric 1.21.1; Java 21 or newer |
+| Valkyrien Skies | `2.4.12-td.9+66a13242ed`, exact original jar |
+| Immersive Portals | Fabric `6.0.6` (the jar named 6.0.7 is the same build) |
+| Eureka | `1.5.3-beta.4-td.4+b0d9511582` |
+| Doctor Who Mod | `>=1.0.38.4`, including `1.0.39`; older or unparseable versions skip the ship bridges |
+| Distant Horizons | `3.3.3` for Fabric 1.21.1 |
+| Freecam | `1.3.0+mc1.21` (client only) |
+| Iris | `1.8.1+mc1.21.1` |
+| Point Blank | Fabric `2.2.0` |
+| Accessories / Player Graves | `1.1.0-beta.48+1.21.1` / `1.0.0` |
+| Sound Physics Remastered | `1.21.1-1.5.2` |
+| BCLib | `30.4.0` |
+| Jade | `15.10.6+fabric` only |
+| Elytra Contrails | `1.4.7.5-1.21.1` only |
+| Xaero's Minimap | `26.6.0` (or `26.5.0`) |
+| Xaero's World Map | `1.47.0` (or `1.46.0`) |
+| Spatial GUI | `1.9.1` only |
+| Sable Companion | crash observed in `1.6.0`, bundled in Windchimes `1.2.0+1.21.1` |
+| Aether, Bumblezone, Trinkets, Chest Tracker | no version check (Chest Tracker was checked against `2.6.7`) |
 
-The Mac improvement coincides with the DH repair; a causal link to the earlier
-gun-over-portal overlap has not been established. The pack owner also confirmed
-Mac nested portals and reports the discussed restart workflows working. Automatic
-update download/install across a restart was also confirmed working by the pack owner
-(2026-10-11).
-Other shader packs and GPUs are outside this confirmation. Earlier pending rendering notes below record their status at that build.
-Point Blank, Freecam/BSL and Graves were also confirmed working on 2026-10-10.
+The ship hooks intentionally pin the VS implementation because their dimension
+lifecycle targets include names from that build's obfuscated physics core.
+Other mod releases need another compatibility audit.
 
-Render diagnostics can now be disabled: omit or set to false
-`fan4compat.renderDiagnostics` and `fan4compat.dhRenderDiagnostics`. Runtime fixes
-remain active. The separate portal depth observer is off by default (beta 35); enable it with the
-"Portal depth-copy logging" setting or `-Dfan4compat.portalDepthDiagnostics=true`.
+## Features
 
-## Aether accessory graves
+**Ships and TARDIS**
+- Ship-mounted TARDIS: recall, landing, door portals, coordinates and sonic destinations follow a moving ship.
+- Ship waypoints that survive restarts and show when a ship has been deleted.
+- Ships load, sync and cross portals reliably with Immersive Portals (duplicate Valkyrien Skies hooks cancelled, ship loading recovery, safe dimension changes, ship-aware reach).
+- Portals cannot be lit on ships; Eureka's portal warnings and debug messages are hidden; Valkyrien Skies' per-save log message is hidden by default.
+- Ship-aware sound occlusion (Sound Physics Remastered) and Jade hidden while steering a helm.
 
-With Aether, Accessories 1.1.0-beta.48+1.21.1 and Player Graves 1.0.0 installed,
-Aether-slot death drops enter the player's grave, including cosmetic accessories.
-Uses Accessories' resolved drop list, preserving its keep-inventory and item
-KEEP/DESTROY rules. Captures other Accessories slots too. Grave ownership and
-access rules stay in effect; no portals or ship mods are required for this fix.
+**Rendering**
+- Immersive Portals on Apple GPUs (depth and stencil formats, framebuffer-copy fallback).
+- Distant Horizons and Iris shaders behave through portal views; Freecam works with Distant Horizons, including with BSL.
+- Point Blank scopes and guns no longer corrupt portal rendering or crash on stale animations.
+- Elytra Contrails wing trails for custom and accessory elytra; TARDIS model cache.
+- Spatial GUI draws correctly next to Immersive Portals portals, and portals stay visible with its screen open.
 
-With exact inventory-layout recovery enabled, crouch-right-click restores
-accessories to their original functional/cosmetic slots when those slots are empty
-and still accept the items. Occupied, removed or invalid slots use normal inventory
-recovery without replacing equipped items. Graves created before beta 14 lack this
-slot metadata and recover accessories into normal inventory.
-The grave screen has six rows. If it fills, reopen it after taking items to expose
-remaining stacks; quick retrieval handles the whole grave. Items persist with the
-grave across world saves. Keep Fan4Compat installed until these graves are emptied.
-The grave stores up to 128 stacks; accessories beyond that capacity drop normally.
-Install the same build on client and server. The pack owner confirmed Graves
-working on 2026-10-10; unusual recovery/save edge cases remain in the checklist.
+**Maps**
+- Xaero's map, minimap and waypoints follow the TARDIS exterior.
+- Shared explored map: terrain any player has explored shows on everyone's World Map.
+- Xaero waypoint sync across PCs through the server.
+
+**Pack extras**
+- Aether and Trinkets items go into Player Graves graves and return to their slots.
+- Aether capes no longer turn your skin layers back on.
+- Chest Tracker's button is hidden on screens that cannot hold items.
+- Bumblezone turns shaders off on entry and back on when you leave.
+- BCLib recipe fix and Sable Companion fallback.
+
+**Built in**
+- Automatic updates from this repository's releases.
+- Settings screen (Mod Menu + YACL) for every switchable feature.
+
+
+## Install
+
+1. Add `Fan4Compat-0.1.0-beta.51.jar` to `mods` on the client and server.
+2. Install whichever supported target mods you want. No gameplay mod is required
+   by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
+   MixinSquared is bundled in the addon.
+3. If using ship fixes, use the original supported VS jar, not earlier patched
+   `IP-compat-v4` / `IP-Sable-*` builds. Unsupported versions skip their hooks
+   and dependent bridges, with a startup warning; they do not block the addon.
+
+Fixes activate only when their required combination is installed at supported
+versions. With Point Blank + Doctor Who Mod alone, the gun animation crash fix
+and DWM model-cache reuse apply. TARDIS ship features require supported VS;
+portal-specific ship hooks also require supported Immersive Portals. Accessories
+and Iris portal fixes require IP but do not require VS. DH dynamic dimensions,
+BCLib recipe fixes and Elytra Contrails fallback can activate independently.
+Sound Physics ship acoustics and Jade helm hiding require VS (Jade also Eureka).
+Sound Physics/IP snapshot protection works without VS; without VS installed,
+acoustic rays are restricted to cloned chunks and split below IP’s ray limit.
+A missing snapshot uses Sound Physics’s default audio environment for that
+evaluation. Unsafe level access retains its native ray handling.
+No target mods installed means no compatibility mixins apply.
 
 ## Automatic Fan4Compat updates
 
@@ -93,284 +125,6 @@ notes for each new release. Pull requests only upload Actions artifacts.
 
 See [updater details and server hosting](docs/automatic-updates.md), including
 pre-start installation for hosts that kill child processes at shutdown.
-
-## Beta 11 remaining Jade rays and Mac recursive depth
-
-Jade ignores cached crosshair hits outside its current targeting range before
-building a ray, including hits retained across dimension changes. Its configured
-range and eye/camera perspective are respected; the global crosshair is unchanged.
-
-On Apple OpenGL, IP's recursive renderer chooses its stencil depth representation
-from the actual main depth texture format, including unsized textures' depth bits
-and component type. Layer buffers are recreated when that representation changes.
-Other GPU vendors retain IP's choice. This targets a possible format mismatch
-behind the compatibility-mode switch; the original error check and fallback stay
-active. The pack owner confirmed Mac nested portals on beta 33.
-
-## Beta 10 Jade rays and macOS portal copying
-
-Jade normalizes ship hit, eye and camera vectors into world space before its
-ray calculations, preserving shipyard block addresses for overlay lookup.
-Requires supported Jade and VS; Eureka and IP are optional for this fix.
-
-With supported Iris/IP, contexts lacking `glCopyImageSubData` use OpenGL 3
-framebuffer blits for the portal renderer's depth and color copies. This targets
-the native abort on macOS OpenGL 4.1. The existing image-copy path stays active
-on GPUs supporting it. Temporary framebuffer objects and scissor/binding state
-are cleaned up after each fallback copy. Beta 33 Mac portal/camera rendering is
-owner-confirmed, including nested portals in the tested BSL setup.
-
-## Beta 9 Freecam with BSL
-
-The reported disappearing LODs occur only with BSL enabled. BSL 10.1.5 has an
-independent DH terrain/water distance discard that beta 8's native clip changes
-do not affect. Beta 9 bypasses that specific discard while the active Freecam
-is in an unloaded full-terrain chunk. Loaded terrain, disabled Freecam and portal
-views keep the original rule. Requires supported Freecam, DH and Iris versions;
-shader pack files and global settings remain unchanged. Freecam with BSL was
-confirmed working by the pack owner on 2026-10-10.
-
-## Beta 8 Freecam nearby LOD clipping
-
-While the active Freecam camera is in an unloaded full-terrain chunk, DH's near
-plane is capped at half a block and its native terrain near-clip uniform is zero.
-This targets native clipping around a camera where full chunks cannot replace them.
-Native clipping returns in loaded terrain or when Freecam is disabled. Normal
-player views, other dimensions and portal views retain their native behavior.
-No terrain generation or permanent DH setting is changed. The combined Freecam/BSL
-fixes were confirmed working on 2026-10-10.
-
-## Beta 7 Freecam / Distant Horizons
-
-The active Freecam camera can tick beyond Minecraft's loaded terrain chunks when
-Freecam `1.3.0+mc1.21` (the 1.21.1 download's internal version) and DH `3.3.3` are
-installed. Minecraft's inherited player tick otherwise returns at that boundary,
-even when DH displays distant terrain. The hook changes that one tick condition
-for the active camera only; the real player retains the native terrain check.
-It does not request extra chunks, enable interactions with LODs, or alter ship
-collision guards. Freecam was confirmed working on 2026-10-10.
-
-## Beta 6 cleanup
-
-Removed temporary movement diagnostics and unused collision-query code. Native
-ship loading recovery and chunk preparation needed for TARDIS exits remain.
-No separate ship-preview renderer is retained.
-[Code and feature map](docs/code-feature-map.md) explains the retained paths.
-
-## Alpha 35: remove the WWOO border experiment
-
-The experimental WWOO / Distant Horizons generation border from alpha 34 has
-been removed at the pack owner's request. Its visual benefit was unverified and
-it added generation work. DH now uses its original generation path; the
-`fan4compat.wwooBorder` JVM switch has no effect in this build.
-
-WWOO grid seams remain an unresolved upstream compatibility issue. The existing
-Distant Horizons dynamic-dimension bridge remains enabled for its supported
-version. [Investigation notes](docs/wwoo-distant-horizons.md) are retained as history.
-
-## Alpha 33 deleted ship waypoints
-
-Ship waypoints whose original ship ID no longer exists show a crossed-out name
-in the waypoint list. Selecting one shows **This ship has been deleted or
-reassembled** in the coordinate area. The message wraps within the detail column.
-You can still remove the waypoint; it remains immutable and preserves normal
-access rules. Successfully loading an available ship waypoint also shows DWM's
-normal **Waypoint loaded** message.
-
-Status is supplied by the server when the console data is refreshed (reopen the
-waypoint screen after deleting a ship). The check uses all registered ship data,
-so an existing ship whose chunks are unloaded is not marked deleted. Names and
-saved anchors are unchanged, and a reassembled ship with a new ID does not revive
-the old waypoint. This display change still needs in-game verification.
-
-## Alpha 32 waypoint screen crash fix
-
-Selecting a ship waypoint hides its coordinate fields without changing their
-text. This prevents recursive DWM change callbacks and the reported stack overflow.
-Saved waypoint data remains intact.
-
-## Alpha 31 goals
-
-Ship waypoint creation now reads DWM's nested `tardisTag`, so it preserves the
-ship identity and local landing address even while the ship moves during naming.
-Create a new waypoint while landed on the ship; existing ordinary world waypoints
-are not automatically rebound. Ship waypoints keep the existing access rules,
-hide coordinates, and cannot be updated. They bind to a persistent VS ship ID.
-Disassembling and reassembling a ship can replace that ID; a waypoint to the old
-ship then reports that the ship is unavailable. Save a new waypoint while landed
-on the reassembled ship. Waypoints are not rebound to another ship by proximity.
-
-Elytra Contrails `1.4.7.5-1.21.1` receives fallback wing emitters when a gliding
-player's custom or accessory renderer supplies none. The fallback uses a vanilla
-elytra model with the player's rendered body pose, including roll, and preserves
-existing native samples and trail settings. Custom wing shapes use approximate
-vanilla-sized wing tips. Other Elytra Contrails versions skip this hook.
-
-The missing TARDIS biome translations are supplied, including the key reported
-by Xaero. Create/Flywheel rendering remains open; see [the investigation](docs/create-rendering.md).
-The pack owner confirmed waypoint UI, contrails and the TARDIS biome label working.
-Return travel using ship waypoints is now confirmed in singleplayer, including
-a world restart. Reassembly still requires a new waypoint for the new ship ID.
-
-## Ship loading recovery (alpha 27)
-
-Acknowledgements are now sent even when native player construction already marked
-ships known locally, and resent after portal world transitions. Early acknowledgements
-wait briefly for the authoritative server ship to finish loading. Nearby active ship
-chunks remain watched through IP's existing loading cadence, including empty chunks
-outside the visible hull that the VS movement guard needs.
-
-When the native guard blocks the local player, bounded recovery retransmits native
-acknowledgements and selectively requeues valid delivered IP watches near the player.
-Collision, teleport validation and IP's normal chunk batching remain in place.
-These changes require in-game verification against the reported boundary freeze.
-
-## Install
-
-1. Add `Fan4Compat-0.1.0-beta.50.jar` to `mods` on the client and server.
-2. Install whichever supported target mods you want. No gameplay mod is required
-   by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
-   MixinSquared is bundled in the addon.
-3. If using ship fixes, use the original supported VS jar, not earlier patched
-   `IP-compat-v4` / `IP-Sable-*` builds. Unsupported versions skip their hooks
-   and dependent bridges, with a startup warning; they do not block the addon.
-
-Fixes activate only when their required combination is installed at supported
-versions. With Point Blank + Doctor Who Mod alone, the gun animation crash fix
-and DWM model-cache reuse apply. TARDIS ship features require supported VS;
-portal-specific ship hooks also require supported Immersive Portals. Accessories
-and Iris portal fixes require IP but do not require VS. DH dynamic dimensions,
-BCLib recipe fixes and Elytra Contrails fallback can activate independently.
-Sound Physics ship acoustics and Jade helm hiding require VS (Jade also Eureka).
-Sound Physics/IP snapshot protection works without VS; without VS installed,
-acoustic rays are restricted to cloned chunks and split below IP’s ray limit.
-A missing snapshot uses Sound Physics’s default audio environment for that
-evaluation. Unsafe level access retains its native ray handling.
-No target mods installed means no compatibility mixins apply.
-
-## Supported builds
-
-| Component | Target |
-| --- | --- |
-| Minecraft / loader | Fabric 1.21.1; Java 21 or newer |
-| Valkyrien Skies | `2.4.12-td.9+66a13242ed`, exact original jar |
-| Immersive Portals | Fabric `6.0.6`, supplied filename says 6.0.7 |
-| Eureka debug control | `1.5.3-beta.4-td.4+b0d9511582` |
-| Doctor Who Mod ship bridges | `>=1.0.38.4`, including `1.0.39`; older/unparseable versions skip these hooks |
-| Optional log fixes | Iris `1.8.1+mc1.21.1`, Accessories `1.1.0-beta.48+1.21.1`, Sound Physics `1.21.1-1.5.2`, BCLib `30.4.0` |
-| Sable Companion crash observed | `1.6.0`, bundled in Windchimes `1.2.0+1.21.1` |
-| Elytra Contrails fallback | `1.4.7.5-1.21.1` only |
-| Jade helm overlay | `15.10.6+fabric` only |
-| Freecam / DH unloaded camera tick | Freecam `1.3.0+mc1.21`, DH `3.3.3`; client only |
-| Distant Horizons dynamic-world transfer | `3.3.3` for Fabric 1.21.1 |
-
-The ship hooks intentionally pin the VS implementation because their dimension
-lifecycle targets include names from that build's obfuscated physics core.
-Other mod releases need another compatibility audit.
-
-## Fixes
-
-* Cancel VS's duplicate frustum and tracked-entity mixins only while IP is
-  installed. Preserve them when IP is absent. MixinSquared performs cancellation
-  at runtime; original jars stay intact.
-* Preserve ship-local hit coordinates, while using ship-aware distances for
-  Minecraft's final interaction reach check and IP's portal-versus-block choice.
-* Restore VS ship-chunk connectivity initialization and Sodium notification
-  after IP's replacement client chunk manager loads ship chunks. Sodium is notified
-  in the chunk's own world, including remote portal views. Connectivity uses only
-  the active player world because the VS queue drains against that world.
-* Restore loaded-ship acknowledgements after portal-world changes: synchronized
-  loaded ships in the active dimension are acknowledged once through VS's normal
-  known-ship API. VS's unloaded chunk and unsynchronized-world guards remain active.
-* Resolve VS's unflagged covariant getter adapters by their most specific return
-  type when parameter signatures are identical. This fixes alpha.6's repeated
-  `Et.getAllShips` reflection error; genuine method overloads remain guarded.
-* Clear VS's ship attachment, drag/interpolation state and queued position update
-  before IP changes a player's dimension on both client and server. Reject C2S
-  ship motion from a ship in another dimension, preventing a late overworld packet
-  from replacing the arrival position inside the TARDIS.
-* Implement VS's ship-chunk cache interface on IP's client chunk manager. Ship
-  unloads use IP's existing per-world cache and normal unload notifications;
-  unrelated chunks and other worlds' caches remain intact. This fixes the
-  `ImmPtlClientChunkMap` / `ClientChunkCacheDuck` cast failure on dimension changes.
-* Defer out-of-phase VS dimension adds, updates and removals until the next
-  `preTick` finishes. Close the mutation window before `POST_TICK_START`.
-  Startup registration remains synchronous, operation order is preserved, and
-  VS consistency exceptions remain active. This addresses the observed TARDIS
-  dimension registration after `CLEAR_FOR_RESET`.
-* Use Distant Horizons' normal `getOrLoadLevel` path when its player-transfer
-  callback encounters a dynamically created world that missed initial level
-  registration. Existing level instances are reused. This fixes the observed
-  null level in `AbstractDhServerWorld.changePlayerLevel`; it does not suppress
-  DH's own level-loading errors or replace inventory data.
-* When Sable Companion is only its default fallback, do not feed its VS-backed
-  plot check back into VS's Sable exclusion logic. This prevents recursion and
-  avoids misclassifying VS ship chunks as a separate Sable sublevel. Genuine
-  non-default Sable implementations retain their normal path.
-* Disable the two unconditional `[VS-TD-DBG-CLIENT]` INFO calls in the targeted
-  Eureka client callback by default. Other Eureka logging stays intact.
-
-* Keep DWM exterior block positions in VS ship-local coordinates. Display the
-  transformed world position and facing on the console and new waypoint screen.
-* Transform both TARDIS door portal endpoints and the exterior portal orientation
-  when the ship moves or rotates. Stationary endpoints avoid repeated syncs.
-* Position ship-attached door portals before spawning them and disable IP's default
-  position animation so a newly opened portal does not animate from shipyard space.
-* Cut a doorway through the front half of an open ship-mounted TARDIS shell when
-  its active portal is teleportable. Preserve side walls, the back, deck and
-  neighboring blocks. Closed doors keep DWM's original collision and outline.
-* Use the exterior's transformed world position for the key's normal ten-block
-  opening range. Keep saved exterior addresses in ship-local coordinates.
-* Acknowledge already received ships across portal dimensions, without requiring
-  the player to visit the ship's dimension first.
-* Show world coordinates followed by `(On ship)` in the sonic destination message,
-  while preserving the ship-local landing target.
-* Coordinate-based vertical scans also compare VS ship surfaces with terrain,
-  validating ship-local landing space through DWM's native checks.
-* Key recall recognizes the ship deck below the player. A direct ship-local
-  support-block check handles raycasts that miss the deck or report only terrain. Store a fixed block
-  position and facing on that ship, so the destination follows its movement
-  throughout the flight. Use DWM's direct safe-landing check; an obstructed or
-  removed target fails rather than falling through to terrain. Save the target
-  ship identity with the recall so this check survives a world reload.
-* Measure ship flights in world coordinates. Ship trips use ordinary demat/remat
-  because DWM's flyover animation assumes stationary world block positions;
-  the saved flyover lever setting remains intact for ordinary trips.
-
-Immersive Portals’ Eureka incompatibility notice is suppressed while Fan4Compat
-and Eureka are installed. Other mod warnings (including Create), shader warnings
-and severe incompatibility checks remain active. This does not edit IP settings.
-
-Point Blank Fabric 2.2.0: stale gun animation callbacks with empty or non-gun
-item stacks return no controllers, preventing the `AirBlockItem` → `GunItem`
-cast crash. Valid gun animations retain their native handling. Alpha 39 also rejects draw
-transitions when the passed item differs from the cached gun or its native fire
-mode is unresolved. This prevents the subsequent null fire-mode ammo crash
-without changing ammo data or fabricating a fire mode. Alpha 40 corrects the
-client-tick draw call to use Point Blank’s operable gun context, including an
-offhand gun while a TARDIS key is in the main hand. Gun type and saved weapon UUID
-must match the selected state; other draws retain their original stack.
-
-Beta 21 routes Point Blank scope stencil setters through Minecraft's state cache.
-With supported Immersive Portals installed, its normal stencil renderer also uses
-that cache. Point Blank's scope setup/cleanup and preparatory clears leave portal
-stencil state and contents alone during nested portal views; ordinary scope draws
-retain their stencil behavior. This targets the missing-solid-terrain issue seen
-with shaders off and the XM3. The pack owner confirmed solid terrain no longer disappears in beta 21. Portal
-regression testing was unavailable and accepted as unverified; shader/platform
-variants remain separate checks.
-
-Beta 20 temporarily enables read-only graphics diagnostics for Point Blank 2.2.0.
-Reports tagged `[Fan4Compat RenderDiag]` compare actual OpenGL state and Minecraft's
-cached state around gun preparation, gun drawing, scope-world rendering and world
-rendering. They include shader status, framebuffer attachments, stencil/depth
-settings and color masks. Differences are evidence to investigate, not automatic
-proof of a rendering fault. No graphics state is repaired or changed.
-
-To reproduce the missing-terrain issue, restart with shaders disabled (or Iris
-removed), draw the XM3, then switch away and share `latest.log`. Sampling is limited
-to once per second per stage; duplicate reports are suppressed and each launch is
-capped at 96 reports. Diagnostics are off by default; add JVM argument `-Dfan4compat.renderDiagnostics=true` to enable these temporary diagnostic hooks on the next launch. Gun fixes are always on.
 
 ## Settings screen and options
 
@@ -420,97 +174,6 @@ older `-Dfan4compat.renderDiagnostics`, `-Dfan4compat.dhRenderDiagnostics`,
 The Xaero diagnostics write `[Fan4Compat XaeroDiag]` lines to `latest.log`: inside a TARDIS the exterior, compass turn, cave start and layer (when they change); the shared map's queue and progress every few seconds; and each step of the waypoint exchange on the server and the client.
 The render diagnostics switch also turns on the Distant Horizons diagnostics unless those are set
 separately. Xaero waypoint sync has its entry above.
-
-## Xaero minimap and waypoints follow the TARDIS exterior
-
-Client only; needs Xaero's Minimap 26.6.0 (or 26.5.0), Xaero's World Map 1.47.0 (or 1.46.0) and Doctor Who Mod. While you are inside a TARDIS that
-has landed, Xaero treats you as standing at the exterior:
-
-- **Waypoints** belong to the outside. The waypoint list shows the exterior dimension's waypoints (the same world switch the
-  waypoint menu's own world selector makes), and new waypoints, the waypoint dialog's default coordinates and the temporary
-  waypoint hotkey use the exterior's dimension and coordinates, not the interior's.
-- **The minimap** centers on the exterior and shows waypoints relative to it. Its terrain comes from the World Map's stored
-  data for that spot: the outside is not loaded on your client, so you see terrain you have already mapped there, and blank
-  where you have not.
-- **Height and ceilings.** Under a ceiling dimension (the Nether) the minimap shows the layer at the TARDIS's own height, as it
-  would if you stood outside, instead of the bedrock roof. Xaero normally works that out by scanning the blocks around you for a
-  roof; inside the TARDIS that is the interior, so Fan4Compat supplies the exterior's height instead. Open-sky exteriors keep the
-  normal top view.
-- **The World Map** keeps viewing the exterior's dimension while you are inside, loads regions around the exterior, and puts
-  your marker there.
-- **Compass, coordinates and radar.** While the TARDIS is landed the minimap's compass and the World Map arrow are turned to the
-  exterior's orientation (not the interior's), the coordinates show the exterior's (following the flight while it travels), and
-  Xaero's entity radar shows nothing inside a TARDIS so interior entities do not appear on the outside map.
-
-In flight, outside a TARDIS, or when the exterior cannot be found, everything is normal, and anything it changed is put back
-(a waypoint world or map dimension you chose yourself is never touched). While the exterior is shown, Xaero does not record the
-interior's chunks (Xaero's own rule whenever the map shows another dimension). Not covered: an exterior in a
-differently scaled dimension such as the Nether (coordinates may be scaled wrongly), and live terrain. On by default.
-
-## Shared explored map
-
-Needs Fan4Compat on the **server and on each client**, and Xaero's World Map 1.47.0 (or 1.46.0) on the client. Terrain that any player has explored shows
-up on everyone's World Map, including areas you have never visited. On by default.
-
-- **Where the terrain comes from (`sharedMapMode`, set by the server operator in `config/fan4compat-xaero.properties`).**
-  `SERVER` records the chunks the server has loaded around players. `CLIENT` records what clients upload from their own Xaero map data
-  (the server captures nothing itself). `BOTH`, the default, does both: uploads only fill places the server has not captured, so a client
-  can never overwrite what the server saw. `NORMAL` turns it off: Xaero behaves as normal, the server shares and stores nothing and
-  clients upload nothing. The server tells each client its mode at join.
-- **Server.** In `SERVER` and `BOTH` modes, a few times a second the dedicated server looks at some chunks around each player (the chunks their client holds, nearest
-  first), writes a small surface summary of each (top block, biome, terrain height and top height per column), and stores it under the
-  world folder in `fan4compat/shared-map/`. Chunks it has not seen before, or that changed, are streamed to every Fan4Compat client in the
-  same dimension. Only the Overworld, Nether, End and the Aether are shared by default (`sharedMapDimensions` in
-  `config/fan4compat-xaero.properties`); TARDIS interiors and Valkyrien Skies ship chunks are not.
-- **Client.** The summaries are written into Xaero's own map data a few per frame, the way Xaero's writer writes a chunk it has just read, and
-  only where Xaero has no tile of its own. Xaero replaces a shared tile with real data the first time you load that chunk. Your client tells
-  the server at join what it already has, so each join sends only what is new.
-- **What it looks like.** Surface terrain only (no caves), with the top block, biome and height; water shows as water. Because the tiles are
-  in Xaero's data, the corner minimap (when it draws from the World Map) can show them too.
-- **Uploads (`CLIENT` and `BOTH`).** Your client reads the surface tiles Xaero has loaded around you (including old map data Xaero loads from
-  its files as you get near), a few per frame, and sends the ones the server has not been given in that form, in small batches. It never
-  uploads while the map shows a different dimension than your world (inside a TARDIS), and does not send back chunks the server gave it.
-  The server accepts an upload only for a shared dimension you are standing in, inside the world border, within a rate limit, and stamps
-  it itself. Uploads are not verified against the world, so `CLIENT` mode trusts every player with the mod; use `SERVER` or `BOTH` on
-  a server where that matters (in `BOTH` a client can only fill gaps).
-- **Privacy.** Everyone sees terrain other players explored, and server admins can read the stored data.
-- **Safe to lose.** If Xaero changes its internals the shared map switches itself off for that session with one log warning and the map
-  carries on; the server and every other feature are unaffected. Removing Fan4Compat leaves Xaero's own files working.
-
-## Xaero waypoint sync
-
-Your Xaero's Minimap waypoints are kept on the server, so they follow you between PCs. It needs Fan4Compat on
-the server and on your client, and Xaero's Minimap 26.6.0 (or 26.5.0) on the client. It is on by default.
-
-- **How it works.** While you log in, the server holds your join (briefly, in the connection's configuration
-  phase, before the world loads) and sends the waypoint files it has for you. Your client writes the newer ones into
-  Xaero's folder for that server and sends back any files the server lacks. Xaero then builds its session and reads
-  the already-updated files, so nothing needs reloading. Edits you make while playing are uploaded within about
-  30 seconds.
-- **Conflicts.** The newest save wins. When both PCs changed the same file, the loser is kept: on the server as a
-  bounded set of timestamped backups, and on the PC under `fan4compat/backups/` in the game folder. A waypoint you delete stays
-  deleted only if that file is the newest save.
-- **Files.** Only waypoint files are synced (`xaero/minimap/Multiplayer_<address>/<dimension>/<world>.txt`), not
-  Xaero's `config.txt` files or the world map. Different PCs may use different server addresses; each uses its own
-  Xaero folder and shares one copy on the server. Addresses in IPv6 form are not supported.
-- **Limits and privacy.** At most 64 files, 64 KiB per file and 256 KiB per player by default
-  (`waypointMaxBytesPerPlayer` in `config/fan4compat-xaero.properties` on the server, capped at 700000). The server
-  stores them under the world folder, `fan4compat/xaero-waypoints/<player UUID>.json`, readable by server admins.
-- **Safe to lose.** If the exchange fails or the player's client lacks the feature, the join continues after at most
-  20 seconds and Xaero works from its local files exactly as before. Turning the switch off, or removing Fan4Compat,
-  leaves Xaero's own files untouched.
-
-## Xaero map shows the TARDIS exterior
-
-Client only; needs Xaero's World Map 1.47.0 (or 1.46.0) and Doctor Who Mod. Open the World Map while you are inside a TARDIS that
-has landed and it opens on the exterior's dimension, centered on where the TARDIS is, instead of on the interior
-dimension. The client already receives the exterior from Doctor Who Mod, so no server change is needed. While the TARDIS
-is in flight, or if the exterior cannot be found, the map behaves as normal; leaving the TARDIS puts the map back. The
-switch is the same one Xaero's own dimension button makes, and it lasts only while the map screen is open: closing the
-screen puts the map back, so the corner minimap and the rest of Xaero never see it. Xaero's map writer already skips
-recording whenever the map's dimension is not the player's real one, so no interior chunk is saved into the exterior's
-map (and the interior is simply not mapped while the exterior is on screen). Not covered: the corner minimap showing the
-exterior, the player marker, and following the TARDIS during travel. On by default; switch it off in the Fan4Compat settings.
 
 ## Remaining issues and limits
 
@@ -577,35 +240,6 @@ bundling Minecraft or the unofficial port binaries. Runtime helpers live in
 `src`. There is one GitHub Actions job, **Build**, which runs `./gradlew clean build` and
 uploads the jar.
 
-## Validate in game
-
-Test in a copy of the world, starting with the original VS jar and Fan4Compat.
-
-1. Start the client and a dedicated server.
-2. Assemble a small Eureka ship; check its model, helm outline, helm interaction,
-   steering, and save/reload with Sodium and Iris.
-3. Place a new TARDIS and open it to create a new interior; repeat with another
-   TARDIS, then reopen an existing interior and reload the world. Check return
-   travel with Distant Horizons, a few disposable inventory items and an inventory
-   comparison before and after. Verify a stationary TARDIS before a ship-mounted
-   one. With DWM 1.0.38.4, summon while standing on a ship deck, then move
-   and rotate the ship before arrival. Check it lands at the same deck block,
-   the console shows world coordinates, and both portal directions track the
-   doors. Enter and exit with the ship stopped, then moving. Open the doors from
-   inside and check that the portal appears attached immediately and the ship is
-   visible after exiting; pre-entry ship visibility is a known limitation. Set a sonic destination on the deck and check world coordinates
-   followed by `(On ship)`; repeat on terrain to check the ordinary message.
-   Check repeated crossings without commands, stationary entry, inventory and
-   dimension agreement, then repeat while moving. Check closed-door and nearby deck collisions. Repeat after save/reload. Block the landing space and verify failure
-   instead of a ground landing.
-4. Restore Windchimes and check startup, nearby ship rendering and interaction.
-5. Check stationary and moving ship-mounted TARDIS doorways with shaders
-   enabled and disabled.
-
-The standalone build and static verification are not substitutes for these
-runtime checks. In particular, the new dimension queue is covered by isolated
-tests, but has not yet been tested with the full Minecraft/DimLib runtime.
-
 ## Repository layout
 
 Compatibility code is grouped by the mod being integrated with Valkyrien Skies:
@@ -652,88 +286,3 @@ Update this README and `PROGRESS.md` with each compatibility change, including
 supported versions, user-visible behavior and outstanding runtime validation.
 Keep completed implementations separate from open goals and preserve historical
 results as history. Produce release artifacts with `./gradlew clean build`.
-
-## Portal depth-copy diagnostics (beta 24)
-
-To investigate Mac shader-on nested portals falling back to compatibility mode,
-beta 24 logs `[Fan4Compat PortalDepthDiag]` once for a successful depth copy and
-up to eight failed copies per launch. It records the original GL error and both
-framebuffers' depth/stencil representations without changing the native fallback
-or consuming extra errors. Reproduce nested portal rendering with BSL enabled
-and share `latest.log`. Beta 35 turns this observer off by default; enable it with the
-"Portal depth-copy logging" setting or `-Dfan4compat.portalDepthDiagnostics=true`. Existing fixes stay enabled.
-Point Blank render diagnostics remain off by default as of beta 23.
-
-## Mac nested portal depth workaround (beta 25)
-
-On Apple OpenGL, recursive Iris portal targets use a depth-only floating-point
-texture and separate stencil renderbuffer when copying the main view's DEPTH32F
-texture. This targets the depth-copy failure captured in beta 24. Other GPUs and
-main framebuffers retain their native layout. If the driver rejects the separate
-attachments, the original layout and compatibility fallback remain available.
-Test nested portals with BSL enabled; actual Mac rendering is not yet confirmed.
-The `[Fan4Compat PortalDepthDiag]` reports remain enabled for verification.
-
-## XM3 framebuffer restoration (beta 26)
-
-Point Blank's lazy scope-stencil setup rebuilds the main framebuffer and can leave
-framebuffer 0 bound. Beta 26 restores the caller's read/draw bindings around both
-native stencil-enablement calls, resolving recreated target IDs. Requires supported
-Point Blank only; Iris and IP are optional. Mac terrain recovery remains to be
-tested with shaders on and off. Keep `-Dfan4compat.renderDiagnostics=true` enabled
-for that test. The beta 25 Mac portal workaround remains active.
-
-## Deferred scope/camera diagnostics (beta 27)
-
-Enable `-Dfan4compat.renderDiagnostics=true`, draw/aim the XM3 with shaders off
-and on, switch away, then open the TARDIS exterior camera. Reports now include
-actual stencil setup/cleanup callbacks, GUI camera boundaries, dimension and portal
-layer. Sampling allows four distinct reports per stage and 96 total per launch.
-Existing fixes are unchanged; this build does not claim to resolve the Mac issue.
-
-Beta 28 extends `pointblank/StencilCompat` to reapply owned stencil functions
-after cache updates, and adds `IrisScopeStencilMixin` for Iris glow/muzzle-flash
-raw calls. Regression/native checks cover the cached-no-op mismatch and callback
-bindings. Mac XM3/exterior-camera visual recovery still needs testing; retain
-`-Dfan4compat.renderDiagnostics=true`. See the maintained Mac investigation.
-
-Beta 29 adds an opt-in 45-second framebuffer/stencil caller trace to investigate the
-remaining Mac XM3 disappearance. It does not add a new rendering repair. Draw the
-XM3 promptly after joining with `-Dfan4compat.renderDiagnostics=true`.
-
-Beta 31 resets stale scope stencil comparisons before Immersive Portals clears its
-top-level stencil frame. Recursive portal masks remain owned by IP. Mac recovery
-requires gameplay verification; diagnostics remain available.
-
-## Beta 32: persistent DH overlay diagnostics
-
-The Windows AMD capture reports DH LODs overlaying world terrain while guns remain
-visible. Unequipping does not recover; shader reload does. Root cause is unconfirmed.
-Opt-in DHRenderDiagnostics records native layer/fade pass entry/exit framebuffer,
-depth-test/write/function, attachment IDs, shader program, active texture/binding,
-main depth texture, portal layer, GUI-camera status and dimension. Iris DH depth
-getter return IDs are observed without requesting extra getters. Samples occur at
-most every five seconds per stage, capped at 600 total, and remain available for
-late onset. No graphics state is mutated and no error queue consumed. Enable
--Dfan4compat.dhRenderDiagnostics=true (existing renderDiagnostics also enables it).
-Capture normal rendering, overlay onset, and shader off/on recovery in one log;
-note the onset time. Supported DH is required; depth getter observer also needs
-supported Iris. No Point Blank/IP dependency for the DH pass observers.
-
-## Beta 33: preserve DH depth attachments during Iris main-depth refresh
-
-Beta 32 captures DH FBO 29 changing depth attachment from DH texture 106 to main
-texture 4; shader reload rebuilds a DH framebuffer with 106 and restores rendering.
-Iris RenderTargets.resizeIfNeeded assigns the changed main depth texture to owned
-framebuffers. DH framebuffers are in that collection, while DH reconnectDHTextures
-skips attachment updates when its stored DH texture ID remains unchanged.
-
-DhDepthAttachmentMixin records objects returned by RenderTargets.createDHFramebuffer
-in a weak identity map. Only that class's main-depth refresh skips these objects;
-ordinary framebuffer updates and DH's native reconnection/resizing remain intact.
-Hook requires supported Iris and DH, without requiring PB/IP or diagnostics.
-No recurring GL queries, forced pipeline reload or texture allocation is added.
-Regression checks cover identity and repeated refresh; native selectors checked
-against Iris 1.8.1. The pack owner confirmed Windows DH recovery and normal Mac
-rendering on beta 33 (2026-10-11). Existing beta 32 diagnostics remain available;
-the causal link to Mac gun/portal overlap remains unproven.

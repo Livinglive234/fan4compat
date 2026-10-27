@@ -30,6 +30,9 @@ public final class SpatialGuiNativeCheck {
         XaeroSyncNativeCheck.field(mc+"class_310","field_1773",false);
         for(String field:new String[]{"field_18712","field_18717","field_18718"})XaeroSyncNativeCheck.field(mc+"class_4184",field,false);
         for(String field:new String[]{"field_1352","field_1351","field_1350"})XaeroSyncNativeCheck.field(mc+"class_243",field,false);
+        // Camera.setup (the portal camera hook) and, when the Immersive Portals jar is given, the method it calls.
+        XaeroSyncNativeCheck.method(mc+"class_4184","method_19321","(L"+mc+"class_1922;L"+mc+"class_1297;ZZF)V",false);
+        if(args.length>2)XaeroSyncNativeCheck.method("qouteall/imm_ptl/core/render/context_management/WorldRenderInfo","adjustCameraPos","(L"+mc+"class_4184;)V",true);
         System.out.println("PASS: every Spatial GUI and Minecraft member used by the portal trace exists in the real jars with the exact descriptors");
     }
 }
