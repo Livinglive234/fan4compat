@@ -34,6 +34,8 @@ public class GenerateAddon implements Opcodes {
         EurekaGenerator.debugMixin();
         EurekaGenerator.warningMixin();
         AetherCapeGenerator.skinLayersMixin();
+        SpatialGuiDiagnosticGenerator.generate();
+        SpatialGuiPerspectiveGenerator.generate();
         EurekaGenerator.severeWarningMixin();
         PointBlankGenerator.generate();
         StencilGenerator.generate();

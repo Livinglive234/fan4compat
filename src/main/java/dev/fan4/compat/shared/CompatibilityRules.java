@@ -51,6 +51,7 @@ public final class CompatibilityRules {
         boolean vs=supported(mods,"valkyrienskies"),ip=supported(mods,"immersive_portals");
         boolean iris=supported(mods,"iris"),dh=supported(mods,"distanthorizons"),spr=supported(mods,"sound_physics_remastered"),eureka=supported(mods,"vs_eureka");
         boolean bclib=supported(mods,"bclib"),accessories=supported(mods,"accessories");
+        if(path.startsWith("spatialgui."))return "1.9.1".equals(mods.get("spatial_gui"))&&ip&&(simple.equals("SpatialGuiPerspectiveMixin")||Diagnostics.spatialGui());
         if(simple.equals("AetherCapeSkinLayersMixin"))return mods.containsKey("aether");
         if(path.startsWith("graves."))return supported(mods,"graves")&&accessories&&mods.containsKey("aether");
         if(path.startsWith("xaero."))return supported(mods,simple.startsWith("TardisMinimap")?"xaerominimap":"xaeroworldmap")&&(simple.startsWith("SharedMap")||supported(mods,"dwm"));

@@ -19,6 +19,7 @@ public final class Diagnostics {
         return override!=null?Boolean.parseBoolean(override):render()||Features.enabled("dhRenderDiagnostics");
     }
     public static boolean xaero(){return flag("fan4compat.xaeroDiagnostics","xaeroDiagnostics");}
+    public static boolean spatialGui(){return flag("fan4compat.spatialGuiDiagnostics","spatialGuiDiagnostics");}
     public static boolean portalDepth(){return flag("fan4compat.portalDepthDiagnostics","portalDepthDiagnostics");}
 
     /** Per-stage rate limit, report cap and failure latch; one failure silences the whole probe. */

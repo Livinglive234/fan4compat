@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'dev.fan4'
-version = '0.1.0-beta.49'
+version = '0.1.0-beta.50'
 
 repositories {
     mavenCentral()
@@ -76,7 +76,7 @@ tasks.named('processResources') {
     filesMatching('fabric.mod.json') { expand version: project.version }
 }
 
-['DimensionQueueTest', 'CompatCancellationTest', 'ShipPoseTest', 'CompatCallsTest', 'OptionalCompatibilityTest', 'PortalDepthTextureTest', 'FreecamTickTest', 'FreecamShaderTest', 'FramebufferCopyTest', 'JadeRaycastTest', 'DepthFormatTest', 'PortalDepthDiagnosticsTest', 'SeparateStencilTest', 'UpdateTest', 'AccessoryGraveTest', 'AccessoryGraveSlotsTest', 'TrinketGraveTest', 'FeaturesTest', 'ConfigScreenTest', 'WaypointSyncTest', 'XaeroSyncFlowTest', 'TardisMapCompatTest', 'TardisLocationTest', 'SharedMapTest', 'SharedMapServerTest', 'SharedMapClientTest', 'SharedMapUploadTest', 'SharedMapSummarizerTest', 'RenderDiagnosticsTest', 'StencilCompatTest', 'GunFramebufferTest', 'SaveLogFilterTest', 'BumblezoneShadersTest', 'ChestTrackerScreensTest'].each { testMain ->
+['DimensionQueueTest', 'CompatCancellationTest', 'ShipPoseTest', 'CompatCallsTest', 'OptionalCompatibilityTest', 'PortalDepthTextureTest', 'FreecamTickTest', 'FreecamShaderTest', 'FramebufferCopyTest', 'JadeRaycastTest', 'DepthFormatTest', 'PortalDepthDiagnosticsTest', 'SeparateStencilTest', 'UpdateTest', 'AccessoryGraveTest', 'AccessoryGraveSlotsTest', 'TrinketGraveTest', 'FeaturesTest', 'ConfigScreenTest', 'WaypointSyncTest', 'XaeroSyncFlowTest', 'TardisMapCompatTest', 'TardisLocationTest', 'SharedMapTest', 'SharedMapServerTest', 'SharedMapClientTest', 'SharedMapUploadTest', 'SharedMapSummarizerTest', 'RenderDiagnosticsTest', 'StencilCompatTest', 'GunFramebufferTest', 'SaveLogFilterTest', 'BumblezoneShadersTest', 'ChestTrackerScreensTest', 'SpatialGuiDiagnosticsTest'].each { testMain ->
     def regression = tasks.register(testMain.uncapitalize(), JavaExec) {
         dependsOn tasks.named('testClasses')
         classpath = sourceSets.test.runtimeClasspath
@@ -342,6 +342,17 @@ tasks.register('configNativeCheck', JavaExec) {
     }
 }
 
+// The Spatial GUI jar and an intermediary-named 1.21.1 Minecraft jar: every method the Spatial GUI portal trace injects into or reads.
+tasks.register('spatialGuiNativeCheck', JavaExec) {
+    dependsOn tasks.named('classes'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'SpatialGuiNativeCheck'
+    if (project.hasProperty('spatialGuiJar') && project.hasProperty('xaeroMinecraftJar')) {
+        args project.property('spatialGuiJar'), project.property('xaeroMinecraftJar')
+    } else {
+        onlyIf { false }
+    }
+}
 // Chest Tracker's jar plus the jars of the mods whose screens are listed: the blacklist method and every listed class must exist (paths separated by the platform's path separator in -PchestTrackerJars).
 tasks.register('chestTrackerScreensNativeCheck', JavaExec) {
     dependsOn tasks.named('classes'), tasks.named('toolsClasses')

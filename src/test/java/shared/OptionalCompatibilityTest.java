@@ -12,8 +12,8 @@ public final class OptionalCompatibilityTest {
         Matcher matcher=Pattern.compile("\"((?:[a-z]+)\\.(?:common|client)\\.[A-Za-z0-9]+)\"").matcher(config);
         List<String> mixins=new ArrayList<>();while(matcher.find())mixins.add(matcher.group(1));
         check(mixins.size()>60,"manifest coverage");
-        Map<String,String> all=new HashMap<>(CompatibilityRules.VERSIONS);all.put("aether","1.5.11");
-        System.setProperty("fan4compat.renderDiagnostics","true");System.setProperty("fan4compat.portalDepthDiagnostics","true");
+        Map<String,String> all=new HashMap<>(CompatibilityRules.VERSIONS);all.put("aether","1.5.11");all.put("spatial_gui","1.9.1");
+        System.setProperty("fan4compat.renderDiagnostics","true");System.setProperty("fan4compat.portalDepthDiagnostics","true");System.setProperty("fan4compat.spatialGuiDiagnostics","true");
         for(String name:mixins){
             check(!applies(Map.of(),name),"empty setup applies "+name);
             check(applies(all,name)!=name.endsWith("PortalSoundRayMixin"),"full supported setup skips "+name);
@@ -98,6 +98,22 @@ public final class OptionalCompatibilityTest {
         String metadata=Files.readString(Path.of("src/main/resources/fabric.mod.json"));
         String depends=metadata.substring(metadata.indexOf("\"depends\""),metadata.indexOf("\"jars\""));
         check(!depends.contains("valkyrienskies")&&!depends.contains("immersive_portals")&&!depends.contains("pointblank")&&!depends.contains("dwm"),"gameplay mods declared mandatory");
+        // The Spatial GUI trace needs Spatial GUI 1.9.1, Immersive Portals and its own switch.
+        Map<String,String> spatial=Map.of("spatial_gui","1.9.1","immersive_portals","6.0.6");
+        String trace="spatialgui.client.SpatialGuiLevelDiagnosticMixin";
+        check(applies(spatial,trace),"trace applies with Spatial GUI 1.9.1 and Immersive Portals");
+        check(!applies(Map.of("spatial_gui","1.9","immersive_portals","6.0.6"),trace)&&!applies(Map.of("spatial_gui","2.0","immersive_portals","6.0.6"),trace),"trace is exact to the Spatial GUI build it was checked against");
+        check(!applies(Map.of("spatial_gui","1.9.1"),trace)&&!applies(Map.of("immersive_portals","6.0.6"),trace),"trace needs both mods");
+        System.clearProperty("fan4compat.spatialGuiDiagnostics");
+        check(!applies(spatial,trace),"trace is off unless the switch is on");
+        // The perspective fix is a pack feature: it needs the same two mods at the same build but not the diagnostics switch, and its own feature switch turns it off.
+        String fix="spatialgui.client.SpatialGuiPerspectiveMixin";
+        check(applies(spatial,fix),"perspective fix applies without the diagnostics switch");
+        check(!applies(Map.of("spatial_gui","1.9","immersive_portals","6.0.6"),fix)&&!applies(Map.of("spatial_gui","1.9.1"),fix)&&!applies(Map.of("immersive_portals","6.0.6"),fix),"perspective fix needs Spatial GUI 1.9.1 and Immersive Portals");
+        System.setProperty("fan4compat.feature.spatialGuiPortalFix","false");
+        check(!applies(spatial,fix),"perspective fix can be turned off");
+        System.clearProperty("fan4compat.feature.spatialGuiPortalFix");
+        System.setProperty("fan4compat.spatialGuiDiagnostics","true");
         System.out.println("PASS: all "+mixins.size()+" optional mixin gates; empty, target-only, Point Blank/TARDIS, missing VS/IP, unsupported versions and metadata");
     }
 }
