@@ -163,7 +163,7 @@ the supplied VS/Eureka files have different marketing and metadata versions.
 | `dwm` | `>=1.0.38.4` (inclusive minimum) |
 | `vs_eureka` | `1.5.3-beta.4-td.4+b0d9511582` |
 | `distanthorizons` | `3.3.3` |
-| `iris` | `1.8.1+mc1.21.1` |
+| `iris` | `1.8.1+mc1.21.1` (also `1.8.14-beta.1+mc1.21.1`) |
 | `freecam` | `1.3.0+mc1.21` |
 | `pointblank` | `2.2.0` |
 | `accessories` | `1.1.0-beta.48+1.21.1` |
@@ -175,7 +175,7 @@ the supplied VS/Eureka files have different marketing and metadata versions.
 | `xaeroworldmap` | `1.47.0` (also `1.46.0`) |
 | `elytratrails` | `1.4.7.5-1.21.1` |
 
-Trinkets' grave helper separately checks `3.10.0`. Aether is presence-gated for
+Trinkets' grave helper separately checks `3.10.0`. The Sodium 0.8 hooks check that `sodium` starts with `0.8.` (`CompatibilityRules.sodium08`), the Spatial GUI hooks check `spatial_gui` `1.9.1`, and the Aether Immersive Portals pack hook checks `aether` `1.5.11`. Aether is otherwise presence-gated for
 the grave and Aether portal hooks. Sable checks the presence and identity of its
 default companion class instead of adding a general Sable version pin. The
 optional-recipe filter checks installed recipe dependencies individually.
@@ -196,6 +196,10 @@ optional-recipe filter checks installed recipe dependencies individually.
 | Point Blank animation, draw, scope and diagnostics | Supported Point Blank; IP cache bridge additionally needs supported IP. |
 | Accessory entity packets | Supported Accessories + IP. |
 | Equipment in graves | Supported Graves + Accessories + Aether present; optional supported Trinkets is handled inside that integration. |
+| Sodium 0.8 portal culling and portal occlusion (replace Immersive Portals' own Sodium mixins, which are cancelled) | Sodium `0.8.x` + supported IP. |
+| Sodium 0.8 ship rendering (replaces Valkyrien Skies' `RenderSectionManager` mixins, which are cancelled) | Sodium `0.8.x` + supported VS + supported IP. |
+| Spatial GUI portal camera and matrix fix | Spatial GUI `1.9.1` + supported IP. |
+| Aether Immersive Portals data pack registration | Aether `1.5.11` + supported IP. |
 | Sound snapshot and portal-only ray bridge | Supported IP + Sound Physics; the portal-only ray bridge is selected when VS is absent. |
 | Ship acoustic ray/snapshot bridge | Supported VS + Sound Physics. |
 | Jade ship rays | Supported Jade + VS; helm overlay additionally needs Eureka. |
