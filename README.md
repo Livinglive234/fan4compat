@@ -8,9 +8,9 @@ Iris, Point Blank, Aether, Spatial GUI and more). It does not overwrite existing
 mod jars, and each fix applies only when the mod it targets is installed at a
 supported version.
 
-**Status: beta, 0.1.0-beta.52.**
+**Status: beta, 0.1.0-beta.53.**
 
-[Beta 52 release notes](docs/releases/0.1.0-beta.52.md) ·
+[Beta 53 release notes](docs/releases/0.1.0-beta.53.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -70,6 +70,7 @@ Other mod releases need another compatibility audit.
 **Pack extras**
 - Aether and Trinkets items go into Player Graves graves and return to their slots.
 - Aether capes no longer turn your skin layers back on.
+- The Aether portal works with Immersive Portals (Aether 1.5.11) without a patched Aether jar.
 - Chest Tracker's button is hidden on screens that cannot hold items.
 - Bumblezone turns shaders off on entry and back on when you leave.
 - BCLib recipe fix and Sable Companion fallback.
@@ -81,7 +82,7 @@ Other mod releases need another compatibility audit.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.52.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.53.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.

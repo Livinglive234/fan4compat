@@ -11,6 +11,7 @@
     "graves.common.AccessoryGraveEmptyMixin",
     "eureka.common.EurekaPortalWarningMixin",
     "aether.common.AetherCapeSkinLayersMixin",
+    "aether.common.AetherPortalPackMixin",
     "sodium.client.SodiumViewportCullingMixin",
     "sodium.client.SodiumShipRenderingMixin",
     "sodium.client.SodiumPortalOcclusionMixin",

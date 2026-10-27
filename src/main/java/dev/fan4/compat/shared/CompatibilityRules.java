@@ -55,6 +55,7 @@ public final class CompatibilityRules {
         boolean bclib=supported(mods,"bclib"),accessories=supported(mods,"accessories");
         if(path.startsWith("sodium."))return sodium08(mods)&&(simple.equals("SodiumShipRenderingMixin")?vs:ip);
         if(path.startsWith("spatialgui."))return "1.9.1".equals(mods.get("spatial_gui"))&&ip&&(!simple.endsWith("DiagnosticMixin")||Diagnostics.spatialGui());
+        if(simple.equals("AetherPortalPackMixin"))return "1.5.11".equals(mods.get("aether"))&&ip;
         if(simple.equals("AetherCapeSkinLayersMixin"))return mods.containsKey("aether");
         if(path.startsWith("graves."))return supported(mods,"graves")&&accessories&&mods.containsKey("aether");
         if(path.startsWith("xaero."))return supported(mods,simple.startsWith("TardisMinimap")?"xaerominimap":"xaeroworldmap")&&(simple.startsWith("SharedMap")||supported(mods,"dwm"));
