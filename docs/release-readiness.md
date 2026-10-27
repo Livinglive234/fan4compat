@@ -123,6 +123,12 @@ IronChest and BetterEnd cosmetic warning candidates as low priority.
   This remains a known limitation and future work, not a beta/stable blocker.
 - Create/Flywheel GPU rendering with Iris shaders and Immersive Portals, if a
   supported shader bridge can be implemented and tested.
+- Cleanup left over from the beta 52 simplification pass (all behaviour-neutral, none done yet):
+  - Cache the reflective Immersive Portals calls on the Spatial GUI paths (`SpatialGuiPortalFix.keepPortalCamera`, `Diagnostics.portalLayer`) as method handles; needs a Spatial GUI game check.
+  - Cache each ship's Sodium render lists between frames and bound the section loop by the ship's real height; reuse the per-ship matrices instead of allocating per pass; hold the ship lists on the manager instead of a nested `WeakHashMap`.
+  - Replace the `CompatPlugin.shouldCancelFor` overloads with one table of named cancel rules next to `Features.hooks`, so a replaced mixin and its replacement are declared together.
+  - Fold `sodium08`, the Spatial GUI `1.9.1` literal and `ALSO_SUPPORTED` into `VERSIONS` so every pin gives the startup "Skipping compatibility hooks" warning and the settings text derives from one place; key the Aether and Sodium ship rules by package, not simple class name.
+  - Share the repeated `getRenderSection` stub and bridge between `SodiumShipGenerator` and `SodiumOcclusionGenerator`; give `GenerateAddon` one helper that writes mixin annotations visible so generators cannot pick the flag by hand.
 - Revisit WWOO / Distant Horizons grid seams only with a demonstrated fix whose
   generation cost is acceptable; the alpha 34 border experiment remains removed.
 

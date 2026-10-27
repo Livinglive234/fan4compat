@@ -28,9 +28,21 @@ public final class CompatPlugin implements IMixinConfigPlugin, MixinCanceller {
         if (!registered) { MixinCancellerRegistrar.register(this); registered = true; }
     }
     public boolean shouldCancel(List<String> targets, String mixinClassName) {
-        return shouldCancelFor(CompatibilityRules.portalsOnVs(installedMods()), HAS_SABLE, mixinClassName);
+        Map<String,String> mods=installedMods();
+        return shouldCancelFor(CompatibilityRules.portalsOnVs(mods), HAS_SABLE, CompatibilityRules.sodium08(mods), CompatibilityRules.supported(mods,"valkyrienskies"), mixinClassName);
     }
-    public static boolean shouldCancelFor(boolean portals, boolean sable, String name) {
+    public static boolean shouldCancelFor(boolean portals, boolean sable, String name) { return shouldCancelFor(portals, sable, false, name); }
+    /** IP's redirect of Sodium 0.6's Viewport.isBoxVisible has no call to redirect in Sodium 0.8 and its OcclusionCuller handler names Sodium 0.6's Visitor type (and IP's injectors are required), so they are replaced by sodium.client.SodiumViewportCullingMixin and SodiumPortalOcclusionMixin. */
+    public static boolean shouldCancelFor(boolean portals, boolean sable, boolean sodium08, String name) { return shouldCancelFor(portals, sable, sodium08, false, name); }
+    /**
+     * Valkyrien Skies' own hooks for drawing ships through Sodium were written for Sodium 0.6. Two of its mixin classes mix hooks that cannot apply to Sodium 0.8 (the
+     * render-list creation and the layer drawing) with ones that can, and the duck interface the others read through, so both classes are replaced as a whole by
+     * sodium.client.SodiumShipRenderingMixin. They are cancelled whatever the feature switch says: left in, the first of them stops the world from loading.
+     */
+    public static boolean shouldCancelFor(boolean portals, boolean sable, boolean sodium08, boolean vs, String name) {
+        if (sodium08 && vs && (name.equals("org.valkyrienskies.mod.mixin.mod_compat.sodium.MixinRenderSectionManager")
+            || name.equals("org.valkyrienskies.mod.fabric.mixin.compat.sodium.MixinRenderSectionManager"))) return true;
+        if (sodium08 && (name.equals("qouteall.imm_ptl.core.compat.mixin.sodium.MixinSodiumViewport") || name.equals("qouteall.imm_ptl.core.compat.mixin.sodium.MixinSodiumOcclusionCuller"))) return true;
         if (portals && (name.equals("org.valkyrienskies.mod.mixin.feature.fix_frustum_dead_loop.MixinFrustum")
             || name.equals("org.valkyrienskies.mod.mixin.server.world.MixinChunkMap$TrackedEntity"))) return true;
         return false;

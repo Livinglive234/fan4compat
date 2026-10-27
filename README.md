@@ -8,9 +8,9 @@ Iris, Point Blank, Aether, Spatial GUI and more). It does not overwrite existing
 mod jars, and each fix applies only when the mod it targets is installed at a
 supported version.
 
-**Status: beta, 0.1.0-beta.51.**
+**Status: beta, 0.1.0-beta.52.**
 
-[Beta 51 release notes](docs/releases/0.1.0-beta.51.md) ·
+[Beta 52 release notes](docs/releases/0.1.0-beta.52.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -27,7 +27,8 @@ supported version.
 | Doctor Who Mod | `>=1.0.38.4`, including `1.0.39`; older or unparseable versions skip the ship bridges |
 | Distant Horizons | `3.3.3` for Fabric 1.21.1 |
 | Freecam | `1.3.0+mc1.21` (client only) |
-| Iris | `1.8.1+mc1.21.1` |
+| Iris | `1.8.1+mc1.21.1`, or `1.8.14-beta.1+mc1.21.1` with Sodium 0.8 |
+| Sodium (experimental) | `0.6.7` stock, or `0.8.13` with an edited Immersive Portals jar and Fabric Loader 0.20.1; see the [beta 52 notes](docs/releases/0.1.0-beta.52.md) |
 | Point Blank | Fabric `2.2.0` |
 | Accessories / Player Graves | `1.1.0-beta.48+1.21.1` / `1.0.0` |
 | Sound Physics Remastered | `1.21.1-1.5.2` |
@@ -55,6 +56,7 @@ Other mod releases need another compatibility audit.
 
 **Rendering**
 - Immersive Portals on Apple GPUs (depth and stencil formats, framebuffer-copy fallback).
+- Sodium 0.8.13 and Iris 1.8.14-beta.1 run with Immersive Portals and Valkyrien Skies (portal culling, ship drawing; experimental, needs an edited Immersive Portals jar).
 - Distant Horizons and Iris shaders behave through portal views; Freecam works with Distant Horizons, including with BSL.
 - Point Blank scopes and guns no longer corrupt portal rendering or crash on stale animations.
 - Elytra Contrails wing trails for custom and accessory elytra; TARDIS model cache.
@@ -79,7 +81,7 @@ Other mod releases need another compatibility audit.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.51.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.52.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.

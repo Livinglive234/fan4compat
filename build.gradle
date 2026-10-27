@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'dev.fan4'
-version = '0.1.0-beta.51'
+version = '0.1.0-beta.52'
 
 repositories {
     mavenCentral()
@@ -76,7 +76,7 @@ tasks.named('processResources') {
     filesMatching('fabric.mod.json') { expand version: project.version }
 }
 
-['DimensionQueueTest', 'CompatCancellationTest', 'ShipPoseTest', 'CompatCallsTest', 'OptionalCompatibilityTest', 'PortalDepthTextureTest', 'FreecamTickTest', 'FreecamShaderTest', 'FramebufferCopyTest', 'JadeRaycastTest', 'DepthFormatTest', 'PortalDepthDiagnosticsTest', 'SeparateStencilTest', 'UpdateTest', 'AccessoryGraveTest', 'AccessoryGraveSlotsTest', 'TrinketGraveTest', 'FeaturesTest', 'ConfigScreenTest', 'WaypointSyncTest', 'XaeroSyncFlowTest', 'TardisMapCompatTest', 'TardisLocationTest', 'SharedMapTest', 'SharedMapServerTest', 'SharedMapClientTest', 'SharedMapUploadTest', 'SharedMapSummarizerTest', 'RenderDiagnosticsTest', 'StencilCompatTest', 'GunFramebufferTest', 'SaveLogFilterTest', 'BumblezoneShadersTest', 'ChestTrackerScreensTest', 'SpatialGuiDiagnosticsTest'].each { testMain ->
+['DimensionQueueTest', 'CompatCancellationTest', 'ShipPoseTest', 'CompatCallsTest', 'OptionalCompatibilityTest', 'PortalDepthTextureTest', 'FreecamTickTest', 'FreecamShaderTest', 'FramebufferCopyTest', 'JadeRaycastTest', 'DepthFormatTest', 'PortalDepthDiagnosticsTest', 'SeparateStencilTest', 'UpdateTest', 'AccessoryGraveTest', 'AccessoryGraveSlotsTest', 'TrinketGraveTest', 'FeaturesTest', 'ConfigScreenTest', 'WaypointSyncTest', 'XaeroSyncFlowTest', 'TardisMapCompatTest', 'TardisLocationTest', 'SharedMapTest', 'SharedMapServerTest', 'SharedMapClientTest', 'SharedMapUploadTest', 'SharedMapSummarizerTest', 'RenderDiagnosticsTest', 'StencilCompatTest', 'GunFramebufferTest', 'SaveLogFilterTest', 'BumblezoneShadersTest', 'ChestTrackerScreensTest', 'SpatialGuiDiagnosticsTest', 'PortalCullingTest', 'ShipSectionsTest', 'PortalOcclusionTest'].each { testMain ->
     def regression = tasks.register(testMain.uncapitalize(), JavaExec) {
         dependsOn tasks.named('testClasses')
         classpath = sourceSets.test.runtimeClasspath
@@ -350,6 +350,28 @@ tasks.register('spatialGuiNativeCheck', JavaExec) {
     if (project.hasProperty('spatialGuiJar') && project.hasProperty('xaeroMinecraftJar')) {
         args project.property('spatialGuiJar'), project.property('xaeroMinecraftJar')
         if (project.hasProperty('ipJar')) args project.property('ipJar')
+    } else {
+        onlyIf { false }
+    }
+}
+// The Sodium 0.8 jar and the Immersive Portals jar: every member the portal culling hooks and reads.
+tasks.register('sodiumNativeCheck', JavaExec) {
+    dependsOn tasks.named('classes'), tasks.named('toolsClasses')
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'SodiumNativeCheck'
+    if (project.hasProperty('sodiumJar') && project.hasProperty('ipJar')) {
+        args project.property('sodiumJar'), project.property('ipJar')
+    } else {
+        onlyIf { false }
+    }
+}
+// The Sodium 0.8 jar, the Valkyrien Skies jar, an intermediary-named Minecraft jar and JOML: every member the ship rendering names, and what its mixin targets and shadows.
+tasks.register('sodiumShipNativeCheck', JavaExec) {
+    dependsOn tasks.named('classes'), tasks.named('toolsClasses'), generateAddon
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'SodiumShipNativeCheck'
+    if (project.hasProperty('sodiumJar') && project.hasProperty('vsJar') && project.hasProperty('xaeroMinecraftJar') && project.hasProperty('jomlJar') && project.hasProperty('ipJar')) {
+        args layout.buildDirectory.dir("classes/java/main").get().asFile, generatedClasses.get().asFile, project.property('sodiumJar'), project.property('vsJar'), project.property('xaeroMinecraftJar'), project.property('jomlJar'), project.property('ipJar')
     } else {
         onlyIf { false }
     }

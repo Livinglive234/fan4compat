@@ -134,6 +134,18 @@ public class VerifyAddon {
             for(int n=1;n<setters.length;n++)if(!exists(drag,"set"+setters[n],"("+setters[0]+")V",new HashSet<>()))throw new AssertionError("Missing drag reset "+setters[n]);
         System.out.println("PASS: exact ship transfer and motion packet reflection contracts verified");
     }
+    /**
+     * Mixin reads every annotation except @Mixin (and MixinExtras' parameter sugar such as @Local) from the visible annotations: they have runtime retention, so an invisible
+     * @Shadow, @Unique, @Final, @Inject and so on is silently ignored (a shadow method then fails to apply, a shadow field is merged as an ordinary field).
+     */
+    static void mixinAnnotationsVisible(ClassNode c) {
+        List<List<AnnotationNode>> invisible=new ArrayList<>();
+        for(MethodNode m:c.methods)if(m.invisibleAnnotations!=null)invisible.add(m.invisibleAnnotations);
+        for(FieldNode f:c.fields)if(f.invisibleAnnotations!=null)invisible.add(f.invisibleAnnotations);
+        for(List<AnnotationNode> list:invisible)for(AnnotationNode a:list)
+            if((a.desc.startsWith("Lorg/spongepowered/asm/mixin/")&&!a.desc.equals("Lorg/spongepowered/asm/mixin/Mixin;"))||a.desc.startsWith("Lcom/llamalad7/mixinextras/injector/"))
+                throw new AssertionError("Mixin annotation written as invisible, so Mixin would ignore it: "+a.desc+" in "+c.name);
+    }
     public static void main(String[] args)throws Exception {
         for(int i=1;i<args.length;i++)readJar(args[i]);
         tardisContracts();transitContracts();
@@ -142,6 +154,7 @@ public class VerifyAddon {
             ClassNode c=new ClassNode();new ClassReader(Files.readAllBytes(p)).accept(c,0);
             if(args.length>1)injectionTargets(c);
             Set<String> signatures=new HashSet<>();
+            mixinAnnotationsVisible(c);
             for(MethodNode m:c.methods) {
                 if(!signatures.add(m.name+m.desc))throw new AssertionError("Duplicate JVM method in "+c.name+": "+m.name+m.desc);
                 if((m.access & (Opcodes.ACC_ABSTRACT | Opcodes.ACC_NATIVE))==0)new Analyzer<>(new BasicVerifier()).analyze(c.name,m);

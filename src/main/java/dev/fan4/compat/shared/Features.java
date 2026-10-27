@@ -25,9 +25,11 @@ public final class Features {
         of("pointBlankStencilFixes",RENDERING,"Point Blank scope stencil fixes","Keeps Point Blank scopes and Immersive Portals from corrupting each other's stencil state (the missing-terrain-after-drawing-a-scoped-gun bug).",true,true,"pointblank"),
         of("freecamFixes",RENDERING,"Freecam with Distant Horizons","Lets Freecam tick and clip distant terrain correctly outside loaded chunks, including the BSL shader overlap fix.",true,true,"freecam","distanthorizons"),
         of("wingTrails",RENDERING,"Elytra Contrails wing trails","Draws wing-tip trails for custom and accessory elytra that Elytra Contrails cannot sample on its own.",true,true,"elytratrails"),
+        of("sodiumPortalCulling",RENDERING,"Immersive Portals culling with Sodium 0.8","While a portal view is drawn, Immersive Portals tells Sodium which parts of the world the portal hides so they are not drawn. Sodium 0.8 reorganised the code Immersive Portals hooked for that, so this redoes the hook on the new code. Turn off only to test; portal views then draw more than they need to. Sodium 0.8.x only.",true,true,"sodium","immersive_portals"),
         of("tardisModelCache",RENDERING,"TARDIS model cache","Caches Doctor Who Mod's TARDIS models to reduce per-frame work. Turn off if a TARDIS model ever looks stale.",true,true,"dwm"),
         of("shipPortalBlocking",SHIPS,"Block portals on ships","Stops Nether, Aether and Immersive Portals frames from being lit on a ship. Turn off only if you want to experiment; portals on moving ships can misbehave.",true,true,"valkyrienskies"),
         of("shipAcoustics",SHIPS,"Ship-aware sound occlusion","Makes Sound Physics Remastered trace sound through ship blocks in their own frame. Costs some CPU on busy ships.",true,true,"valkyrienskies","sound_physics_remastered"),
+        of("sodiumShipRendering",SHIPS,"Valkyrien Skies ships with Sodium 0.8","Draws Valkyrien Skies ships through Sodium 0.8, which reorganised the code the ship hooks relied on. Turn off only to test; with it off, ships are not drawn (their original hooks cannot work on Sodium 0.8). Sodium 0.8.x only.",true,true,"valkyrienskies","sodium"),
         of("eurekaWarnings",PACK,"Hide Eureka portal warnings","Removes Eureka from Immersive Portals' incompatibility notices; other warnings are not touched.",true,true,"vs_eureka","immersive_portals"),
         of("jadeHelm",PACK,"Hide Jade while at a helm","Hides the Jade overlay while you steer a ship from a helm, and brings it back when you dismount.",true,true,"jade","vs_eureka"),
         of("xaeroTardisMap",PACK,"Xaero map shows the TARDIS exterior","While you are inside a TARDIS that has landed, Xaero's World Map opens on the exterior's dimension, centered on where the TARDIS is. In flight, or when the exterior is not known, the map behaves as normal.",true,true,"xaeroworldmap","dwm"),
@@ -56,6 +58,8 @@ public final class Features {
         hooks("appleGpuFixes","IrisFramebufferCopyMixin","IrisDepthFormatMixin","IrisSeparateStencilMixin","IrisStencilCleanupMixin");
         hooks("pointBlankStencilFixes","PortalStencilCacheMixin","PortalStencilPrepareMixin","GunStencilMixin","IrisScopeStencilMixin","GunFramebufferMixin","GunAuxFramebufferMixin","GunStencilClearMixin");
         hooks("wingTrails","WingTrailFallbackMixin");
+        hooks("sodiumPortalCulling","SodiumViewportCullingMixin","SodiumPortalOcclusionMixin");
+        hooks("sodiumShipRendering","SodiumShipRenderingMixin");
         hooks("spatialGuiPortalFix","SpatialGuiPerspectiveMixin","SpatialGuiPortalCameraMixin");
         hooks("shipPortalBlocking","ShipNetherPortalCreationMixin","ShipAetherPortalCreationMixin","ShipNetherPortalActivationMixin","ShipFramePortalActivationMixin");
         hooks("shipAcoustics","ShipAcousticRaycastMixin","ShipAcousticSnapshotMixin");

@@ -12,7 +12,7 @@ public final class OptionalCompatibilityTest {
         Matcher matcher=Pattern.compile("\"((?:[a-z]+)\\.(?:common|client)\\.[A-Za-z0-9]+)\"").matcher(config);
         List<String> mixins=new ArrayList<>();while(matcher.find())mixins.add(matcher.group(1));
         check(mixins.size()>60,"manifest coverage");
-        Map<String,String> all=new HashMap<>(CompatibilityRules.VERSIONS);all.put("aether","1.5.11");all.put("spatial_gui","1.9.1");
+        Map<String,String> all=new HashMap<>(CompatibilityRules.VERSIONS);all.put("aether","1.5.11");all.put("spatial_gui","1.9.1");all.put("sodium","0.8.13+mc1.21.1");
         System.setProperty("fan4compat.renderDiagnostics","true");System.setProperty("fan4compat.portalDepthDiagnostics","true");System.setProperty("fan4compat.spatialGuiDiagnostics","true");
         for(String name:mixins){
             check(!applies(Map.of(),name),"empty setup applies "+name);
@@ -104,6 +104,28 @@ public final class OptionalCompatibilityTest {
         check(applies(spatial,trace),"trace applies with Spatial GUI 1.9.1 and Immersive Portals");
         check(!applies(Map.of("spatial_gui","1.9","immersive_portals","6.0.6"),trace)&&!applies(Map.of("spatial_gui","2.0","immersive_portals","6.0.6"),trace),"trace is exact to the Spatial GUI build it was checked against");
         check(!applies(Map.of("spatial_gui","1.9.1"),trace)&&!applies(Map.of("immersive_portals","6.0.6"),trace),"trace needs both mods");
+        // Iris 1.8.14-beta.1 (the build that works with Sodium 0.8) is supported next to 1.8.1, so the Iris and Distant Horizons fixes apply to it; other builds are not.
+        Map<String,String> iris14=new HashMap<>(all);iris14.put("iris","1.8.14-beta.1+mc1.21.1");
+        check(CompatibilityRules.supported(iris14,"iris")&&applies(iris14,"iris.client.DhDepthAttachmentMixin")&&applies(iris14,"iris.client.DhPortalShaderMixin"),"Iris 1.8.14-beta.1 is supported and gets the Distant Horizons depth fixes");
+        iris14.put("iris","1.8.13+mc1.21.1");
+        check(!CompatibilityRules.supported(iris14,"iris")&&!applies(iris14,"iris.client.DhDepthAttachmentMixin"),"other Iris builds are still skipped");
+        // The Sodium 0.8 portal culling needs the 0.8 series and Immersive Portals, and has its own feature switch.
+        String cull="sodium.client.SodiumViewportCullingMixin";Map<String,String> sodium08=Map.of("sodium","0.8.13+mc1.21.1","immersive_portals","6.0.6");
+        check(applies(sodium08,cull),"portal culling applies with Sodium 0.8 and Immersive Portals");
+        check(!applies(Map.of("sodium","0.6.7+mc1.21.1","immersive_portals","6.0.6"),cull)&&!applies(Map.of("sodium","0.9.0","immersive_portals","6.0.6"),cull),"portal culling is only for the Sodium 0.8 series");
+        check(!applies(Map.of("sodium","0.8.13+mc1.21.1"),cull)&&!applies(Map.of("immersive_portals","6.0.6"),cull),"portal culling needs both mods");
+        String occlusion="sodium.client.SodiumPortalOcclusionMixin";
+        check(applies(sodium08,occlusion)&&!applies(Map.of("sodium","0.6.7+mc1.21.1","immersive_portals","6.0.6"),occlusion)&&!applies(Map.of("sodium","0.8.13+mc1.21.1"),occlusion),"portal occlusion: Sodium 0.8 and Immersive Portals");
+        // Ships on Sodium 0.8 need the 0.8 series and Valkyrien Skies at its supported build (Immersive Portals is not needed), and have their own switch.
+        String ships="sodium.client.SodiumShipRenderingMixin";Map<String,String> shipsOn08=Map.of("sodium","0.8.13+mc1.21.1","valkyrienskies","2.4.12-td.9+66a13242ed");
+        check(applies(shipsOn08,ships)&&!applies(Map.of("sodium","0.8.13+mc1.21.1"),ships),"ship rendering applies with Sodium 0.8 and Valkyrien Skies, not without VS");
+        check(!applies(Map.of("sodium","0.6.7+mc1.21.1","valkyrienskies","2.4.12-td.9+66a13242ed"),ships)&&!applies(Map.of("sodium","0.8.13+mc1.21.1","valkyrienskies","3.0.0"),ships),"ship rendering is only for Sodium 0.8 and the supported VS build");
+        System.setProperty("fan4compat.feature.sodiumShipRendering","false");
+        check(!applies(shipsOn08,ships),"ship rendering can be turned off");
+        System.clearProperty("fan4compat.feature.sodiumShipRendering");
+        System.setProperty("fan4compat.feature.sodiumPortalCulling","false");
+        check(!applies(sodium08,cull),"portal culling can be turned off");
+        System.clearProperty("fan4compat.feature.sodiumPortalCulling");
         System.clearProperty("fan4compat.spatialGuiDiagnostics");
         check(!applies(spatial,trace),"trace is off unless the switch is on");
         // The perspective fix is a pack feature: it needs the same two mods at the same build but not the diagnostics switch, and its own feature switch turns it off.

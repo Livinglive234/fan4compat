@@ -40,7 +40,7 @@ public final class FeaturesTest {
             check(ids.contains(hook.getValue()),"hook points at a listed feature: "+hook);
             check(mixins.stream().anyMatch(name->name.endsWith("."+hook.getKey())),"hooked mixin still exists: "+hook.getKey());
         }
-        ALL.put("aether","1.5.11");ALL.put("spatial_gui","1.9.1");
+        ALL.put("aether","1.5.11");ALL.put("spatial_gui","1.9.1");ALL.put("sodium","0.8.13+mc1.21.1");
         for(Features.Feature feature:Features.ALL) {
             List<String> controlled=mixins.stream().filter(name->feature.id().equals(Features.featureFor(name.substring(0,name.lastIndexOf('.')),name.substring(name.lastIndexOf('.')+1)))).toList();
             Features.reset(dir.resolve("none.properties"));

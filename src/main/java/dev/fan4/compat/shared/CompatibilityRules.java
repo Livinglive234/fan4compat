@@ -16,7 +16,7 @@ public final class CompatibilityRules {
         Map.entry("sound_physics_remastered","1.21.1-1.5.2"),Map.entry("bclib","30.4.0"),
         Map.entry("graves","1.0.0"),Map.entry("xaerominimap","26.6.0"),Map.entry("xaeroworldmap","1.47.0"),Map.entry("jade","15.10.6+fabric"),Map.entry("elytratrails","1.4.7.5-1.21.1"));
     /** Older builds that are still supported next to the one in VERSIONS: every class the hooks and helpers touch was checked identical. */
-    public static final Map<String,Set<String>> ALSO_SUPPORTED=Map.of("xaerominimap",Set.of("26.5.0"),"xaeroworldmap",Set.of("1.46.0"));
+    public static final Map<String,Set<String>> ALSO_SUPPORTED=Map.of("xaerominimap",Set.of("26.5.0"),"xaeroworldmap",Set.of("1.46.0"),"iris",Set.of("1.8.14-beta.1+mc1.21.1"));
     private static final Set<String> PORTAL_TARDIS=Set.of("TardisShipPortalMixin","TardisShipPortalDataMixin","TardisShipExteriorShapeMixin");
     private CompatibilityRules() {}
     public static boolean supported(Map<String,String> mods,String id) {
@@ -34,6 +34,8 @@ public final class CompatibilityRules {
         Set<String> also=ALSO_SUPPORTED.getOrDefault(id,Set.of());
         return also.isEmpty()?VERSIONS.get(id):VERSIONS.get(id)+" (or "+String.join(", ",new java.util.TreeSet<>(also))+")";
     }
+    /** Sodium from the 0.8 series, whose Viewport and Frustum the portal culling targets. */
+    public static boolean sodium08(Map<String,String> mods){String v=mods.get("sodium");return v!=null&&v.startsWith("0.8.");}
     /** VS and IP are both installed at their supported builds. */
     public static boolean portalsOnVs(Map<String,String> mods) {
         return supported(mods,"valkyrienskies")&&supported(mods,"immersive_portals");
@@ -51,6 +53,7 @@ public final class CompatibilityRules {
         boolean vs=supported(mods,"valkyrienskies"),ip=supported(mods,"immersive_portals");
         boolean iris=supported(mods,"iris"),dh=supported(mods,"distanthorizons"),spr=supported(mods,"sound_physics_remastered"),eureka=supported(mods,"vs_eureka");
         boolean bclib=supported(mods,"bclib"),accessories=supported(mods,"accessories");
+        if(path.startsWith("sodium."))return sodium08(mods)&&(simple.equals("SodiumShipRenderingMixin")?vs:ip);
         if(path.startsWith("spatialgui."))return "1.9.1".equals(mods.get("spatial_gui"))&&ip&&(!simple.endsWith("DiagnosticMixin")||Diagnostics.spatialGui());
         if(simple.equals("AetherCapeSkinLayersMixin"))return mods.containsKey("aether");
         if(path.startsWith("graves."))return supported(mods,"graves")&&accessories&&mods.containsKey("aether");
