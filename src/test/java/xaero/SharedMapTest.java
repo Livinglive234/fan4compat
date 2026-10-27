@@ -88,7 +88,7 @@ public final class SharedMapTest {
         Path victim;try(var files=Files.walk(dir)){victim=files.filter(p->p.toString().endsWith(".smc")).findFirst().orElseThrow();}
         Files.write(victim,new byte[]{1,2,3,4});
         SharedMapStore damaged=new SharedMapStore(dir,4);
-        damaged.regions(overworld).forEach(r->damaged.region(overworld,r[0],r[1]));
+        for(String dimension:List.of(overworld,"minecraft:the_nether"))damaged.regions(dimension).forEach(r->damaged.region(dimension,r[0],r[1]));
         try(var files=Files.walk(dir)){check(files.anyMatch(p->p.getFileName().toString().contains(".damaged-")),"a damaged region is kept aside, not overwritten");}
         System.out.println("PASS: shared map chunk validation, bounded batch codec (including an inflation bomb), and the server region store with dedupe, newest-wins, eviction, restart and damaged-file handling");
     }
