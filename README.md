@@ -103,6 +103,37 @@ A missing snapshot uses Sound Physics’s default audio environment for that
 evaluation. Unsafe level access retains its native ray handling.
 No target mods installed means no compatibility mixins apply.
 
+### Using Sodium 0.8.13 and Iris 1.8.14-beta.1 (experimental)
+
+Fan4Compat can run Immersive Portals and Valkyrien Skies on Sodium 0.8.13 with Iris 1.8.14-beta.1 instead of Sodium 0.6.7 and Iris 1.8.1. Read the
+[beta 52 notes](docs/releases/0.1.0-beta.52.md) first: this needs an edited copy of another mod's jar, and problems from it should not be reported to that mod.
+
+1. Use Fabric Loader 0.20.1 or newer, Sodium `0.8.13+mc1.21.1` and Iris `1.8.14-beta.1+mc1.21.1`. Remove Sodium Options API (Sodium 0.8.13 refuses to load with it).
+2. Immersive Portals declares that it breaks with any Sodium other than 0.6.7 and any Iris other than 1.8.1, and the loader refuses to start. Remove those two entries from
+   its `fabric.mod.json`. With Python 3 installed, save this as `fix.py`, then run `python3 fix.py immersive-portals-6.0.6-mc1.21.1-fabric.jar` (use your jar's file name):
+
+   ```python
+   import json, sys, zipfile
+
+   src = sys.argv[1]
+   dst = src[:-4] + "-sodium08.jar"
+   with zipfile.ZipFile(src) as zin, zipfile.ZipFile(dst, "w", zipfile.ZIP_DEFLATED) as zout:
+       for item in zin.infolist():
+           data = zin.read(item.filename)
+           if item.filename == "fabric.mod.json":
+               meta = json.loads(data)
+               meta["breaks"].pop("sodium", None)
+               meta["breaks"].pop("iris", None)
+               data = json.dumps(meta, indent=2).encode()
+           zout.writestr(item, data)
+       print("wrote", dst)
+   ```
+
+   Or by hand: open the jar with any zip tool, open `fabric.mod.json`, delete the `"iris": [...]` and `"sodium": [...]` lines inside `"breaks"`, and save the jar.
+3. Put the new `...-sodium08.jar` in `mods` and take the original Immersive Portals jar out. Apply this to the client and the server.
+
+Stay on Sodium 0.6.7 and Iris 1.8.1 and nothing here is needed: Fan4Compat behaves the same as before.
+
 ## Automatic Fan4Compat updates
 
 Install beta 12 or newer once on each client and server. Fan4Compat then checks
