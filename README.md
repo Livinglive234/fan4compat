@@ -28,7 +28,7 @@ supported version.
 | Distant Horizons | `3.3.3` for Fabric 1.21.1 |
 | Freecam | `1.3.0+mc1.21` (client only) |
 | Iris | `1.8.1+mc1.21.1`, or `1.8.14-beta.1+mc1.21.1` with Sodium 0.8 |
-| Sodium (experimental) | `0.6.7` stock, or `0.8.13` with an edited Immersive Portals jar and Fabric Loader 0.20.1; see the [beta 52 notes](docs/releases/0.1.0-beta.52.md) |
+| Sodium (experimental) | `0.6.7` stock, or `0.8.13` with an edited Immersive Portals jar and Fabric Loader 0.20.1; see the [Sodium Experimental instructions](https://github.com/Livinglive234/fan4compat#using-sodium-0813-and-iris-1814-beta1-experimental) |
 | Point Blank | Fabric `2.2.0` |
 | Accessories / Player Graves | `1.1.0-beta.48+1.21.1` / `1.0.0` |
 | Sound Physics Remastered | `1.21.1-1.5.2` |
