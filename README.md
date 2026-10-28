@@ -71,7 +71,7 @@ Other mod releases need another compatibility audit.
 **Pack extras**
 - Aether and Trinkets items go into Player Graves graves and return to their slots.
 - Aether capes no longer turn your skin layers back on.
-- Sable 2.0.6 runs with Immersive Portals and Valkyrien Skies: the three clashing hooks (entity collision, player fit check, bed placement) are merged so the game starts.
+- Sable 2.0.6 runs with Immersive Portals and Valkyrien Skies: the three clashing hooks (entity collision, player fit check, bed placement) are merged so the game starts. Fan4Compat must already be in `mods` next to them; it cannot fix the start-up from outside.
 - The Aether portal works with Immersive Portals (Aether 1.5.11) without a patched Aether jar.
 - Chest Tracker's button is hidden on screens that cannot hold items.
 - Bumblezone turns shaders off on entry and back on when you leave.
@@ -107,7 +107,7 @@ No target mods installed means no compatibility mixins apply.
 
 ### Using Sodium 0.8.13 and Iris 1.8.14-beta.1 (experimental)
 
-Fan4Compat can run Immersive Portals and Valkyrien Skies on Sodium 0.8.13 with Iris 1.8.14-beta.1 instead of Sodium 0.6.7 and Iris 1.8.1. Read the
+Fan4Compat has to be in the same `mods` folder as the other mods for any of this to work. It can run Immersive Portals and Valkyrien Skies on Sodium 0.8.13 with Iris 1.8.14-beta.1 instead of Sodium 0.6.7 and Iris 1.8.1. Read the
 [beta 52 notes](docs/releases/0.1.0-beta.52.md) first: this needs an edited copy of another mod's jar, and problems from it should not be reported to that mod.
 
 1. Use Fabric Loader 0.20.1 or newer, Sodium `0.8.13+mc1.21.1` and Iris `1.8.14-beta.1+mc1.21.1`. Remove Sodium Options API (Sodium 0.8.13 refuses to load with it).
