@@ -35,6 +35,7 @@ public class GenerateAddon implements Opcodes {
         EurekaGenerator.warningMixin();
         AetherCapeGenerator.skinLayersMixin();
         AetherPortalPackGenerator.generate();
+        SablePlayerCollisionGenerator.generate();
         SpatialGuiDiagnosticGenerator.generate();
         SpatialGuiPerspectiveGenerator.generate();
         SodiumViewportGenerator.generate();

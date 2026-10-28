@@ -14,7 +14,7 @@ public final class CompatibilityRules {
         Map.entry("freecam","1.3.0+mc1.21"),Map.entry("distanthorizons","3.3.3"),Map.entry("pointblank","2.2.0"),
         Map.entry("iris","1.8.1+mc1.21.1"),Map.entry("accessories","1.1.0-beta.48+1.21.1"),
         Map.entry("sound_physics_remastered","1.21.1-1.5.2"),Map.entry("bclib","30.4.0"),
-        Map.entry("graves","1.0.0"),Map.entry("xaerominimap","26.6.0"),Map.entry("xaeroworldmap","1.47.0"),Map.entry("jade","15.10.6+fabric"),Map.entry("elytratrails","1.4.7.5-1.21.1"));
+        Map.entry("sable","2.0.6"),Map.entry("graves","1.0.0"),Map.entry("xaerominimap","26.6.0"),Map.entry("xaeroworldmap","1.47.0"),Map.entry("jade","15.10.6+fabric"),Map.entry("elytratrails","1.4.7.5-1.21.1"));
     /** Older builds that are still supported next to the one in VERSIONS: every class the hooks and helpers touch was checked identical. */
     public static final Map<String,Set<String>> ALSO_SUPPORTED=Map.of("xaerominimap",Set.of("26.5.0"),"xaeroworldmap",Set.of("1.46.0"),"iris",Set.of("1.8.14-beta.1+mc1.21.1"),"bclib",Set.of("30.5.4","30.5.6"));
     private static final Set<String> PORTAL_TARDIS=Set.of("TardisShipPortalMixin","TardisShipPortalDataMixin","TardisShipExteriorShapeMixin");
@@ -34,6 +34,10 @@ public final class CompatibilityRules {
         Set<String> also=ALSO_SUPPORTED.getOrDefault(id,Set.of());
         return also.isEmpty()?VERSIONS.get(id):VERSIONS.get(id)+" (or "+String.join(", ",new java.util.TreeSet<>(also))+")";
     }
+    /** Sable 2.0.6 beside Immersive Portals: both redirect Entity.collide in Entity.move (see sable.IpCollisionAdjuster). */
+    public static boolean sablePortals(Map<String,String> mods){return supported(mods,"sable")&&supported(mods,"immersive_portals");}
+    /** Valkyrien Skies beside Sable: both change how a sleeping entity is placed (see sable.VsSleepingAdjuster). */
+    public static boolean sableShips(Map<String,String> mods){return supported(mods,"sable")&&supported(mods,"valkyrienskies");}
     /** Sodium from the 0.8 series, whose Viewport and Frustum the portal culling targets. */
     public static boolean sodium08(Map<String,String> mods){String v=mods.get("sodium");return v!=null&&v.startsWith("0.8.");}
     /** VS and IP are both installed at their supported builds. */
@@ -55,6 +59,7 @@ public final class CompatibilityRules {
         boolean bclib=supported(mods,"bclib"),accessories=supported(mods,"accessories");
         if(path.startsWith("sodium."))return sodium08(mods)&&(simple.equals("SodiumShipRenderingMixin")?vs:ip);
         if(path.startsWith("spatialgui."))return "1.9.1".equals(mods.get("spatial_gui"))&&ip&&(!simple.endsWith("DiagnosticMixin")||Diagnostics.spatialGui());
+        if(path.startsWith("sableip."))return sablePortals(mods);
         if(simple.equals("AetherPortalPackMixin"))return "1.5.11".equals(mods.get("aether"))&&ip;
         if(simple.equals("AetherCapeSkinLayersMixin"))return mods.containsKey("aether");
         if(path.startsWith("graves."))return supported(mods,"graves")&&accessories&&mods.containsKey("aether");

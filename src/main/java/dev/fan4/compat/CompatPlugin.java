@@ -25,10 +25,24 @@ public final class CompatPlugin implements IMixinConfigPlugin, MixinCanceller {
                 dev.fan4.compat.shared.GameLog.warn("Skipping compatibility hooks for " + entry.getKey() + ": supported " + CompatibilityRules.requirement(entry.getKey()) + ", installed " + mods.get(entry.getKey()));
         }
         MixinSquaredBootstrap.init();
-        if (!registered) { MixinCancellerRegistrar.register(this); registered = true; }
+        if (!registered) {
+            MixinCancellerRegistrar.register(this);
+            if (CompatibilityRules.sablePortals(mods) && dev.fan4.compat.shared.Features.enabled("sablePortalCollision")) {
+                com.bawnorton.mixinsquared.adjuster.MixinAnnotationAdjusterRegistrar.register(new dev.fan4.compat.sable.IpCollisionAdjuster());
+                dev.fan4.compat.shared.GameLog.info("Sable collision hook registered: Sable's Entity.collide redirect will run inside Immersive Portals' collision handler");
+            }
+            if (CompatibilityRules.sableShips(mods) && dev.fan4.compat.shared.Features.enabled("sableSleeping")) {
+                com.bawnorton.mixinsquared.adjuster.MixinAnnotationAdjusterRegistrar.register(new dev.fan4.compat.sable.VsSleepingAdjuster());
+                dev.fan4.compat.shared.GameLog.info("Sable sleeping hook registered: Valkyrien Skies' two bed wraps are skipped");
+            }
+            registered = true;
+        }
     }
+    /** Immersive Portals' @Overwrite of Player.canPlayerFitWithinBlocksAndEntitiesWhen; replaced by sable.IpPlayerCollisionMixin, which Sable can inject into (see SablePlayerCollisionGenerator). */
+    static final String IP_PLAYER_COLLISION="qouteall.imm_ptl.core.mixin.common.collision.MixinPlayer_Collision";
     public boolean shouldCancel(List<String> targets, String mixinClassName) {
         Map<String,String> mods=installedMods();
+        if (mixinClassName.equals(IP_PLAYER_COLLISION) && CompatibilityRules.sablePortals(mods) && dev.fan4.compat.shared.Features.enabled("sablePortalCollision")) return true;
         return shouldCancelFor(CompatibilityRules.portalsOnVs(mods), HAS_SABLE, CompatibilityRules.sodium08(mods), CompatibilityRules.supported(mods,"valkyrienskies"), mixinClassName);
     }
     public static boolean shouldCancelFor(boolean portals, boolean sable, String name) { return shouldCancelFor(portals, sable, false, name); }

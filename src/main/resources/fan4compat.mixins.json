@@ -12,6 +12,7 @@
     "eureka.common.EurekaPortalWarningMixin",
     "aether.common.AetherCapeSkinLayersMixin",
     "aether.common.AetherPortalPackMixin",
+    "sableip.common.IpPlayerCollisionMixin",
     "sodium.client.SodiumViewportCullingMixin",
     "sodium.client.SodiumShipRenderingMixin",
     "sodium.client.SodiumPortalOcclusionMixin",

@@ -8,9 +8,9 @@ Iris, Point Blank, Aether, Spatial GUI and more). It does not overwrite existing
 mod jars, and each fix applies only when the mod it targets is installed at a
 supported version.
 
-**Status: beta, 0.1.0-beta.54.**
+**Status: beta, 0.1.0-beta.55.**
 
-[Beta 54 release notes](docs/releases/0.1.0-beta.54.md) ·
+[Beta 55 release notes](docs/releases/0.1.0-beta.55.md) ·
 [Architecture and feature guide](docs/architecture-and-features.md) ·
 [Mac nested portal investigation](docs/mac-nested-portals.md) ·
 [Release validation and wishlist](docs/release-readiness.md) ·
@@ -38,6 +38,7 @@ supported version.
 | Xaero's Minimap | `26.6.0` (or `26.5.0`) |
 | Xaero's World Map | `1.47.0` (or `1.46.0`) |
 | Spatial GUI | `1.9.1` only |
+| Sable | `2.0.6`, beside Immersive Portals and/or Valkyrien Skies (entity collision and bed placement) |
 | Sable Companion | crash observed in `1.6.0`, bundled in Windchimes `1.2.0+1.21.1` |
 | Aether, Bumblezone, Trinkets, Chest Tracker | no version check (Chest Tracker was checked against `2.6.7`) |
 
@@ -56,7 +57,7 @@ Other mod releases need another compatibility audit.
 
 **Rendering**
 - Immersive Portals on Apple GPUs (depth and stencil formats, framebuffer-copy fallback).
-- Sodium 0.8.13 and Iris 1.8.14-beta.1 run with Immersive Portals and Valkyrien Skies (portal culling, ship drawing; experimental, needs an edited Immersive Portals jar).
+- Sodium 0.8.13 and Iris 1.8.14-beta.1 run with Immersive Portals and Valkyrien Skies (portal culling, ship drawing; experimental). Double-click the jar to edit the Immersive Portals jar it needs, or to see what a downgrade involves.
 - Distant Horizons and Iris shaders behave through portal views; Freecam works with Distant Horizons, including with BSL.
 - Point Blank scopes and guns no longer corrupt portal rendering or crash on stale animations.
 - Elytra Contrails wing trails for custom and accessory elytra; TARDIS model cache.
@@ -70,6 +71,7 @@ Other mod releases need another compatibility audit.
 **Pack extras**
 - Aether and Trinkets items go into Player Graves graves and return to their slots.
 - Aether capes no longer turn your skin layers back on.
+- Sable 2.0.6 runs with Immersive Portals and Valkyrien Skies: the three clashing hooks (entity collision, player fit check, bed placement) are merged so the game starts.
 - The Aether portal works with Immersive Portals (Aether 1.5.11) without a patched Aether jar.
 - Chest Tracker's button is hidden on screens that cannot hold items.
 - Bumblezone turns shaders off on entry and back on when you leave.
@@ -82,7 +84,7 @@ Other mod releases need another compatibility audit.
 
 ## Install
 
-1. Add `Fan4Compat-0.1.0-beta.54.jar` to `mods` on the client and server.
+1. Add `Fan4Compat-0.1.0-beta.55.jar` to `mods` on the client and server.
 2. Install whichever supported target mods you want. No gameplay mod is required
    by Fan4Compat; Fabric Loader, Minecraft 1.21.1 and Java 21 remain required.
    MixinSquared is bundled in the addon.
@@ -109,8 +111,24 @@ Fan4Compat can run Immersive Portals and Valkyrien Skies on Sodium 0.8.13 with I
 [beta 52 notes](docs/releases/0.1.0-beta.52.md) first: this needs an edited copy of another mod's jar, and problems from it should not be reported to that mod.
 
 1. Use Fabric Loader 0.20.1 or newer, Sodium `0.8.13+mc1.21.1` and Iris `1.8.14-beta.1+mc1.21.1`. Remove Sodium Options API (Sodium 0.8.13 refuses to load with it).
-2. Immersive Portals declares that it breaks with any Sodium other than 0.6.7 and any Iris other than 1.8.1, and the loader refuses to start. Remove those two entries from
-   its `fabric.mod.json`. With Python 3 installed, save this as `fix.py`, then run `python3 fix.py immersive-portals-6.0.6-mc1.21.1-fabric.jar` (use your jar's file name):
+2. Immersive Portals declares that it breaks with any Sodium other than 0.6.7 and any Iris other than 1.8.1, and Fabric Loader refuses to start ("Incompatible mods found").
+   Fabric Loader stops before it loads any mod, so Fan4Compat cannot show a message from inside the game. Instead, **double-click the Fan4Compat jar** in your `mods` folder
+   (or run `java -jar Fan4Compat-….jar`). If it finds an Immersive Portals jar that conflicts with the installed Sodium or Iris, it asks what you want to do:
+   - **Patch Immersive Portals**: removes the two conflicting entries from the Immersive Portals jar and moves the original to a `.fan4compat-backup` folder beside `mods`.
+   - **Show downgrade list**: lists each installed Sodium-related mod with the version it needs on Sodium 0.6.7 / Iris 1.8.1 (each name links to that version on Modrinth), and that Sodium Options API must be reinstalled. The old versions run on Fabric Loader 0.19.5.
+
+   If your computer opens .jar files with an old Java (Java 8 is common), the jar starts itself again with a newer Java it finds (Prism's, or one in Program Files or `JAVA_HOME`), and says what to do if it finds none. Afterwards you start the game yourself. If it finds nothing to fix, it does nothing. On a server or without a display it prints the same message; add `patch` to edit the jar (`java -jar Fan4Compat-….jar patch`) or `list` for the downgrade list,
+   and a folder path to point it at a `mods` folder elsewhere.
+3. To get the same question automatically before the game starts, add this to the instance's Java arguments (Prism: Edit Instance, Settings, Java, Java arguments), using the jar's exact file name:
+
+   ```
+   -javaagent:mods/Fan4Compat-0.1.0-beta.55.jar
+   ```
+
+   The agent runs before Fabric Loader and shows the same two buttons. After it patches the jar, the game keeps starting by itself with no second launch needed, and it does nothing when there is no conflict. Add `=patch` after the file name to edit the jar without asking (for servers).
+   If you rename or replace the jar with a differently named one, remove or fix this argument, or Java will not start. Fan4Compat's own updater keeps the file name.
+4. If the tool cannot run, edit the jar by hand: open it with any zip tool, open `fabric.mod.json`, delete the `"iris": [...]` and `"sodium": [...]` lines inside `"breaks"`, and save the jar.
+   Or with Python 3 save this as `fix.py` and run `python3 fix.py immersive-portals-6.0.6-mc1.21.1-fabric.jar` (use your jar's file name); it writes a new `...-sodium08.jar`:
 
    ```python
    import json, sys, zipfile
@@ -129,8 +147,7 @@ Fan4Compat can run Immersive Portals and Valkyrien Skies on Sodium 0.8.13 with I
        print("wrote", dst)
    ```
 
-   Or by hand: open the jar with any zip tool, open `fabric.mod.json`, delete the `"iris": [...]` and `"sodium": [...]` lines inside `"breaks"`, and save the jar.
-3. Put the new `...-sodium08.jar` in `mods` and take the original Immersive Portals jar out. Apply this to the client and the server.
+   Put the new jar in `mods` and take the original out. Apply this to the client and the server.
 
 Stay on Sodium 0.6.7 and Iris 1.8.1 and nothing here is needed: Fan4Compat behaves the same as before.
 

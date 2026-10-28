@@ -30,6 +30,8 @@ public final class Features {
         of("shipPortalBlocking",SHIPS,"Block portals on ships","Stops Nether, Aether and Immersive Portals frames from being lit on a ship. Turn off only if you want to experiment; portals on moving ships can misbehave.",true,true,"valkyrienskies"),
         of("shipAcoustics",SHIPS,"Ship-aware sound occlusion","Makes Sound Physics Remastered trace sound through ship blocks in their own frame. Costs some CPU on busy ships.",true,true,"valkyrienskies","sound_physics_remastered"),
         of("sodiumShipRendering",SHIPS,"Valkyrien Skies ships with Sodium 0.8","Draws Valkyrien Skies ships through Sodium 0.8, which reorganised the code the ship hooks relied on. Turn off only to test; with it off, ships are not drawn (their original hooks cannot work on Sodium 0.8). Sodium 0.8.x only.",true,true,"valkyrienskies","sodium"),
+        of("sablePortalCollision",SHIPS,"Sable and Immersive Portals share entity collision","Sable and Immersive Portals both replace the same entity collision call, which stops the game from starting when both are installed. This runs Immersive Portals' collision inside Sable's, so both work: Sable's collision with its physics objects first, then Immersive Portals' portal-aware collision. Sable 2.0.6 with Immersive Portals only; restart to change.",true,true,"sable","immersive_portals"),
+        of("sableSleeping",SHIPS,"Sable and Valkyrien Skies share bed placement","Both mods change where a sleeping or waking entity is placed, and the game cannot start with both installed. This keeps Sable's version and skips the two Valkyrien Skies bed hooks that clash with it. Sable 2.0.6 with Valkyrien Skies only; restart to change.",true,true,"sable","valkyrienskies"),
         of("eurekaWarnings",PACK,"Hide Eureka portal warnings","Removes Eureka from Immersive Portals' incompatibility notices; other warnings are not touched.",true,true,"vs_eureka","immersive_portals"),
         of("jadeHelm",PACK,"Hide Jade while at a helm","Hides the Jade overlay while you steer a ship from a helm, and brings it back when you dismount.",true,true,"jade","vs_eureka"),
         of("xaeroTardisMap",PACK,"Xaero map shows the TARDIS exterior","While you are inside a TARDIS that has landed, Xaero's World Map opens on the exterior's dimension, centered on where the TARDIS is. In flight, or when the exterior is not known, the map behaves as normal.",true,true,"xaeroworldmap","dwm"),
@@ -66,6 +68,7 @@ public final class Features {
         hooks("shipAcoustics","ShipAcousticRaycastMixin","ShipAcousticSnapshotMixin");
         hooks("eurekaWarnings","EurekaPortalWarningMixin","EurekaPortalWarningInfoMixin");
         hooks("jadeHelm","JadeHelmMixin");
+        hooks("sablePortalCollision","IpPlayerCollisionMixin");
         hooks("aetherCapeSkinLayers","AetherCapeSkinLayersMixin");
         hooks("aetherPortalPack","AetherPortalPackMixin");
         hooks("xaeroTardisMap","TardisMapMixin");

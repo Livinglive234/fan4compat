@@ -14,6 +14,9 @@ public final class FeatureLinkAudit {
                 classes.put(entry.getName().substring(0,entry.getName().length()-6),new String(jar.getInputStream(entry).readAllBytes(),StandardCharsets.ISO_8859_1));
             String config=new String(jar.getInputStream(jar.getEntry("fan4compat.mixins.json")).readAllBytes(),StandardCharsets.UTF_8);
             Matcher mixins=MIXIN.matcher(config);while(mixins.find())roots.add("dev/fan4/compat/mixin/"+mixins.group(1).replace('.','/'));
+            // The jar's own main and agent classes are entry points too.
+            Matcher launchers=Pattern.compile("(?:Main|Premain)-Class: (\\S+)").matcher(new String(jar.getInputStream(jar.getEntry("META-INF/MANIFEST.MF")).readAllBytes(),StandardCharsets.UTF_8));
+            while(launchers.find()){String name=launchers.group(1).replace('.','/');if(classes.containsKey(name))roots.add(name);}
             for(String resource:new String[]{"fabric.mod.json","fan4compat.mixins.json"}) {
                 Matcher names=CLASS.matcher(new String(jar.getInputStream(jar.getEntry(resource)).readAllBytes(),StandardCharsets.UTF_8));
                 while(names.find()){String name=names.group().replace('.','/');if(classes.containsKey(name))roots.add(name);}

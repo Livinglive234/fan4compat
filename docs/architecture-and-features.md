@@ -174,6 +174,7 @@ the supplied VS/Eureka files have different marketing and metadata versions.
 | `xaerominimap` | `26.6.0` (also `26.5.0`) |
 | `xaeroworldmap` | `1.47.0` (also `1.46.0`) |
 | `elytratrails` | `1.4.7.5-1.21.1` |
+| `sable` | `2.0.6` |
 
 Trinkets' grave helper separately checks `3.10.0`. The Sodium 0.8 hooks check that `sodium` starts with `0.8.` (`CompatibilityRules.sodium08`), the Spatial GUI hooks check `spatial_gui` `1.9.1`, and the Aether Immersive Portals pack hook checks `aether` `1.5.11`. Aether is otherwise presence-gated for
 the grave and Aether portal hooks. Sable checks the presence and identity of its
@@ -200,6 +201,8 @@ optional-recipe filter checks installed recipe dependencies individually.
 | Sodium 0.8 ship rendering (replaces Valkyrien Skies' `RenderSectionManager` mixins, which are cancelled) | Sodium `0.8.x` + supported VS + supported IP. |
 | Spatial GUI portal camera and matrix fix | Spatial GUI `1.9.1` + supported IP. |
 | Aether Immersive Portals data pack registration | Aether `1.5.11` + supported IP. |
+| Sable / Immersive Portals entity collision and player fit check (Sable's `Entity.collide` redirect moved into IP's handler; IP's `Player` overwrite replaced at lower priority) | Sable `2.0.6` + supported IP. |
+| Sable / Valkyrien Skies bed placement (two VS bed wraps skipped) | Sable `2.0.6` + supported VS. |
 | Sound snapshot and portal-only ray bridge | Supported IP + Sound Physics; the portal-only ray bridge is selected when VS is absent. |
 | Ship acoustic ray/snapshot bridge | Supported VS + Sound Physics. |
 | Jade ship rays | Supported Jade + VS; helm overlay additionally needs Eureka. |
@@ -685,6 +688,10 @@ result. The audio evaluation reads the snapshot rather than live moving world
 state. Only already available chunk data is cloned; this is not an audio-driven
 world generation or chunk-loading service. Uncached regions are not fabricated
 as solid walls. `AcousticBounds` supplies finite clipping bounds.
+
+### Sodium 0.8 bridge tool (jar entry points)
+
+The Fan4Compat jar has a `Main-Class` and a `Premain-Class` (`dev.fan4.compat.tool.BridgeTool`) so it can run before Fabric Loader, which refuses to start when Immersive Portals' `breaks` pin Sodium and Iris to 0.6.7 and 1.8.1. It scans the mods folder, and on a conflict offers to remove those two `breaks` entries from the Immersive Portals jar (original kept in `.fan4compat-backup`) or to print the downgrade list. It uses only the JDK, does nothing without a conflict and never stops a launch. Details and flags are in the README.
 
 ### BCLib/BetterEnd stack formats and optional recipes
 
